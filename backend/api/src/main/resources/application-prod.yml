@@ -1,0 +1,11 @@
+app:
+  storage:
+    mode: r2
+  payments:
+    mode: stripe
+  video:
+    mock-renderer-enabled: false
+management:
+  endpoint:
+    health:
+      show-details: when_authorized

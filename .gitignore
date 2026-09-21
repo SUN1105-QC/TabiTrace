@@ -1,0 +1,28 @@
+# ── 依赖与构建产物 ──
+node_modules/
+.next/
+out/
+target/
+*.tsbuildinfo
+
+# ── 本地工具二进制（FFmpeg 等，体积大且与平台相关）──
+.tools/
+
+# ── 运行时产物：日志、上传的照片、渲染出的视频 ──
+*.log
+backend/.tabitrace/
+frontend/public/generated-videos/
+video-output/
+
+# ── 环境变量（只提交示例文件）──
+.env
+.env.*
+!.env.example
+
+# ── 本机 Claude / IDE / 系统文件 ──
+.claude/settings.local.json
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db

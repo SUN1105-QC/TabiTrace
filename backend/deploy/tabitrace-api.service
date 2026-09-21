@@ -1,0 +1,14 @@
+[Unit]
+Description=TabiTrace API
+After=network.target mysql.service
+
+[Service]
+User=tabitrace
+WorkingDirectory=/opt/tabitrace/backend
+EnvironmentFile=/opt/tabitrace/backend/.env
+ExecStart=/usr/bin/java -jar /opt/tabitrace/backend/tabitrace-api.jar --spring.profiles.active=prod
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

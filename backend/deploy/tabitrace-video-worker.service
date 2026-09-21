@@ -1,0 +1,14 @@
+[Unit]
+Description=TabiTrace Video Worker
+After=network.target mysql.service
+
+[Service]
+User=tabitrace
+WorkingDirectory=/opt/tabitrace/backend
+EnvironmentFile=/opt/tabitrace/backend/.env
+ExecStart=/usr/bin/java -jar /opt/tabitrace/backend/tabitrace-video-worker.jar
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

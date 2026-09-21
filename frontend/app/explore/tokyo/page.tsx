@@ -1,0 +1,26 @@
+'use client'
+
+import Link from 'next/link'
+import { useEffect,useMemo,useState } from 'react'
+import { Check, MapPin, Plus, Sparkles, Trophy } from 'lucide-react'
+import { SiteHeader } from '@/components/common/SiteHeader'
+import { tripApi, type PlaceView } from '@/services/tabitrace-api'
+
+export default function TokyoExplorePage(){
+  const[places,setPlaces]=useState<PlaceView[]>([])
+  const[area,setArea]=useState('全部')
+  const[added,setAdded]=useState<number[]>([])
+  const[toast,setToast]=useState('')
+  const[error,setError]=useState('')
+  const[tripId,setTripId]=useState(0)
+  const[loading,setLoading]=useState(true)
+
+  useEffect(()=>{(async()=>{try{const current=Number(localStorage.getItem('tabitrace-live-trip-id')||0);setTripId(current);const official=await tripApi.officialPlaces('TOKYO');setPlaces(official);if(current){try{const existing=await tripApi.places(current);setAdded(existing.filter(p=>p.sourceType==='OFFICIAL').map(p=>p.id))}catch{}}}catch(e:any){setError(e.message||'无法读取东京官方地点')}finally{setLoading(false)}})()},[])
+  const areas=useMemo(()=>Array.from(new Set(places.map(p=>p.area).filter(Boolean))) as string[],[places])
+  const filtered=area==='全部'?places:places.filter(p=>p.area===area)
+  const add=async(p:PlaceView)=>{if(!tripId){setToast('请先创建或打开一段旅行');setTimeout(()=>setToast(''),1800);return}try{await tripApi.addOfficial(tripId,p.id);setAdded(v=>v.includes(p.id)?v:[...v,p.id]);setToast(`已将「${p.name}」加入当前旅行`)}catch(e:any){const msg=e.message||'加入失败';if(String(e.code||'').includes('DUPLICATE')||msg.includes('已加入'))setAdded(v=>v.includes(p.id)?v:[...v,p.id]);setToast(msg)}setTimeout(()=>setToast(''),1800)}
+
+  return <main><SiteHeader/><section className="mx-auto max-w-[1280px] px-5 pb-12 sm:px-8"><div className="grid gap-6 lg:grid-cols-[1fr_360px]"><div><p className="text-sm font-bold text-warm">TOKYO OFFICIAL EXPLORE</p><h1 className="mt-2 font-serif text-5xl leading-tight">从东京开始，探索一座城市的另一种方式。</h1><p className="mt-4 max-w-2xl text-sm leading-7 text-black/50">官方地点来自 Spring Boot 内容库。用户可以一键加入当前旅行，也可以继续记录自己的咖啡店、街角和临时发现。</p></div><div className="overflow-hidden rounded-[28px] border border-black/[0.06] bg-[#F4E7D7]"><img src="/images/cover.jpg" alt="东京" className="h-40 w-full object-cover"/><div className="p-5"><div className="text-xs tracking-[.18em] text-warm">FIRST OFFICIAL CITY</div><div className="mt-2 font-serif text-4xl">TOKYO</div><div className="mt-2 text-xs text-black/45">{places.length||30} 个官方地点 · 城市成就 · 专属成果模板</div></div></div></div>{error&&<div className="mt-6 rounded-2xl bg-warm/10 p-4 text-sm text-warm">{error}</div>}{loading?<div className="mt-8 warm-card p-8 text-sm text-black/40">正在读取东京官方内容…</div>:<><div className="mt-9 flex gap-2 overflow-x-auto pb-2"><button onClick={()=>setArea('全部')} className={`shrink-0 rounded-full px-4 py-2 text-xs ${area==='全部'?'bg-ink text-white':'border border-black/10 bg-white/60'}`}>全部</button>{areas.map(a=><button key={a} onClick={()=>setArea(a)} className={`shrink-0 rounded-full px-4 py-2 text-xs ${area===a?'bg-ink text-white':'border border-black/10 bg-white/60'}`}>{a}</button>)}</div><div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">{filtered.map((place,index)=>{const isAdded=added.includes(place.id);return <article key={place.id} className="warm-card overflow-hidden"><img src={place.coverImage||fallback(index)} alt={place.name} className="h-44 w-full object-cover"/><div className="p-5"><div className="flex items-start justify-between gap-3"><div><div className="text-[10px] tracking-[.16em] text-black/35">{String(index+1).padStart(2,'0')} · {place.area||'东京'}</div><h2 className="mt-2 font-serif text-2xl">{place.name}</h2></div><span className="grid h-9 w-9 place-items-center rounded-full bg-orangeSoft text-warm"><MapPin size={15}/></span></div><p className="mt-3 min-h-12 text-xs leading-6 text-black/45">{place.description||place.address||'东京官方精选地点'}</p><button disabled={isAdded} onClick={()=>add(place)} className={`mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold ${isAdded?'bg-sage/10 text-sage':'bg-warm text-white'}`}>{isAdded?<><Check size={14}/> 已加入旅行</>:<><Plus size={14}/> 加入当前旅行</>}</button></div></article>})}</div></>}
+    <div className="mt-10 grid gap-4 md:grid-cols-2"><div className="rounded-[28px] bg-[#F2E6D8] p-7"><Sparkles className="text-warm"/><h2 className="mt-5 font-serif text-3xl">官方探索 + 自由旅行</h2><p className="mt-3 text-sm leading-7 text-black/50">官方推荐提供轻松起点，但用户自己的地点同样进入地图、时间轴和旅行作品。</p></div><div className="rounded-[28px] bg-ink p-7 text-white"><Trophy className="text-gold"/><h2 className="mt-5 font-serif text-3xl">东京专属成就</h2><p className="mt-3 text-sm leading-7 text-white/55">传统派、夜行者、城市探索者等成就会根据真实打卡自动计算。</p>{tripId>0&&<Link href={`/trips/${tripId}/achievements`} className="mt-5 inline-flex text-sm font-bold text-white">查看当前旅行成就 →</Link>}</div></div></section>{toast&&<div className="fixed bottom-8 left-1/2 z-[120] -translate-x-1/2 rounded-full bg-ink px-5 py-3 text-xs text-white shadow-soft">{toast}</div>}</main>
+}
+function fallback(i:number){return ['/images/asakusa.jpg','/images/ueno.jpg','/images/akihabara.jpg','/images/tokyo-station.jpg','/images/ginza.jpg','/images/shibuya.jpg','/images/shinjuku.jpg','/images/odaiba.jpg'][i%8]}

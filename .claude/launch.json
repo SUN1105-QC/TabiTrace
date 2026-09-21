@@ -1,0 +1,29 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "tabitrace-api",
+      "runtimeExecutable": "mvn",
+      "runtimeArgs": [
+        "-f",
+        "backend/pom.xml",
+        "-pl",
+        "api",
+        "spring-boot:run",
+        "-Dspring-boot.run.arguments=--app.video.mock-renderer-enabled=false"
+      ],
+      "port": 8080
+    },
+    {
+      "name": "tabitrace-web",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "frontend",
+        "run",
+        "dev"
+      ],
+      "port": 3000
+    }
+  ]
+}

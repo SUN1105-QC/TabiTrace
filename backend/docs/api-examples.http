@@ -1,0 +1,80 @@
+@base = http://localhost:8080/api/v1
+@token = REPLACE_ACCESS_TOKEN
+@tripId = 1
+
+### Register
+POST {{base}}/auth/register
+Content-Type: application/json
+
+{"email":"demo@example.com","password":"Demo12345","nickname":"Demo"}
+
+### Login
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{"email":"demo@example.com","password":"Demo12345"}
+
+### Tokyo official city
+GET {{base}}/official-cities/TOKYO
+
+### Create trip
+POST {{base}}/trips
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"title":"我的东京旅行","destinationName":"东京","countryCode":"JP","city":"东京","startDate":"2026-10-01","endDate":"2026-10-06","peopleCount":2,"joinOfficialExplore":true}
+
+### Add manual itinerary
+POST {{base}}/trips/{{tripId}}/itinerary
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"customPlaceName":"东京街角咖啡","area":"涩谷","plannedDate":"2026-10-04","plannedTime":"15:30:00","note":"下午休息一下","latitude":35.6600,"longitude":139.7010}
+
+### Manual checkin
+POST {{base}}/trips/{{tripId}}/checkins
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"checkinTime":"2026-10-04T18:30:00+09:00","placeName":"涩谷十字路口","area":"涩谷","note":"第一次真正感受到东京的速度。"}
+
+### Timeline
+GET {{base}}/trips/{{tripId}}/timeline
+Authorization: Bearer {{token}}
+
+### Photo presign
+POST {{base}}/trips/{{tripId}}/photos/presign
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"fileName":"shibuya.webp","contentType":"image/webp","fileSize":450000}
+
+### Summary
+GET {{base}}/trips/{{tripId}}/summary
+Authorization: Bearer {{token}}
+
+### Create share link
+POST {{base}}/trips/{{tripId}}/share-links
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{}
+
+### Create video project
+POST {{base}}/trips/{{tripId}}/video-projects
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"templateCode":"JOURNAL","aspectRatio":"9:16","duration":30,"musicCode":"CITY_WALK","showText":true,"showMap":true,"showAchievements":true,"photoIds":[1,2,3]}
+
+### Archive trip (read-only, frees the FREE trip slot)
+POST {{base}}/trips/{{tripId}}/archive
+Authorization: Bearer {{token}}
+
+### Unarchive trip
+POST {{base}}/trips/{{tripId}}/unarchive
+Authorization: Bearer {{token}}
+
+### Upgrade Trip Pro (mock locally)
+POST {{base}}/trips/{{tripId}}/payments/checkout
+Authorization: Bearer {{token}}

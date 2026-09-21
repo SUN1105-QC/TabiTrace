@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: tabitrace-video-worker
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/tabitrace?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC}
+    username: ${DB_USERNAME:tabitrace_app}
+    password: ${DB_PASSWORD:tabitrace_dev}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+worker:
+  poll-ms: ${VIDEO_WORKER_POLL_MS:5000}
+  ffmpeg-binary: ${FFMPEG_BINARY:ffmpeg}
+  work-dir: ${VIDEO_WORK_DIR:../../frontend/public/generated-videos}
+  music-dir: ${VIDEO_MUSIC_DIR:../../frontend/public/music}
+  storage:
+    mode: ${STORAGE_MODE:mock}
+    local:
+      public-base-url: ${VIDEO_PUBLIC_BASE_URL:http://localhost:3000/generated-videos}
+    r2:
+      endpoint: ${R2_ENDPOINT:}
+      access-key: ${R2_ACCESS_KEY:}
+      secret-key: ${R2_SECRET_KEY:}
+      bucket: ${R2_BUCKET:}
+      public-base-url: ${R2_PUBLIC_BASE_URL:}

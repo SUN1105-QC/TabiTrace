@@ -1,0 +1,9 @@
+logging:
+  level:
+    com.tabitrace: DEBUG
+
+app:
+  video:
+    # true = API 内置的假渲染器直接把任务标成 COMPLETED（写 example.invalid 占位地址）
+    # 跑真实的 video-worker 时必须设成 false，否则假渲染器会先抢走 QUEUED 任务
+    mock-renderer-enabled: ${VIDEO_MOCK_RENDERER:true}

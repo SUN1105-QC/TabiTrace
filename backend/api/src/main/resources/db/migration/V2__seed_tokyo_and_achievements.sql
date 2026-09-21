@@ -1,0 +1,45 @@
+INSERT INTO official_cities(id,code,name,country_code,description,cover_image,status,theme,created_at) VALUES
+(1,'TOKYO','东京','JP','TabiTrace 首套官方精选城市内容：约 30 个地点、9 个探索区域与专属成就。',NULL,'ACTIVE','TOKYO_WARM',UTC_TIMESTAMP());
+
+INSERT INTO places(id,name,country_code,country,city,area,address,latitude,longitude,category,source_type,description,cover_image,created_at,updated_at) VALUES
+(1,'浅草寺','JP','日本','东京','浅草',NULL,35.7148000,139.7967000,'寺院','OFFICIAL','浅草寺 · 东京官方推荐地点。',NULL,UTC_TIMESTAMP(),UTC_TIMESTAMP()),
+(2,'雷门','JP','日本','东京','浅草',NULL,35.7111000,139.7964000,'地标','OFFICIAL','雷门 · 东京官方推荐地点。',NULL,UTC_TIMESTAMP(),UTC_TIMESTAMP()),
+(3,'东京晴空塔','JP','日本','东京','浅草',NULL,35.7101000,139.8107000,'地标','OFFICIAL','东京晴空塔 · 东京官方推荐地点。',NULL,UTC_TIMESTAMP(),UTC_TIMESTAMP()),
+(4,'仲见世','JP','日本','东京','浅草',NULL,35.7122000,139.7965000,'街区','OFFICIAL','仲见世 · 东京官方推荐地点。',NULL,UTC_TIMESTAMP(),UTC_TIMESTAMP()),
+(5,'秋叶原电器街','JP','日本','东京','秋叶原',NULL,35.6984000,139.7731000,'街区','OFFICIAL','秋叶原电器街 · 东京官方推荐地点。',NULL,UTC_TIMESTAMP(),UTC_TIMESTAMP()),
+(6,'神田明神','JP','日本','东京','秋叶原',NULL,35.7019000,139.7679000,'神社','OFFICIAL','神田明神 · 东京官方推荐地点。',NULL,UTC_TIMESTAMP(),UTC_TIMESTAMP()),
+(7,'秋叶原UDX','JP','日本','东京','秋叶原',NULL,35.7006000,139.7726000,'城市地标','OFFICIAL','秋叶原UDX · 东京官方推荐地点。',NULL,UTC_TIMESTAMP(),UTC_TIMESTAMP()),
+(8,'上野公园','JP','日本','东京','上野',NULL,35.7153000,139.7730000,'公园','OFFICIAL','上野公园 · 东京官方推荐地点。',NULL,UTC_TIMESTAMP(),UTC_TIMESTAMP()),
+(9,'阿美横丁','JP','日本','东京','上野',NULL,35.7092000,139.7745000,'街区','OFFICIAL','阿美横丁 · 东京官方推荐地点。',NULL,UTC_TIMESTAMP(),UTC_TIMESTAMP()),
+(10,'东京国立博物馆','JP','日本','东京','上野',NULL,35.7188000,139.7765000,'博物馆','OFFICIAL','东京国立博物馆 · 东京官方推荐地点。',NULL,UTC_TIMESTAMP(),UTC_TIMESTAMP()),
+(11,'东京站','JP','日本','东京','东京站',NULL,35.6812000,139.7671000,'地标','OFFICIAL','东京站 · 东京官方推荐地点。',NULL,UTC_TIMESTAMP(),UTC_TIMESTAMP()),
+(12,'皇居外苑','JP','日本','东京','东京站',NULL,35.6795000,139.7580000,'公园','OFFICIAL','皇居外苑 · 东京官方推荐地点。',NULL,UTC_TIMESTAMP(),UTC_TIMESTAMP()),
+(13,'丸之内仲通','JP','日本','东京','东京站',NULL,35.6790000,139.7630000,'街区','OFFICIAL','丸之内仲通 · 东京官方推荐地点。',NULL,UTC_TIMESTAMP(),UTC_TIMESTAMP()),
+(14,'银座','JP','日本','东京','银座',NULL,35.6717000,139.7658000,'街区','OFFICIAL','银座 · 东京官方推荐地点。',NULL,UTC_TIMESTAMP(),UTC_TIMESTAMP()),
+(15,'GINZA SIX','JP','日本','东京','银座',NULL,35.6697000,139.7643000,'商业','OFFICIAL','GINZA SIX · 东京官方推荐地点。',NULL,UTC_TIMESTAMP(),UTC_TIMESTAMP()),
+(16,'歌舞伎座','JP','日本','东京','银座',NULL,35.6695000,139.7677000,'文化','OFFICIAL','歌舞伎座 · 东京官方推荐地点。',NULL,UTC_TIMESTAMP(),UTC_TIMESTAMP()),
+(17,'涩谷十字路口','JP','日本','东京','涩谷',NULL,35.6595000,139.7005000,'城市地标','OFFICIAL','涩谷十字路口 · 东京官方推荐地点。',NULL,UTC_TIMESTAMP(),UTC_TIMESTAMP()),
+(18,'涩谷 SKY','JP','日本','东京','涩谷',NULL,35.6585000,139.7022000,'观景台','OFFICIAL','涩谷 SKY · 东京官方推荐地点。',NULL,UTC_TIMESTAMP(),UTC_TIMESTAMP()),
+(19,'忠犬八公像','JP','日本','东京','涩谷',NULL,35.6591000,139.7006000,'地标','OFFICIAL','忠犬八公像 · 东京官方推荐地点。',NULL,UTC_TIMESTAMP(),UTC_TIMESTAMP()),
+(20,'明治神宫','JP','日本','东京','原宿',NULL,35.6764000,139.6993000,'神社','OFFICIAL','明治神宫 · 东京官方推荐地点。',NULL,UTC_TIMESTAMP(),UTC_TIMESTAMP()),
+(21,'竹下通','JP','日本','东京','原宿',NULL,35.6716000,139.7030000,'街区','OFFICIAL','竹下通 · 东京官方推荐地点。',NULL,UTC_TIMESTAMP(),UTC_TIMESTAMP()),
+(22,'代代木公园','JP','日本','东京','原宿',NULL,35.6717000,139.6949000,'公园','OFFICIAL','代代木公园 · 东京官方推荐地点。',NULL,UTC_TIMESTAMP(),UTC_TIMESTAMP()),
+(23,'新宿御苑','JP','日本','东京','新宿',NULL,35.6852000,139.7100000,'公园','OFFICIAL','新宿御苑 · 东京官方推荐地点。',NULL,UTC_TIMESTAMP(),UTC_TIMESTAMP()),
+(24,'东京都厅','JP','日本','东京','新宿',NULL,35.6896000,139.6921000,'观景台','OFFICIAL','东京都厅 · 东京官方推荐地点。',NULL,UTC_TIMESTAMP(),UTC_TIMESTAMP()),
+(25,'歌舞伎町','JP','日本','东京','新宿',NULL,35.6940000,139.7028000,'街区','OFFICIAL','歌舞伎町 · 东京官方推荐地点。',NULL,UTC_TIMESTAMP(),UTC_TIMESTAMP()),
+(26,'东京塔','JP','日本','东京','港区',NULL,35.6586000,139.7454000,'地标','OFFICIAL','东京塔 · 东京官方推荐地点。',NULL,UTC_TIMESTAMP(),UTC_TIMESTAMP()),
+(27,'麻布台 Hills','JP','日本','东京','港区',NULL,35.6615000,139.7406000,'城市地标','OFFICIAL','麻布台 Hills · 东京官方推荐地点。',NULL,UTC_TIMESTAMP(),UTC_TIMESTAMP()),
+(28,'台场海滨公园','JP','日本','东京','台场',NULL,35.6298000,139.7768000,'海滨','OFFICIAL','台场海滨公园 · 东京官方推荐地点。',NULL,UTC_TIMESTAMP(),UTC_TIMESTAMP()),
+(29,'彩虹大桥','JP','日本','东京','台场',NULL,35.6366000,139.7631000,'地标','OFFICIAL','彩虹大桥 · 东京官方推荐地点。',NULL,UTC_TIMESTAMP(),UTC_TIMESTAMP()),
+(30,'丰洲市场','JP','日本','东京','台场',NULL,35.6455000,139.7800000,'市场','OFFICIAL','丰洲市场 · 东京官方推荐地点。',NULL,UTC_TIMESTAMP(),UTC_TIMESTAMP());
+
+INSERT INTO achievements(code,name,description,type,city_code,icon_url,condition_type,condition_value,created_at) VALUES
+('FIRST','初次启程','完成第一次打卡','GLOBAL',NULL,NULL,'CHECKIN_COUNT',1,UTC_TIMESTAMP()),
+('PHOTO_STORY','旅行记录者','在一次旅行中记录 10 张照片','GLOBAL',NULL,NULL,'PHOTO_COUNT',10,UTC_TIMESTAMP()),
+('EXPLORER','城市探索者','探索 5 个区域','GLOBAL',NULL,NULL,'AREA_COUNT',5,UTC_TIMESTAMP()),
+('COLLECTOR','足迹收藏家','累计记录 20 个地点','GLOBAL',NULL,NULL,'CHECKIN_COUNT',20,UTC_TIMESTAMP()),
+('TRIP_COMPLETE','旅程完成','完成一次旅行','GLOBAL',NULL,NULL,'TRIP_COMPLETED',1,UTC_TIMESTAMP()),
+('TOKYO_START','东京初心者','完成首个东京官方地点','CITY','TOKYO',NULL,'OFFICIAL_CHECKIN_COUNT',1,UTC_TIMESTAMP()),
+('TRADITION','东京传统派','完成浅草寺与明治神宫','CITY','TOKYO',NULL,'TOKYO_TRADITION',2,UTC_TIMESTAMP()),
+('NIGHT','东京夜行者','完成 3 个东京夜景地点','CITY','TOKYO',NULL,'TOKYO_NIGHT',3,UTC_TIMESTAMP()),
+('TOKYO_MASTER','东京达人','完成 20 个东京官方地点','CITY','TOKYO',NULL,'OFFICIAL_CHECKIN_COUNT',20,UTC_TIMESTAMP());
