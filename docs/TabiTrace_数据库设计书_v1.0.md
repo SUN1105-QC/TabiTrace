@@ -331,8 +331,8 @@ official_cities ──(逻辑上按 code/city 管理)── official places / ci
 | trip_id             | BIGINT       | NOT NULL                  | FK → trips.id         | 升级的具体旅行                         |
 | provider            | VARCHAR(30)  | NOT NULL                  |                       | MOCK / STRIPE                          |
 | provider_payment_id | VARCHAR(255) | NULL                      | idx_payments_provider | Stripe Checkout Session 等外部支付标识 |
-| amount              | INT          | NOT NULL                  |                       | 最小货币单位金额；当前 JPY 490         |
-| currency            | VARCHAR(10)  | NOT NULL                  |                       | 货币，如 JPY                           |
+| amount              | INT          | NOT NULL                  |                       | 最小货币单位金额；当前 CNY 12800（128 元）|
+| currency            | VARCHAR(10)  | NOT NULL                  |                       | 货币代码，当前 CNY                     |
 | status              | VARCHAR(30)  | NOT NULL                  |                       | PENDING / PAID 等支付状态              |
 | paid_at             | DATETIME(6)  | NULL                      |                       | 支付确认时间，UTC                      |
 | created_at          | DATETIME(6)  | NOT NULL                  |                       | 创建时间，UTC                          |

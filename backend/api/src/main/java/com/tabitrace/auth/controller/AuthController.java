@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     private final AuthService service;
     public AuthController(AuthService service){this.service=service;}
-    @PostMapping("/register") public ApiResponse<TokenResponse> register(@Valid @RequestBody RegisterRequest r){return ApiResponse.ok(service.register(r));}
-    @PostMapping("/login") public ApiResponse<TokenResponse> login(@Valid @RequestBody LoginRequest r){return ApiResponse.ok(service.login(r));}
-    @PostMapping("/refresh") public ApiResponse<TokenResponse> refresh(@Valid @RequestBody RefreshRequest r){return ApiResponse.ok(service.refresh(r));}
+    @PostMapping("/register") public ApiResponse<TokenResponse> register(@Valid @RequestBody RegisterRequest r,@RequestHeader(value="User-Agent",required=false) String ua){return ApiResponse.ok(service.register(r,ua));}
+    @PostMapping("/login") public ApiResponse<TokenResponse> login(@Valid @RequestBody LoginRequest r,@RequestHeader(value="User-Agent",required=false) String ua){return ApiResponse.ok(service.login(r,ua));}
+    @PostMapping("/refresh") public ApiResponse<TokenResponse> refresh(@Valid @RequestBody RefreshRequest r,@RequestHeader(value="User-Agent",required=false) String ua){return ApiResponse.ok(service.refresh(r,ua));}
     @PostMapping("/logout") public ApiResponse<Void> logout(@RequestBody(required=false) LogoutRequest r){
         Long userId=null;
         Authentication authentication=SecurityContextHolder.getContext().getAuthentication();

@@ -21,4 +21,7 @@ public interface TripMapper {
     @Update("UPDATE trips SET plan_type=#{planType},updated_at=UTC_TIMESTAMP() WHERE id=#{id}") int updatePlan(@Param("id") Long id,@Param("planType") String planType);
     @Update("UPDATE trips SET visibility=#{visibility},updated_at=UTC_TIMESTAMP() WHERE id=#{id}") int updateVisibility(@Param("id") Long id,@Param("visibility") String visibility);
     @Delete("DELETE FROM trips WHERE id=#{id}") int delete(Long id);
+    @Update("UPDATE trips SET cover_image=#{url},updated_at=UTC_TIMESTAMP() WHERE id=#{id}") int updateCover(@Param("id") Long id,@Param("url") String url);
+    /** 旅行封面正好是被删除的照片时清空，避免封面指向已删除的照片 */
+    @Update("UPDATE trips SET cover_image=NULL,updated_at=UTC_TIMESTAMP() WHERE id=#{id} AND cover_image=#{url}") int clearCoverIf(@Param("id") Long id,@Param("url") String url);
 }

@@ -30,7 +30,7 @@ public class SecurityConfig {
                 .accessDeniedHandler((req,res,e) -> { res.setStatus(403); res.setContentType("application/json;charset=UTF-8"); res.getWriter().write("{\"success\":false,\"data\":null,\"code\":\"ACCESS_DENIED\",\"message\":\"没有权限执行此操作\"}"); }))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/api/v1/auth/**", "/api/v1/share/**", "/api/v1/local-storage/**", "/api/v1/payments/stripe/webhook", "/actuator/health").permitAll()
+                .requestMatchers("/api/v1/auth/**", "/api/v1/share/**", "/api/v1/local-storage/**", "/api/v1/payments/stripe/webhook", "/api/v1/plans/**", "/actuator/health").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/official-cities/**", "/api/v1/places/search").permitAll()
                 .anyRequest().authenticated())
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

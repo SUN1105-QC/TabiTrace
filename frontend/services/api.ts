@@ -12,11 +12,14 @@ const REFRESH_KEY = 'tabitrace-refresh-token'
 export class ApiError extends Error {
   status: number
   code?: string | null
-  constructor(message: string, status: number, code?: string | null) {
+  /** 错误响应里的补充信息（如 retryAfter、remainingAttempts） */
+  details?: Record<string, unknown> | null
+  constructor(message: string, status: number, code?: string | null, details?: Record<string, unknown> | null) {
     super(message)
     this.name = 'ApiError'
     this.status = status
     this.code = code
+    this.details = details
   }
 }
 
@@ -108,7 +111,7 @@ async function request<T>(path: string, init: RequestInit, auth: boolean, allowR
   let envelope: ApiEnvelope<T> | null = null
   try { envelope = await response.json() } catch {}
   if (!response.ok || !envelope?.success) {
-    throw new ApiError(envelope?.message || `HTTP ${response.status}`, response.status, envelope?.code)
+    throw new ApiError(envelope?.message || `HTTP ${response.status}`, response.status, envelope?.code, (envelope?.data as Record<string, unknown> | null) ?? null)
   }
   return envelope.data
 }

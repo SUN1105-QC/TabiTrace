@@ -95,13 +95,38 @@ STORAGE_MODE=local mvn -f backend/pom.xml -pl video-worker spring-boot:run
 
 Worker 没有 HTTP 端口，只轮询数据库里的 `QUEUED` 任务。成品地址形如 `http://localhost:3000/generated-videos/project-<id>/output.mp4`，由前端 dev server 直接提供。
 
+#### 可靠性与生产部署
+
+- **崩溃回收**：Worker 处理任务时每 15 秒刷新一次心跳（`updated_at`）。API 内置的看门狗每分钟检查一次，PROCESSING 任务超过 `VIDEO_PROCESSING_TIMEOUT_SECONDS`（默认 300 秒）没有心跳就标记为 FAILED / `RENDER_INTERRUPTED`，用户点「重试」即可重新排队。看门狗放在 API 里，是因为出问题时 Worker 本身可能已经不在。
+- **FFmpeg 卡死**：单次 FFmpeg 调用有硬超时 `WORKER_FFMPEG_TIMEOUT_SECONDS`（默认 600 秒），超时强制结束并以「视频合成失败」告知用户。
+- **中间文件**：工作目录位于 `frontend/public` 下会被公开访问，所以成功后只保留 `output.mp4`，失败时整目录清空；Worker 启动时还会清扫上次被强杀遗留的中间文件和残缺成片。当前清扫假设**只有一个 Worker 实例**，多实例部署需要为每个实例配置独立的 `VIDEO_WORK_DIR`。
+- **启动自检**：Worker 启动日志会报告 FFmpeg 是否可用、视频字体能否显示中文、音乐目录是否存在。
+- **Linux 服务器必须安装中文字体**，否则成片里的中文会显示为方块（日志会出现 WARN）：
+
+```bash
+sudo apt install ffmpeg fonts-noto-cjk
+```
+
+### 邮件与邮箱验证码
+
+注册必须先验证邮箱：`POST /api/v1/auth/email-verification/send` 发送 6 位验证码 → `POST /api/v1/auth/email-verification/verify` 校验后得到一次性的 `emailVerificationToken` → `POST /api/v1/auth/register` 带上令牌才会创建账号。
+
+- **邮件发送**复用 `spring-boot-starter-mail`（SMTP），通过环境变量配置：`MAIL_HOST`、`MAIL_PORT`、`MAIL_USERNAME`、`MAIL_PASSWORD`、`MAIL_SMTP_AUTH`、`MAIL_SMTP_STARTTLS` / `MAIL_SMTP_SSL`、`MAIL_FROM_ADDRESS`、`MAIL_FROM_NAME`。SMTP 不可用时接口如实返回 `503 EMAIL_SEND_FAILED`，不会当作已发送。
+- **本地开发**默认连 `localhost:1025`：运行 `node backend/scripts/dev-mail-catcher.mjs`（启动脚本会自动打开），邮件保存在 `backend/.tabitrace/mail-outbox/`，在 http://127.0.0.1:1080 查看。也可以换成 Mailpit 等同类工具。**生产环境必须配置真实 SMTP。**
+- **安全规则**：验证码用 `SecureRandom` 生成，数据库只存 HMAC-SHA256 哈希（密钥默认沿用 `JWT_SECRET`，可用 `app.email-verification.secret` 单独配置）；令牌只存 SHA-256；验证码和令牌不会出现在响应或日志里。
+- **规则**（`app.email-verification.*`）：验证码 10 分钟有效、最多错 5 次；同一邮箱 60 秒冷却、每小时 5 次；同一 IP 每小时 20 次（生产环境取 nginx 设置的 `X-Real-IP`，只信任本机代理）；令牌 30 分钟有效、只能使用一次。频率限制基于数据库表 `email_verifications`，不需要 Redis；并发的重复发送在插入后再次确认冷却，只会有一次成功；记录保留 7 天后自动清理。
+- **防邮箱探测**：已注册邮箱请求注册验证码时，接口响应与正常发送完全相同，但邮件内容是“这个邮箱已经有旅迹账号，请直接登录”，不含验证码。
+- **并发注册**：令牌在注册事务里加行锁一次性消费，同一令牌并发提交只有一次成功；邮箱唯一性以 `users.email` 唯一约束为准。
+- **通用用途**：`purpose` 目前开放 `register`；`reset_password` / `change_email` 已预留，接入对应流程时在 `EmailVerificationService.ENABLED` 中打开即可复用同一套验证码与令牌。
+
 ### 生产环境注意
 
 - `prod` profile 启动时会校验 `JWT_SECRET`：未设置、短于 32 字节或仍包含 `change-me` 的开发默认值会直接启动失败。
+- 生产环境必须通过 `MAIL_*` 环境变量配置真实 SMTP，否则注册验证码无法发送。
 
 ## 已实现主要能力
 
-- 注册 / 登录 / Refresh / Logout
+- 注册（必须邮箱验证码验证）/ 登录 / Refresh / Logout / 登录设备管理
 - 旅行 CRUD 与 FREE / PRO 状态
 - 旅行归档 / 取消归档：归档旅行只读、不占用 FREE 名额；FREE 旅行取消归档时仍受 1 个名额限制
 - 东京官方城市与地点

@@ -10,8 +10,21 @@ import { Camera, Crosshair, Loader2, MapPin, X } from 'lucide-react'
 import { tripApi, uploadTripPhoto, type PlaceView, type TripView } from '@/services/tabitrace-api'
 import { localDateKey, offsetIso, pad } from '@/lib/time'
 
+/** 预填：从地图工作台“到达打卡”进入时带上地点 / 行程项，打卡会自动完成对应行程 */
+export type QuickCheckInPrefill = {
+  placeId?: number
+  placeName?: string
+  area?: string
+  itineraryItemId?: number
+  /** 今天不在旅行日期内时使用的日期（例如计划的日期） */
+  date?: string
+  note?: string
+  latitude?: number
+  longitude?: number
+}
+
 type QuickCheckInContextValue = {
-  openQuickCheckIn: (tripId?: number) => void
+  openQuickCheckIn: (tripId?: number, prefill?: QuickCheckInPrefill) => void
   /** 每次打卡成功后自增，首页等页面据此刷新数据 */
   checkinVersion: number
 }
@@ -25,10 +38,12 @@ export function useQuickCheckIn() {
 export function QuickCheckInProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false)
   const [requestedTripId, setRequestedTripId] = useState<number | null>(null)
+  const [prefill, setPrefill] = useState<QuickCheckInPrefill | null>(null)
   const [version, setVersion] = useState(0)
 
-  const openQuickCheckIn = useCallback((tripId?: number) => {
+  const openQuickCheckIn = useCallback((tripId?: number, p?: QuickCheckInPrefill) => {
     setRequestedTripId(tripId ?? null)
+    setPrefill(p ?? null)
     setOpen(true)
   }, [])
 
@@ -40,6 +55,7 @@ export function QuickCheckInProvider({ children }: { children: ReactNode }) {
       {open && (
         <QuickCheckInModal
           preferredTripId={requestedTripId}
+          prefill={prefill}
           onClose={() => setOpen(false)}
           onSaved={() => { setVersion(v => v + 1); setOpen(false) }}
         />
@@ -53,18 +69,18 @@ function nowTime() {
   return `${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
-function QuickCheckInModal({ preferredTripId, onClose, onSaved }: { preferredTripId: number | null; onClose: () => void; onSaved: () => void }) {
+function QuickCheckInModal({ preferredTripId, prefill, onClose, onSaved }: { preferredTripId: number | null; prefill: QuickCheckInPrefill | null; onClose: () => void; onSaved: () => void }) {
   const [trips, setTrips] = useState<TripView[]>([])
   const [tripId, setTripId] = useState<number | null>(preferredTripId)
   const [places, setPlaces] = useState<PlaceView[]>([])
-  const [placeId, setPlaceId] = useState<number | null>(null)
-  const [placeName, setPlaceName] = useState('')
-  const [area, setArea] = useState('')
+  const [placeId, setPlaceId] = useState<number | null>(prefill?.placeId ?? null)
+  const [placeName, setPlaceName] = useState(prefill?.placeName ?? '')
+  const [area, setArea] = useState(prefill?.area ?? '')
   const [date, setDate] = useState('')
   const [time, setTime] = useState(nowTime())
-  const [note, setNote] = useState('')
+  const [note, setNote] = useState(prefill?.note ?? '')
   const [file, setFile] = useState<File | null>(null)
-  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null)
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(prefill?.latitude != null && prefill?.longitude != null ? { lat: prefill.latitude, lng: prefill.longitude } : null)
   const [locating, setLocating] = useState(false)
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
@@ -99,7 +115,8 @@ function QuickCheckInModal({ preferredTripId, onClose, onSaved }: { preferredTri
   useEffect(() => {
     if (!trip) return
     const today = localDateKey(new Date())
-    setDate(today < trip.startDate ? trip.startDate : today > trip.endDate ? trip.endDate : today)
+    const inTrip = today >= trip.startDate && today <= trip.endDate
+    setDate(inTrip ? today : prefill?.date && prefill.date >= trip.startDate && prefill.date <= trip.endDate ? prefill.date : today < trip.startDate ? trip.startDate : trip.endDate)
     tripApi.places(trip.id).then(setPlaces).catch(() => setPlaces([]))
   }, [trip?.id, trip?.startDate, trip?.endDate])
 
@@ -110,6 +127,14 @@ function QuickCheckInModal({ preferredTripId, onClose, onSaved }: { preferredTri
     setPlaceId(id)
     if (p) { setPlaceName(p.name); setArea(p.area || '') }
   }
+
+  // 已经授权过定位时自动带上当前位置；没有授权时不主动弹出请求，由用户点击“获取我的位置”
+  useEffect(() => {
+    if (!navigator.geolocation || !navigator.permissions?.query) return
+    if (prefill?.latitude != null) return
+    navigator.permissions.query({ name: 'geolocation' as PermissionName }).then(r => { if (r.state === 'granted') locate() }).catch(() => {})
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   function locate() {
     if (!navigator.geolocation) { setError('当前浏览器不支持定位'); return }
@@ -131,6 +156,8 @@ function QuickCheckInModal({ preferredTripId, onClose, onSaved }: { preferredTri
     try {
       const checkin = await tripApi.addCheckin(trip.id, {
         placeId: placeId ?? undefined,
+        // 从行程进入时一并完成该行程（后端会把行程标记为已完成）；用户改选了别的地点则不再关联
+        itineraryItemId: prefill?.itineraryItemId && (placeId ?? null) === (prefill.placeId ?? null) ? prefill.itineraryItemId : undefined,
         placeName: placeId ? undefined : placeName.trim(),
         area: area.trim() || undefined,
         checkinTime: offsetIso(date, time),
@@ -156,7 +183,7 @@ function QuickCheckInModal({ preferredTripId, onClose, onSaved }: { preferredTri
         <div className="modal-head">
           <div>
             <p className="text-[10px] font-bold tracking-[.18em] text-warm">QUICK CHECK-IN</p>
-            <h2 className="mt-1 font-serif text-2xl">快速打卡</h2>
+            <h2 className="mt-1 font-serif text-2xl">{prefill?.placeName ? `到达打卡 · ${prefill.placeName}` : '快速打卡'}</h2>
           </div>
           <button onClick={onClose} aria-label="关闭快速打卡" className="grid h-9 w-9 place-items-center rounded-full border border-black/10 bg-white"><X size={16} /></button>
         </div>
@@ -183,6 +210,8 @@ function QuickCheckInModal({ preferredTripId, onClose, onSaved }: { preferredTri
               <span className="field-label">选择旅行中的地点</span>
               <select value={placeId ?? ''} onChange={e => pickPlace(e.target.value)} className="field">
                 <option value="">手动填写新地点</option>
+                {/* 预填的地点还不在这段旅行里（例如刚从搜索结果打卡）：保存时后端会把它加入旅行 */}
+                {prefill?.placeId && !places.some(p => p.id === prefill.placeId) && <option value={prefill.placeId}>{prefill.placeName}{prefill.area ? ` · ${prefill.area}` : ''}</option>}
                 {places.map(p => <option key={p.id} value={p.id}>{p.name}{p.area ? ` · ${p.area}` : ''}</option>)}
               </select>
             </label>

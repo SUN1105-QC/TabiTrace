@@ -1,16 +1,208 @@
 'use client'
 
-import { useEffect,useState } from 'react'
-import { Check, CreditCard, Sparkles } from 'lucide-react'
-import { SiteHeader } from '@/components/common/SiteHeader'
-import { tripApi, type TripView } from '@/services/tabitrace-api'
+/**
+ * Trip Pro 升级中心。
+ * 真实商业规则（来自后端 /plans/trip-pro 与 PaymentService）：按单段旅行一次性购买，升级后该旅行永久为 Pro，
+ * 不是订阅、不会自动续费。价格、Free 限制与 Travel Story 差异全部读取方案配置。
+ * 购买复用现有 checkout：模拟支付环境立即完成；Stripe 环境跳转付款页，返回后轮询确认结果，不会假装成功。
+ */
 
-const free=['创建 1 次旅行','全球自由添加地点','最多 10 个打卡','最多 10 张照片','基础统计与分享卡','TabiTrace 水印']
-const pro=['无限打卡','更多照片','完整旅行地图','高级统计与东京官方内容','高清分享图与旅行视频','高级模板 · 去水印']
-export default function PricingPage(){
-  const[trip,setTrip]=useState<TripView|null>(null);const[busy,setBusy]=useState(false);const[msg,setMsg]=useState('')
-  useEffect(()=>{(async()=>{try{const stored=Number(localStorage.getItem('tabitrace-live-trip-id')||0);if(stored){setTrip(await tripApi.get(stored));return}const rows=await tripApi.list();const active=rows.find(t=>t.status!=='ARCHIVED')||rows[0]||null;if(active){localStorage.setItem('tabitrace-live-trip-id',String(active.id));setTrip(active)}}catch{}})()},[])
-  const checkout=async()=>{if(!trip){setMsg('请先创建或打开一段旅行');return}setBusy(true);setMsg('');try{const result=await tripApi.checkout(trip.id);if(result?.mock){const latest=await tripApi.get(trip.id);setTrip(latest);setMsg('本地 Mock 支付成功，当前旅行已升级 Pro')}else if(result?.checkoutUrl){window.location.assign(result.checkoutUrl)}else setMsg('Checkout 已创建')}catch(e:any){setMsg(e.message||'无法开始结账')}finally{setBusy(false)}}
-  return <main><SiteHeader/><section className="mx-auto max-w-5xl px-5 pb-14 sm:px-8"><div className="text-center"><p className="text-sm font-bold text-warm">TRIP PRO</p><h1 className="mt-3 font-serif text-5xl">免费开始，在真正需要时再升级。</h1><p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-black/50">Pro 按单次旅行生效。每一次旅行都拥有独立的 FREE / PRO 状态。</p></div><div className="mt-10 grid gap-5 md:grid-cols-2"><Plan title="FREE" price="¥0" items={free}/><div className="relative rounded-[32px] border border-gold/35 bg-[#F3E8D8] p-7 shadow-card"><span className="absolute right-6 top-6 rounded-full bg-gold px-3 py-1 text-[10px] font-semibold text-white">推荐</span><div className="text-xs tracking-[.2em] text-[#8b6a2f]">TRIP PRO</div><div className="mt-4 font-serif text-5xl">¥490</div><div className="mt-1 text-xs text-black/40">/ 单次旅行</div><div className="mt-7 space-y-3">{pro.map(item=><div key={item} className="flex items-center gap-3 text-sm"><Check size={15} className="text-warm"/>{item}</div>)}</div><button onClick={checkout} disabled={busy||trip?.planType==='PRO'} className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-4 py-3.5 text-sm font-medium text-white disabled:opacity-50"><CreditCard size={16}/>{trip?.planType==='PRO'?'当前旅行已是 Pro':busy?'正在打开 Checkout…':'升级当前旅行'}</button>{trip?<p className="mt-3 text-center text-xs text-black/40">当前：{trip.title} · {trip.planType}</p>:<p className="mt-3 text-center text-xs text-black/40">登录并打开一段旅行后即可升级</p>}{msg&&<p className="mt-3 text-center text-xs font-medium text-warm">{msg}</p>}</div></div><div className="mt-8 warm-card p-6"><Sparkles className="text-warm"/><h2 className="mt-4 font-serif text-2xl">在真正产生价值的时候触发付费</h2><p className="mt-2 text-sm leading-7 text-black/50">用户完成第 10 个地点、准备导出高清旅行长图或 1080P Travel Story 时，再提示升级，更符合当前 MVP 商业设计。</p></div></section></main>
+import Link from 'next/link'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { ArrowRight, CheckCircle2, Info, RefreshCcw, TriangleAlert } from 'lucide-react'
+import { SiteHeader } from '@/components/common/SiteHeader'
+import { PayNotice, TripProStatus, UpgradeButton, type PayState } from '@/components/pro/TripProStatus'
+import { ProComparison, ProFaq, ProPreviews, ProPricing, ProValues, WhyPerTrip } from '@/components/pro/ProSections'
+import { ApiError, hasSession } from '@/services/api'
+import { planApi, tripApi, type TripSummary, type TripView } from '@/services/tabitrace-api'
+import { isOneTimePerTrip, planPrice, type TripProPlan } from '@/utils/plan'
+
+export default function PricingPage() {
+  const [plan, setPlan] = useState<TripProPlan | null>(null)
+  const [planError, setPlanError] = useState('')
+  const [loggedIn, setLoggedIn] = useState(false)
+  const [trips, setTrips] = useState<TripView[]>([])
+  const [trip, setTrip] = useState<TripView | null>(null)
+  const [summary, setSummary] = useState<TripSummary | null>(null)
+  const [loadingTrip, setLoadingTrip] = useState(true)
+  const [pay, setPay] = useState<PayState>('idle')
+  const [payMessage, setPayMessage] = useState('')
+  const [mockPaid, setMockPaid] = useState(false)
+  const [showSticky, setShowSticky] = useState(false)
+  const paying = useRef(false)
+  const statusBox = useRef<HTMLDivElement | null>(null)
+
+  const loadPlan = useCallback(() => {
+    setPlanError('')
+    planApi.tripPro().then(setPlan).catch(e => setPlanError(e instanceof Error && e.message ? e.message : '请稍后再试'))
+  }, [])
+
+  const loadSummary = useCallback((t: TripView) => {
+    setSummary(null)
+    if (t.planType !== 'PRO') tripApi.summary(t.id).then(setSummary).catch(() => setSummary(null))
+  }, [])
+
+  // 付款返回后确认结果：以旅行的真实方案为准，最多等 30 秒，确认不了就如实告诉用户
+  const confirmPaid = useCallback(async (tripId: number) => {
+    setPay('confirming')
+    for (let i = 0; i < 15; i++) {
+      try {
+        const t = await tripApi.get(tripId)
+        if (t.planType === 'PRO') { setTrip(t); setTrips(ts => ts.map(x => (x.id === t.id ? t : x))); setPay('success'); return }
+      } catch { /* 继续等待 */ }
+      await new Promise(r => setTimeout(r, 2000))
+    }
+    setPayMessage('支付结果还在确认中，稍后刷新本页即可看到最新状态；如已扣款，旅行会自动解锁。')
+  }, [])
+
+  useEffect(() => {
+    loadPlan()
+    const q = new URLSearchParams(window.location.search)
+    const wanted = Number(q.get('trip') || 0)
+    const payment = q.get('payment')
+    const session = hasSession()
+    setLoggedIn(session)
+    if (!session) { setLoadingTrip(false); return }
+    ;(async () => {
+      try {
+        const rows = await tripApi.list()
+        setTrips(rows)
+        const stored = Number(localStorage.getItem('tabitrace-live-trip-id') || 0)
+        const picked = rows.find(t => t.id === wanted) || rows.find(t => t.id === stored) || rows.find(t => t.status !== 'ARCHIVED') || rows[0] || null
+        setTrip(picked)
+        if (picked) {
+          loadSummary(picked)
+          if (payment === 'cancelled') setPay('cancelled')
+          if (payment === 'success') void confirmPaid(picked.id)
+        }
+      } catch {
+        setTrip(null)
+      } finally {
+        setLoadingTrip(false)
+        if (payment) { q.delete('payment'); window.history.replaceState(null, '', `${window.location.pathname}${q.toString() ? `?${q}` : ''}`) }
+      }
+    })()
+  }, [loadPlan, loadSummary, confirmPaid])
+
+  // 状态卡片离开视口后才显示底部条，避免同一个购买按钮在屏幕上出现两次
+  useEffect(() => {
+    const el = statusBox.current
+    if (!el) return
+    const io = new IntersectionObserver(([e]) => setShowSticky(!e.isIntersecting), { threshold: 0 })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [plan, loadingTrip])
+
+  const selectTrip = (id: number) => {
+    const t = trips.find(x => x.id === id)
+    if (!t) return
+    setTrip(t); setPay('idle'); setPayMessage(''); loadSummary(t)
+    const q = new URLSearchParams(window.location.search); q.set('trip', String(id))
+    window.history.replaceState(null, '', `${window.location.pathname}?${q}`)
+  }
+
+  const checkout = async () => {
+    if (paying.current || !trip || trip.planType === 'PRO') return
+    paying.current = true
+    setPay('loading'); setPayMessage('')
+    let redirecting = false
+    try {
+      const r = await tripApi.checkout(trip.id)
+      if (r?.mock) {
+        const t = await tripApi.get(trip.id)
+        setTrip(t); setTrips(ts => ts.map(x => (x.id === t.id ? t : x)))
+        setMockPaid(true)
+        setPay(t.planType === 'PRO' ? 'success' : 'failed')
+        if (t.planType !== 'PRO') setPayMessage('支付记录已创建，但旅行还没有解锁，请稍后刷新')
+      } else if (r?.checkoutUrl) {
+        redirecting = true
+        window.location.assign(r.checkoutUrl)
+      } else {
+        setPay('failed'); setPayMessage('没有拿到支付页面，请稍后再试')
+      }
+    } catch (e) {
+      if (e instanceof ApiError && e.code === 'TRIP_ALREADY_PRO') {
+        const t = await tripApi.get(trip.id).catch(() => null)
+        if (t) { setTrip(t); setTrips(ts => ts.map(x => (x.id === t.id ? t : x))) }
+        setPay('already')
+      } else {
+        setPay('failed'); setPayMessage(e instanceof Error && e.message ? e.message : '请稍后再试')
+      }
+    } finally {
+      if (!redirecting) paying.current = false
+    }
+  }
+
+  const pro = trip?.planType === 'PRO'
+  const upgradeCta = plan && trip && !pro ? (
+    <div className="pr-cta-wrap">
+      <UpgradeButton trip={trip} plan={plan} state={pay} onClick={() => void checkout()} />
+      {!plan.realPayments && <p className="pr-mock"><Info size={13} aria-hidden="true" /> 当前是本地开发环境：会模拟支付成功，不会产生真实扣款。</p>}
+    </div>
+  ) : null
+  const notice = <PayNotice state={pay} message={payMessage} trip={trip} mock={mockPaid} />
+  const pricingCta = !plan ? null : !loggedIn
+    ? <Link href="/login?next=%2Fpricing" className="pr-cta">登录后升级 <ArrowRight size={16} /></Link>
+    : !trip ? <Link href="/trips/new" className="pr-cta">先创建一段旅行 <ArrowRight size={16} /></Link>
+    : pro ? <p className="pr-unlocked"><CheckCircle2 size={16} /> 「{trip.title}」已解锁 Trip Pro</p>
+    : upgradeCta
+
+  return (
+    <main>
+      <SiteHeader />
+      <section className={`pr-page${showSticky && trip ? ' has-sticky' : ''}`}>
+        <header className="pr-hero">
+          <p className="pr-eyebrow">TRIP PRO</p>
+          <h1>让值得留下的旅程，<br />拥有完整的表达。</h1>
+          <p className="pr-hero-sub">基础记录永久免费。当你需要更多记录空间、高清成果或完整 Travel Story 时，再为这趟旅行升级。</p>
+          {plan && isOneTimePerTrip(plan) && (
+            <ul className="pr-trust" aria-label="购买说明">
+              <li><CheckCircle2 size={14} aria-hidden="true" />一次购买</li>
+              <li><CheckCircle2 size={14} aria-hidden="true" />当前旅行永久生效</li>
+              <li><CheckCircle2 size={14} aria-hidden="true" />不会自动续费</li>
+            </ul>
+          )}
+        </header>
+
+        {planError ? (
+          <div className="pr-fail" role="alert">
+            <TriangleAlert size={22} />
+            <p>Trip Pro 信息加载失败</p>
+            <small>{planError}</small>
+            <button type="button" className="pr-btn is-primary" onClick={loadPlan}><RefreshCcw size={14} /> 重新加载</button>
+          </div>
+        ) : !plan ? (
+          <div className="pr-status" aria-busy="true" aria-label="正在读取 Trip Pro 方案"><div className="skeleton" style={{ height: 180, borderRadius: 16 }} /></div>
+        ) : (
+          <>
+            <div ref={statusBox}>
+              <TripProStatus plan={plan} loggedIn={loggedIn} trips={trips} trip={trip} summary={summary} loadingTrip={loadingTrip} onSelectTrip={selectTrip} cta={upgradeCta} notice={notice} />
+            </div>
+            <ProValues plan={plan} />
+            <ProPreviews plan={plan} trip={trip} />
+            <ProPricing plan={plan} cta={pricingCta} />
+            <WhyPerTrip plan={plan} />
+            <ProComparison plan={plan} />
+            <ProFaq plan={plan} />
+          </>
+        )}
+
+        {plan && trip && showSticky && (
+          <div className="pr-sticky" role="region" aria-label={pro ? 'Trip Pro 已解锁' : '升级 Trip Pro'}>
+            {pro ? (
+              <>
+                <p><CheckCircle2 size={16} aria-hidden="true" /><span><b>Trip Pro 已解锁</b><small>{trip.title}</small></span></p>
+                <Link href={`/trips/${trip.id}/share`} className="pr-btn is-primary">制作旅行成果 <ArrowRight size={15} /></Link>
+              </>
+            ) : (
+              <>
+                <p><span><b>{trip.title}</b><small>Trip Pro · {planPrice(plan)}{isOneTimePerTrip(plan) ? ' · 一次性' : ''}</small></span></p>
+                <UpgradeButton trip={trip} plan={plan} state={pay} onClick={() => void checkout()} compact />
+              </>
+            )}
+          </div>
+        )}
+      </section>
+    </main>
+  )
 }
-function Plan({title,price,items}:{title:string;price:string;items:string[]}){return <div className="warm-card p-7"><div className="text-xs tracking-[.2em] text-black/35">{title}</div><div className="mt-4 font-serif text-5xl">{price}</div><div className="mt-8 space-y-3">{items.map(i=><div key={i} className="flex items-center gap-3 text-sm"><Check size={15} className="text-sage"/>{i}</div>)}</div></div>}

@@ -18,6 +18,10 @@
 
 ## 本地启动
 
+**最省事**：双击根目录的 `启动TabiTrace前后端.bat`，会分别打开后端、视频渲染服务、前端三个窗口（已在运行的不会重复启动）。找到 FFmpeg 时自动启用真实视频渲染；找不到时后端改用模拟渲染器，视频只走状态流程、不能播放。数据库需要先按下面第 1 步初始化。
+
+手动启动：
+
 1. **数据库**：MySQL 8，先执行 `backend/scripts/mysql-init-local.sql` 创建库和 `tabitrace_app` 账号；表结构由 Flyway 在 API 启动时自动建好。
 2. **后端 API**：`mvn -f backend/pom.xml -pl api spring-boot:run` → http://localhost:8080/api/v1
 3. **前端**：`cd frontend && npm install && npm run dev` → http://localhost:3000

@@ -1,26 +1,268 @@
 'use client'
 
-import Link from 'next/link'
-import { useEffect,useMemo,useState } from 'react'
-import { Check, MapPin, Plus, Sparkles, Trophy } from 'lucide-react'
+/**
+ * 推荐探索 · 东京探索指南。
+ * 首屏城市专题 → 探索方式入口 → 粘性筛选栏 → 编辑精选 → 按主题探索 → 全部地点（混排）→ 底部行动出口。
+ * 地点、专题路线、编辑内容与热度全部来自后端官方内容库；收藏与加入旅行是真实操作。
+ */
+
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { TriangleAlert } from 'lucide-react'
 import { SiteHeader } from '@/components/common/SiteHeader'
-import { tripApi, type PlaceView } from '@/services/tabitrace-api'
+import { ExploreHero } from '@/components/explore/ExploreHero'
+import { ExploreModes } from '@/components/explore/ExploreModes'
+import { ExploreFilterBar } from '@/components/explore/ExploreFilterBar'
+import { EditorPicks } from '@/components/explore/EditorPicks'
+import { RouteBanner, RouteCard } from '@/components/explore/RouteCards'
+import { PlaceCard } from '@/components/explore/PlaceCard'
+import { InfoCardView } from '@/components/explore/InfoCardView'
+import { RouteDrawer } from '@/components/explore/RouteDrawer'
+import { ExploreMapView } from '@/components/explore/ExploreMapView'
+import { ExploreGuide } from '@/components/explore/ExploreGuide'
+import type { ExploreActions } from '@/components/explore/PlaceActions'
+import { hasSession } from '@/services/api'
+import { tripApi, userApi, type DistanceUnit, type OfficialRouteView, type PlaceView } from '@/services/tabitrace-api'
+import { FILTERS, currentSeason, distanceKm, filterOf, formatKm, infoCards, mixedList, sortPlaces, type Geo, type SortKey } from '@/utils/explore'
 
-export default function TokyoExplorePage(){
-  const[places,setPlaces]=useState<PlaceView[]>([])
-  const[area,setArea]=useState('全部')
-  const[added,setAdded]=useState<number[]>([])
-  const[toast,setToast]=useState('')
-  const[error,setError]=useState('')
-  const[tripId,setTripId]=useState(0)
-  const[loading,setLoading]=useState(true)
+const errMsg = (e: unknown, fallback: string) => (e instanceof Error && e.message ? e.message : fallback)
 
-  useEffect(()=>{(async()=>{try{const current=Number(localStorage.getItem('tabitrace-live-trip-id')||0);setTripId(current);const official=await tripApi.officialPlaces('TOKYO');setPlaces(official);if(current){try{const existing=await tripApi.places(current);setAdded(existing.filter(p=>p.sourceType==='OFFICIAL').map(p=>p.id))}catch{}}}catch(e:any){setError(e.message||'无法读取东京官方地点')}finally{setLoading(false)}})()},[])
-  const areas=useMemo(()=>Array.from(new Set(places.map(p=>p.area).filter(Boolean))) as string[],[places])
-  const filtered=area==='全部'?places:places.filter(p=>p.area===area)
-  const add=async(p:PlaceView)=>{if(!tripId){setToast('请先创建或打开一段旅行');setTimeout(()=>setToast(''),1800);return}try{await tripApi.addOfficial(tripId,p.id);setAdded(v=>v.includes(p.id)?v:[...v,p.id]);setToast(`已将「${p.name}」加入当前旅行`)}catch(e:any){const msg=e.message||'加入失败';if(String(e.code||'').includes('DUPLICATE')||msg.includes('已加入'))setAdded(v=>v.includes(p.id)?v:[...v,p.id]);setToast(msg)}setTimeout(()=>setToast(''),1800)}
+export default function TokyoExplorePage() {
+  const [places, setPlaces] = useState<PlaceView[]>([])
+  const [routes, setRoutes] = useState<OfficialRouteView[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [trip, setTrip] = useState<{ id: number; title: string } | null>(null)
+  const [added, setAdded] = useState<Set<number>>(new Set())
+  const [favorites, setFavorites] = useState<Set<number>>(new Set())
+  const [busy, setBusy] = useState<Set<number>>(new Set())
+  const [filter, setFilter] = useState('ALL')
+  const [sort, setSort] = useState<SortKey>('RECOMMEND')
+  const [view, setView] = useState<'grid' | 'map'>('grid')
+  const [geo, setGeo] = useState<Geo | null>(null)
+  const [geoDenied, setGeoDenied] = useState(false)
+  // 距离单位来自设置中心 · 旅行偏好（未登录时用公里）
+  const [unit, setUnit] = useState<DistanceUnit>('KM')
+  useEffect(() => { if (hasSession()) userApi.me().then(u => setUnit(u.distanceUnit === 'MI' ? 'MI' : 'KM')).catch(() => {}) }, [])
+  const [openRoute, setOpenRoute] = useState<OfficialRouteView | null>(null)
+  const [selected, setSelected] = useState<PlaceView | null>(null)
+  const [highlight, setHighlight] = useState<number | null>(null)
+  const [toast, setToast] = useState('')
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  return <main><SiteHeader/><section className="mx-auto max-w-[1280px] px-5 pb-12 sm:px-8"><div className="grid gap-6 lg:grid-cols-[1fr_360px]"><div><p className="text-sm font-bold text-warm">TOKYO OFFICIAL EXPLORE</p><h1 className="mt-2 font-serif text-5xl leading-tight">从东京开始，探索一座城市的另一种方式。</h1><p className="mt-4 max-w-2xl text-sm leading-7 text-black/50">官方地点来自 Spring Boot 内容库。用户可以一键加入当前旅行，也可以继续记录自己的咖啡店、街角和临时发现。</p></div><div className="overflow-hidden rounded-[28px] border border-black/[0.06] bg-[#F4E7D7]"><img src="/images/cover.jpg" alt="东京" className="h-40 w-full object-cover"/><div className="p-5"><div className="text-xs tracking-[.18em] text-warm">FIRST OFFICIAL CITY</div><div className="mt-2 font-serif text-4xl">TOKYO</div><div className="mt-2 text-xs text-black/45">{places.length||30} 个官方地点 · 城市成就 · 专属成果模板</div></div></div></div>{error&&<div className="mt-6 rounded-2xl bg-warm/10 p-4 text-sm text-warm">{error}</div>}{loading?<div className="mt-8 warm-card p-8 text-sm text-black/40">正在读取东京官方内容…</div>:<><div className="mt-9 flex gap-2 overflow-x-auto pb-2"><button onClick={()=>setArea('全部')} className={`shrink-0 rounded-full px-4 py-2 text-xs ${area==='全部'?'bg-ink text-white':'border border-black/10 bg-white/60'}`}>全部</button>{areas.map(a=><button key={a} onClick={()=>setArea(a)} className={`shrink-0 rounded-full px-4 py-2 text-xs ${area===a?'bg-ink text-white':'border border-black/10 bg-white/60'}`}>{a}</button>)}</div><div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">{filtered.map((place,index)=>{const isAdded=added.includes(place.id);return <article key={place.id} className="warm-card overflow-hidden"><img src={place.coverImage||fallback(index)} alt={place.name} className="h-44 w-full object-cover"/><div className="p-5"><div className="flex items-start justify-between gap-3"><div><div className="text-[10px] tracking-[.16em] text-black/35">{String(index+1).padStart(2,'0')} · {place.area||'东京'}</div><h2 className="mt-2 font-serif text-2xl">{place.name}</h2></div><span className="grid h-9 w-9 place-items-center rounded-full bg-orangeSoft text-warm"><MapPin size={15}/></span></div><p className="mt-3 min-h-12 text-xs leading-6 text-black/45">{place.description||place.address||'东京官方精选地点'}</p><button disabled={isAdded} onClick={()=>add(place)} className={`mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold ${isAdded?'bg-sage/10 text-sage':'bg-warm text-white'}`}>{isAdded?<><Check size={14}/> 已加入旅行</>:<><Plus size={14}/> 加入当前旅行</>}</button></div></article>})}</div></>}
-    <div className="mt-10 grid gap-4 md:grid-cols-2"><div className="rounded-[28px] bg-[#F2E6D8] p-7"><Sparkles className="text-warm"/><h2 className="mt-5 font-serif text-3xl">官方探索 + 自由旅行</h2><p className="mt-3 text-sm leading-7 text-black/50">官方推荐提供轻松起点，但用户自己的地点同样进入地图、时间轴和旅行作品。</p></div><div className="rounded-[28px] bg-ink p-7 text-white"><Trophy className="text-gold"/><h2 className="mt-5 font-serif text-3xl">东京专属成就</h2><p className="mt-3 text-sm leading-7 text-white/55">传统派、夜行者、城市探索者等成就会根据真实打卡自动计算。</p>{tripId>0&&<Link href={`/trips/${tripId}/achievements`} className="mt-5 inline-flex text-sm font-bold text-white">查看当前旅行成就 →</Link>}</div></div></section>{toast&&<div className="fixed bottom-8 left-1/2 z-[120] -translate-x-1/2 rounded-full bg-ink px-5 py-3 text-xs text-white shadow-soft">{toast}</div>}</main>
+  const say = useCallback((msg: string) => {
+    setToast(msg)
+    if (toastTimer.current) clearTimeout(toastTimer.current)
+    toastTimer.current = setTimeout(() => setToast(''), 2200)
+  }, [])
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const [ps, rs] = await Promise.all([tripApi.officialPlaces('TOKYO'), tripApi.officialRoutes('TOKYO')])
+        setPlaces(ps)
+        setRoutes(rs)
+        const tripId = Number(localStorage.getItem('tabitrace-live-trip-id') || 0)
+        if (tripId && hasSession()) {
+          const [t, existing] = await Promise.all([tripApi.get(tripId).catch(() => null), tripApi.places(tripId).catch(() => [])])
+          if (t) setTrip({ id: t.id, title: t.title })
+          setAdded(new Set(existing.filter(p => p.sourceType === 'OFFICIAL').map(p => p.id)))
+        }
+        if (hasSession()) setFavorites(new Set(await tripApi.favoritePlaces().catch(() => [])))
+      } catch (e) {
+        setError(errMsg(e, '无法读取东京官方内容'))
+      } finally {
+        setLoading(false)
+      }
+    })()
+  }, [])
+
+  const byId = useMemo(() => new Map(places.map(p => [p.id, p])), [places])
+  const season = currentSeason()
+  const orderedRoutes = useMemo(() => [...routes].sort((a, b) => Number(b.season === season) - Number(a.season === season)), [routes, season])
+  const themeRoutes = orderedRoutes.slice(0, 3)
+  const bannerRoutes = orderedRoutes.slice(3)
+  const counts = useMemo(() => Object.fromEntries(FILTERS.map(f => [f.key, places.filter(f.match).length])), [places])
+  const visible = useMemo(() => sortPlaces(places.filter(filterOf(filter).match), filter === 'HOT' ? 'HOT' : sort, geo), [places, filter, sort, geo])
+  const infos = useMemo(() => infoCards(places, geo, geoDenied, unit), [places, geo, geoDenied, unit])
+  const items = useMemo(() => (filter === 'ALL' ? mixedList(visible, bannerRoutes, infos) : visible.map(place => ({ kind: 'place' as const, place }))), [filter, visible, bannerRoutes, infos])
+
+  const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+
+  // 分享链接带 #place-id 时，载入后定位到对应地点；带 ?filter=NIGHT 等参数时（如从成就页跳来）直接切到对应分类
+  useEffect(() => {
+    if (loading) return
+    const m = /^#place-(\d+)$/.exec(window.location.hash)
+    if (m) { setTimeout(() => focusPlace(Number(m[1])), 300); return }
+    const f = new URLSearchParams(window.location.search).get('filter')
+    if (f && FILTERS.some(x => x.key === f)) { setFilter(f); setTimeout(() => scrollTo('ex-all'), 300) }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading])
+
+  function focusPlace(id: number) {
+    const p = byId.get(id)
+    if (!p) return
+    if (!filterOf(filter).match(p)) setFilter('ALL')
+    setView('grid')
+    setTimeout(() => {
+      document.getElementById(`place-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      setHighlight(id)
+      setTimeout(() => setHighlight(h => (h === id ? null : h)), 1800)
+    }, 80)
+  }
+
+  function pickFilter(key: string) {
+    setFilter(key)
+    scrollTo('ex-all')
+  }
+
+  function locate(then?: () => void) {
+    if (!navigator.geolocation) { setGeoDenied(true); say('当前浏览器不支持定位'); return }
+    navigator.geolocation.getCurrentPosition(
+      pos => { setGeo({ lat: pos.coords.latitude, lng: pos.coords.longitude }); then?.() },
+      () => { setGeoDenied(true); say('没有获得定位权限，无法按距离排序') },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 }
+    )
+  }
+
+  function changeSort(key: SortKey) {
+    if (key === 'DISTANCE' && !geo) { locate(() => setSort('DISTANCE')); return }
+    setSort(key)
+  }
+
+  const add = useCallback(async (p: PlaceView) => {
+    if (!trip) { say('请先创建或打开一段旅行，再把地点加进去'); return false }
+    setBusy(b => new Set(b).add(p.id))
+    try {
+      await tripApi.addOfficial(trip.id, p.id)
+      setAdded(a => new Set(a).add(p.id))
+      return true
+    } catch (e) {
+      const msg = errMsg(e, '加入失败')
+      if (msg.includes('已加入')) { setAdded(a => new Set(a).add(p.id)); return true }
+      say(msg)
+      return false
+    } finally {
+      setBusy(b => { const n = new Set(b); n.delete(p.id); return n })
+    }
+  }, [trip, say])
+
+  const actions: ExploreActions = {
+    added, favorites, busy,
+    onAdd: async p => { if (await add(p)) say(`已将「${p.name}」加入「${trip?.title}」`) },
+    onFavorite: async p => {
+      if (!hasSession()) { say('登录后可以收藏地点'); return }
+      const on = !favorites.has(p.id)
+      setFavorites(f => { const n = new Set(f); if (on) n.add(p.id); else n.delete(p.id); return n })
+      try {
+        await tripApi.setFavorite(p.id, on)
+        say(on ? `已收藏「${p.name}」` : '已取消收藏')
+      } catch (e) {
+        setFavorites(f => { const n = new Set(f); if (on) n.delete(p.id); else n.add(p.id); return n })
+        say(errMsg(e, '收藏失败'))
+      }
+    },
+    onShare: async p => {
+      const url = `${window.location.origin}/explore/tokyo#place-${p.id}`
+      try {
+        if (navigator.share) await navigator.share({ title: `${p.name} · 旅迹东京探索指南`, text: p.tagline ?? p.name, url })
+        else { await navigator.clipboard.writeText(url); say('地点链接已复制') }
+      } catch { /* 用户取消分享 */ }
+    }
+  }
+
+  async function addAll(list: PlaceView[]) {
+    if (!trip) { say('请先创建或打开一段旅行，再把地点加进去'); return }
+    let ok = 0
+    for (const p of list) if (await add(p)) ok++
+    say(`已将 ${ok} 个地点加入「${trip.title}」`)
+  }
+
+  const selectOnMap = useCallback((p: PlaceView) => setSelected(p), [])
+  const openMap = () => { setView('map'); setTimeout(() => scrollTo('ex-all'), 50) }
+  const openRouteByCode = (code: string) => { const r = routes.find(x => x.code === code); if (r) setOpenRoute(r) }
+
+  return (
+    <main>
+      <SiteHeader />
+      <div className="ex-page">
+        <ExploreHero
+          stats={{ places: places.length, routes: routes.length, areas: new Set(places.map(p => p.area).filter(Boolean)).size }}
+          season={season}
+          seasonRoute={routes.find(r => r.season === season)}
+          trip={trip}
+          onStart={() => scrollTo('ex-modes')}
+          onMap={openMap}
+          onFilter={pickFilter}
+          onRoute={openRouteByCode}
+        />
+
+        {error && <div className="ex-alert"><TriangleAlert size={15} /> {error}</div>}
+
+        {loading ? (
+          <div className="ex-loading">
+            <div className="skeleton" style={{ height: 96, borderRadius: 16 }} />
+            <div className="skeleton" style={{ height: 420, borderRadius: 16 }} />
+          </div>
+        ) : (
+          <>
+            <ExploreModes places={places} active={filter} onPick={pickFilter} />
+            <ExploreFilterBar filter={filter} sort={sort} view={view} counts={counts} onFilter={pickFilter} onSort={changeSort} onView={v => { setView(v); if (v === 'map') setSelected(null) }} />
+
+            {filter === 'ALL' && view === 'grid' && (
+              <>
+                <EditorPicks places={places} actions={actions} />
+                {themeRoutes.length > 0 && (
+                  <section className="ex-section">
+                    <header className="ex-section-head">
+                      <div>
+                        <p className="ex-eyebrow">THEME ROUTES</p>
+                        <h2>按主题探索东京</h2>
+                        <p>把顺路的地点串成一条线，照着走就是一段完整的半天或一天。</p>
+                      </div>
+                    </header>
+                    <div className="ex-routes">
+                      {themeRoutes.map(r => <RouteCard key={r.id} route={r} byId={byId} onOpen={setOpenRoute} />)}
+                    </div>
+                  </section>
+                )}
+              </>
+            )}
+
+            <section className="ex-section" id="ex-all">
+              <header className="ex-section-head">
+                <div>
+                  <p className="ex-eyebrow">ALL PLACES</p>
+                  <h2>{filter === 'ALL' ? '全部地点' : filterOf(filter).label}</h2>
+                  <p>{filter === 'ALL' ? '精选东京城市体验，与值得加入旅行的地点。' : `共 ${visible.length} 个地点${sort === 'DISTANCE' && geo ? '，按离你的距离排序' : ''}`}</p>
+                </div>
+              </header>
+              {view === 'map' ? (
+                <ExploreMapView places={visible} selected={selected} actions={actions} onSelect={selectOnMap} />
+              ) : visible.length === 0 ? (
+                <p className="ex-empty">这个分类下暂时没有地点。</p>
+              ) : (
+                <div className="ex-grid">
+                  {items.map(item =>
+                    item.kind === 'place' ? (
+                      <PlaceCard key={`p${item.place.id}`} place={item.place} actions={actions} highlight={highlight === item.place.id}
+                        distance={geo && sort === 'DISTANCE' ? formatKm(distanceKm(geo, item.place), unit) : undefined} />
+                    ) : item.kind === 'route' ? (
+                      <RouteBanner key={`r${item.route.id}`} route={item.route} byId={byId} onOpen={setOpenRoute} />
+                    ) : (
+                      <InfoCardView key={`i${item.info.key}`} info={item.info} onPlace={p => focusPlace(p.id)} onFilter={pickFilter} onLocate={() => locate()} />
+                    )
+                  )}
+                </div>
+              )}
+            </section>
+
+            <ExploreGuide tripId={trip?.id ?? 0} onMap={() => { setFilter('ALL'); openMap() }} />
+          </>
+        )}
+      </div>
+
+      {openRoute && <RouteDrawer route={openRoute} byId={byId} actions={actions} onAddAll={list => void addAll(list)} onClose={() => setOpenRoute(null)} />}
+      {toast && <div className="ex-toast" role="status">{toast}</div>}
+    </main>
+  )
 }
-function fallback(i:number){return ['/images/asakusa.jpg','/images/ueno.jpg','/images/akihabara.jpg','/images/tokyo-station.jpg','/images/ginza.jpg','/images/shibuya.jpg','/images/shinjuku.jpg','/images/odaiba.jpg'][i%8]}

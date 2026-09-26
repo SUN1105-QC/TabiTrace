@@ -18,7 +18,7 @@ import { MobileTopBar } from '@/components/mobile/MobileTopBar'
 import { MobileBottomNav } from '@/components/mobile/MobileBottomNav'
 import { buildNotifications, type NotificationItem } from './NotificationCenter'
 import { hasSession } from '@/services/api'
-import { tripApi, userApi, type TripView, type UserView } from '@/services/tabitrace-api'
+import { USER_UPDATED_EVENT, tripApi, userApi, type TripView, type UserView } from '@/services/tabitrace-api'
 import { useQuickCheckIn } from '@/components/checkin/QuickCheckInProvider'
 
 const APP_PREFIXES = ['/trips', '/explore', '/pricing', '/profile', '/memories']
@@ -31,6 +31,7 @@ export function SiteHeader() {
   const [session, setSession] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [publicMenu, setPublicMenu] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const [drawer, setDrawer] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [user, setUser] = useState<UserView | null>(null)
@@ -62,11 +63,26 @@ export function SiteHeader() {
         tripApi.videos(trip.id).catch(() => []),
         tripApi.shares(trip.id).catch(() => [])
       ])
-      setNotifications(buildNotifications({ trip, summary, achievements, videos, shares }))
+      setNotifications(buildNotifications({ trip, summary, achievements, videos, shares, prefs: me }))
     } catch { /* 外壳数据失败不阻塞页面本身 */ }
   }, [])
 
   useEffect(() => { if (mounted && isAppRoute) load() }, [mounted, isAppRoute, pathname, checkinVersion, load])
+
+  // 设置中心保存资料、头像或通知偏好后，立即刷新外壳（头像、昵称、通知分类），不整页刷新
+  useEffect(() => {
+    const onUser = (e: Event) => { const u = (e as CustomEvent<UserView>).detail; if (u) setUser(u); void load() }
+    window.addEventListener(USER_UPDATED_EVENT, onUser)
+    return () => window.removeEventListener(USER_UPDATED_EVENT, onUser)
+  }, [load])
+
+  // 公共页面：滚动后头部加一点背景与模糊
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -88,27 +104,30 @@ export function SiteHeader() {
   }), [trips])
 
   if (!isAppRoute) {
-    const items: [string, string][] = [['/explore', '探索'], ['/trips', '我的旅行'], ['/explore/tokyo', '东京精选'], ['/pricing', 'Pro']]
+    // 公共导航：未登录不出现“我的旅行”（受保护页面）；开始旅行进入注册，注册后直接创建旅行
+    const items: [string, string][] = [['/explore', '探索'], ['/#features', '功能'], ['/explore/tokyo', '东京精选'], ['/pricing', 'Trip Pro']]
+    const actions: [string, string, boolean][] = session
+      ? [['/trips', '我的旅行', false], ['/', '进入旅迹', true]]
+      : [['/login', '登录', false], ['/register', '开始旅行', true]]
     return (
-      <header className="public-header">
+      <header className={`public-header${scrolled ? ' is-scrolled' : ''}`}>
         <div className="public-header-inner">
-          <Link href="/" aria-label="旅迹 TabiTrace 首页"><Brand /></Link>
+          <Link href="/" aria-label="旅迹 TabiTrace 首页" className="flex min-h-11 items-center"><Brand /></Link>
           <nav className="hidden items-center gap-7 md:flex">
             {items.map(([href, label]) => <Link key={href} href={href} className="text-sm text-black/60 transition hover:text-warm">{label}</Link>)}
-            <Link href={session ? '/profile' : '/login'} className="text-sm text-black/60">{session ? '我的' : '登录'}</Link>
-            <Link href={session ? '/trips/new' : '/login?next=%2Ftrips%2Fnew'} className="warm-button">开始旅行</Link>
+            <span className="h-5 w-px bg-black/10" aria-hidden="true" />
+            {actions.map(([href, label, primary]) => <Link key={href} href={href} className={primary ? 'warm-button' : 'text-sm font-semibold text-black/70 hover:text-warm'}>{label}</Link>)}
           </nav>
-          <button onClick={() => setPublicMenu(v => !v)} className="grid h-10 w-10 place-items-center rounded-xl border border-black/10 md:hidden" aria-label="菜单">
+          <button onClick={() => setPublicMenu(v => !v)} className="public-menu-btn grid h-11 w-11 place-items-center rounded-xl border border-black/10 md:hidden" aria-label={publicMenu ? '关闭菜单' : '打开菜单'} aria-expanded={publicMenu}>
             {publicMenu ? <X size={19} /> : <Menu size={19} />}
           </button>
         </div>
         {publicMenu && (
-          <div className="border-t border-black/5 bg-paper px-5 py-4 md:hidden">
+          <div className="public-menu-panel border-t border-black/5 bg-paper px-5 py-4 md:hidden">
             <div className="grid gap-2">
               {items.map(([href, label]) => <Link key={href} href={href} onClick={() => setPublicMenu(false)} className="rounded-xl px-3 py-3 text-sm hover:bg-orangeSoft">{label}</Link>)}
               <div className="mt-2 grid grid-cols-2 gap-2">
-                <Link href="/login" className="rounded-xl border border-black/10 px-3 py-3 text-center text-sm">登录</Link>
-                <Link href="/login?next=%2Ftrips%2Fnew" className="rounded-xl bg-warm px-3 py-3 text-center text-sm text-white">开始旅行</Link>
+                {actions.map(([href, label, primary]) => <Link key={href} href={href} onClick={() => setPublicMenu(false)} className={primary ? 'rounded-xl bg-warm px-3 py-3 text-center text-sm font-semibold text-white' : 'rounded-xl border border-black/10 px-3 py-3 text-center text-sm'}>{label}</Link>)}
               </div>
             </div>
           </div>
@@ -129,7 +148,8 @@ export function SiteHeader() {
         onOpenSearch={() => setSearchOpen(true)}
         onOpenMenu={() => setDrawer(true)}
       />
-      <MobileTopBar user={user} notifications={notifications} onOpenSearch={() => setSearchOpen(true)} />
+      {/* 旅行详情及其子页面在手机上使用紧凑顶栏，把首屏留给旅行本身 */}
+      <MobileTopBar user={user} notifications={notifications} onOpenSearch={() => setSearchOpen(true)} compact={/^\/trips\/\d+(\/|$)/.test(pathname)} />
       <MobileBottomNav activeTripId={activeTripId} />
       {searchOpen && <GlobalSearch activeTripId={activeTripId} onClose={() => setSearchOpen(false)} />}
       <div className="workspace-spacer" />

@@ -9,7 +9,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Bell, Clock3, Film, Share2, Trophy, TriangleAlert } from 'lucide-react'
 import { relativeTime, toDate, localDateKey } from '@/lib/time'
-import type { AchievementView, ShareLinkView, TripSummary, TripView, VideoProjectView } from '@/services/tabitrace-api'
+import type { AchievementView, ShareLinkView, TripSummary, TripView, UserView, VideoProjectView } from '@/services/tabitrace-api'
 
 export type NotificationItem = { id: string; icon: 'trophy' | 'film' | 'share' | 'clock' | 'warn'; title: string; body: string; at: string | null; href: string }
 
@@ -19,8 +19,14 @@ export function buildNotifications(input: {
   achievements: AchievementView[]
   videos: VideoProjectView[]
   shares: ShareLinkView[]
+  /** 设置中心“通知”里的分类开关；未设置的分类默认显示 */
+  prefs?: Pick<UserView, 'notifyTripReminder' | 'notifyStory' | 'notifyAchievement' | 'notifyShare'> | null
 }): NotificationItem[] {
-  const { trip, summary, achievements, videos, shares } = input
+  const { trip, summary, prefs } = input
+  const achievements = prefs?.notifyAchievement === false ? [] : input.achievements
+  const videos = prefs?.notifyStory === false ? [] : input.videos
+  const shares = prefs?.notifyShare === false ? [] : input.shares
+  const tripReminder = prefs?.notifyTripReminder !== false
   const items: NotificationItem[] = []
   if (!trip) return items
 
@@ -42,11 +48,12 @@ export function buildNotifications(input: {
   })
 
   const today = localDateKey(new Date())
-  if (trip.status !== 'ARCHIVED' && trip.status !== 'COMPLETED') {
+  if (tripReminder && trip.status !== 'ARCHIVED' && trip.status !== 'COMPLETED') {
     if (today < trip.startDate) items.push({ id: `trip-soon-${trip.id}`, icon: 'clock', title: `「${trip.title}」即将开始`, body: `出发日期 ${trip.startDate}`, at: trip.createdAt || null, href: `/trips/${trip.id}` })
     else if (today > trip.endDate) items.push({ id: `trip-end-${trip.id}`, icon: 'clock', title: `「${trip.title}」已经结束`, body: '可以标记完成并生成旅行成果', at: trip.createdAt || null, href: `/trips/${trip.id}/summary` })
   }
 
+  // 免费额度提醒不受分类开关影响
   if (trip.planType === 'FREE' && summary) {
     if (summary.places >= 8) items.push({ id: `limit-place-${trip.id}`, icon: 'warn', title: '免费打卡额度接近上限', body: `已记录 ${summary.places} 个地点，上限 10 个`, at: null, href: '/pricing' })
     if (summary.photos >= 8) items.push({ id: `limit-photo-${trip.id}`, icon: 'warn', title: '免费照片额度接近上限', body: `已保存 ${summary.photos} 张照片，上限 10 张`, at: null, href: '/pricing' })

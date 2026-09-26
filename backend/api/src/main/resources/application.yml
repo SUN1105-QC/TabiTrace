@@ -13,6 +13,22 @@ spring:
     locations: classpath:db/migration
   jackson:
     default-property-inclusion: non_null
+  # 邮件：复用 spring-boot-starter-mail（SMTP）。本地默认连 localhost:1025 的开发邮件接收器
+  # （backend/scripts/dev-mail-catcher.mjs 或 Mailpit），生产环境通过 MAIL_* 环境变量配置真实 SMTP。
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    default-encoding: UTF-8
+    properties:
+      mail.smtp.auth: ${MAIL_SMTP_AUTH:false}
+      mail.smtp.starttls.enable: ${MAIL_SMTP_STARTTLS:false}
+      mail.smtp.ssl.enable: ${MAIL_SMTP_SSL:false}
+      # 超时要短：SMTP 不可用时尽快返回“发送失败”，而不是让请求一直挂着
+      mail.smtp.connectiontimeout: 5000
+      mail.smtp.timeout: 8000
+      mail.smtp.writetimeout: 8000
   servlet:
     multipart:
       max-file-size: 20MB
@@ -24,6 +40,10 @@ mybatis:
 server:
   port: ${SERVER_PORT:8080}
 management:
+  # SMTP 暂时不可用不应让整个 API 显示为 DOWN（启动脚本也依赖 health 判断后端是否已运行）；发送失败由接口本身如实返回
+  health:
+    mail:
+      enabled: false
   endpoints:
     web:
       exposure:
@@ -36,6 +56,17 @@ app:
   api-url: ${APP_API_URL:http://localhost:8080}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://127.0.0.1:3000}
+  mail:
+    from-address: ${MAIL_FROM_ADDRESS:no-reply@tabitrace.local}
+    from-name: ${MAIL_FROM_NAME:旅迹 TabiTrace}
+  # 邮箱验证码（通用，按 purpose 区分）；验证码与令牌只保存哈希，HMAC 密钥默认沿用 JWT_SECRET
+  email-verification:
+    code-ttl-seconds: 600
+    resend-after-seconds: 60
+    max-attempts: 5
+    token-ttl-seconds: 1800
+    email-hourly-limit: 5
+    ip-hourly-limit: 20
   jwt:
     secret: ${JWT_SECRET:tabitrace-dev-secret-change-me-32bytes-minimum}
     access-ttl-minutes: 15
@@ -58,3 +89,6 @@ app:
   video:
     mock-renderer-enabled: ${VIDEO_MOCK_RENDERER:true}
     mock-renderer-interval-ms: 2500
+    # PROCESSING 任务超过这么久没有心跳（Worker 每 15 秒写一次）就判定为生成中断
+    processing-timeout-seconds: ${VIDEO_PROCESSING_TIMEOUT_SECONDS:300}
+    watchdog-interval-ms: 60000

@@ -28,17 +28,24 @@ public class JwtService {
     }
 
     public String createAccessToken(Long userId, String email) {
-        return createToken(userId, email, "ACCESS", UUID.randomUUID().toString(), accessTtl);
+        return createAccessToken(userId, email, null);
+    }
+
+    /** sid 为同时签发的 refresh token 的 jti，用于识别“当前设备”的登录会话 */
+    public String createAccessToken(Long userId, String email, String sid) {
+        return createToken(userId, email, "ACCESS", UUID.randomUUID().toString(), accessTtl, sid);
     }
 
     public TokenWithJti createRefreshToken(Long userId, String email) {
         String jti = UUID.randomUUID().toString();
-        return new TokenWithJti(createToken(userId, email, "REFRESH", jti, refreshTtl), jti, Instant.now().plus(refreshTtl));
+        return new TokenWithJti(createToken(userId, email, "REFRESH", jti, refreshTtl, null), jti, Instant.now().plus(refreshTtl));
     }
 
-    private String createToken(Long userId, String email, String type, String jti, Duration ttl) {
+    private String createToken(Long userId, String email, String type, String jti, Duration ttl, String sid) {
         Instant now = Instant.now();
-        return Jwts.builder()
+        var builder = Jwts.builder();
+        if (sid != null) builder.claim("sid", sid);
+        return builder
                 .subject(String.valueOf(userId))
                 .id(jti)
                 .claim("email", email)

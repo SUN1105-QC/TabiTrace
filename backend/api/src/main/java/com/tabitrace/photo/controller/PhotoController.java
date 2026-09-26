@@ -18,5 +18,7 @@ public class PhotoController {
     @PutMapping("/photos/{id}") public ApiResponse<PhotoView> update(@PathVariable Long id,@RequestBody UpdatePhotoRequest r){return ApiResponse.ok(service.update(SecurityUtils.currentUser().id(),id,r));}
     @PostMapping("/photos/{id}/feature") public ApiResponse<PhotoView> feature(@PathVariable Long id){return ApiResponse.ok(service.feature(SecurityUtils.currentUser().id(),id,true));}
     @DeleteMapping("/photos/{id}/feature") public ApiResponse<PhotoView> unfeature(@PathVariable Long id){return ApiResponse.ok(service.feature(SecurityUtils.currentUser().id(),id,false));}
+    @PostMapping("/trips/{tripId}/photos/{photoId}/cover") public ApiResponse<com.tabitrace.trip.dto.TripDtos.TripView> cover(@PathVariable Long tripId,@PathVariable Long photoId){return ApiResponse.ok(service.setCover(SecurityUtils.currentUser().id(),tripId,photoId));}
+    @PostMapping("/trips/{tripId}/photos/batch") public ApiResponse<BatchPhotoResult> batch(@PathVariable Long tripId,@Valid @RequestBody BatchPhotoRequest r){return ApiResponse.ok(service.batch(SecurityUtils.currentUser().id(),tripId,r));}
     @DeleteMapping("/photos/{id}") public ApiResponse<Void> delete(@PathVariable Long id){service.delete(SecurityUtils.currentUser().id(),id);return ApiResponse.ok();}
 }

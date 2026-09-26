@@ -20,8 +20,12 @@ import org.slf4j.LoggerFactory;
 public class GlobalExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ApiResponse<Void>> business(BusinessException ex) {
-        return ResponseEntity.status(ex.getStatus()).body(ApiResponse.error(ex.getCode(), ex.getMessage()));
+    public ResponseEntity<ApiResponse<Object>> business(BusinessException ex) {
+        ResponseEntity.BodyBuilder res = ResponseEntity.status(ex.getStatus());
+        // 频率限制同时给出标准的 Retry-After 头
+        if (ex.getStatus() == HttpStatus.TOO_MANY_REQUESTS && ex.getDetails() != null && ex.getDetails().get("retryAfter") != null)
+            res.header("Retry-After", String.valueOf(ex.getDetails().get("retryAfter")));
+        return res.body(ApiResponse.error(ex.getCode(), ex.getMessage(), (Object) ex.getDetails()));
     }
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Void>> validation(MethodArgumentNotValidException ex) {

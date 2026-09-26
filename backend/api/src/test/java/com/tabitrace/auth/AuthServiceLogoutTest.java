@@ -1,6 +1,7 @@
 package com.tabitrace.auth;
 
 import com.tabitrace.auth.dto.AuthDtos.LogoutRequest;
+import com.tabitrace.verification.service.EmailVerificationService;
 import com.tabitrace.auth.mapper.RefreshTokenMapper;
 import com.tabitrace.auth.service.AuthService;
 import com.tabitrace.security.JwtService;
@@ -23,7 +24,7 @@ class AuthServiceLogoutTest {
         when(jwt.parse("refresh-token")).thenReturn(claims);
         when(claims.getId()).thenReturn("refresh-jti");
 
-        AuthService service = new AuthService(users, refreshTokens, passwordEncoder, jwt);
+        AuthService service = new AuthService(users, refreshTokens, passwordEncoder, jwt, mock(EmailVerificationService.class));
         service.logout(null, new LogoutRequest("refresh-token"));
 
         verify(refreshTokens).revoke("refresh-jti");
@@ -36,7 +37,8 @@ class AuthServiceLogoutTest {
                 mock(UserMapper.class),
                 mock(RefreshTokenMapper.class),
                 mock(PasswordEncoder.class),
-                mock(JwtService.class));
+                mock(JwtService.class),
+                mock(EmailVerificationService.class));
         service.logout(null, null);
     }
 }

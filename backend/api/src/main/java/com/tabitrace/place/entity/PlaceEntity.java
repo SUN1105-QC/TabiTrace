@@ -17,6 +17,13 @@ public class PlaceEntity {
     public String sourceType;
     public String description;
     public String coverImage;
+    /** 以下为探索指南的编辑内容（仅官方地点有值） */
+    public String tagline;
+    public String recommendReason;
+    public Integer stayMinutes;
+    public String bestTime;
+    public String tags;
+    public Integer editorRank;
     public LocalDateTime createdAt;
     public LocalDateTime updatedAt;
 }
