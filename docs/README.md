@@ -26,7 +26,7 @@
 | `06_backend/` | 后端怎么组织 | [后端架构](06_backend/01_后端架构设计.md) · [API 接口](06_backend/02_API接口设计.md) · [异常与错误码](06_backend/03_异常与错误码设计.md) · [文件存储](06_backend/04_文件存储设计.md) · [任务与视频渲染](06_backend/05_任务与视频渲染机制.md) |
 | `07_security/` | 你是谁、能做什么、怎么防护 | [认证](07_security/01_认证设计.md) · [权限](07_security/02_权限设计.md) · [安全、日志与审计](07_security/03_安全设计.md) |
 | `08_testing/` | 怎么验证 | [测试计划](08_testing/01_测试计划.md) |
-| `09_deployment/` | 怎么运行和部署 | [环境与配置](09_deployment/01_环境与配置说明.md) · [部署设计（Railway、CI、监控、备份）](09_deployment/02_部署设计.md) · [新手上手指南](09_deployment/03_新手上手指南.md) |
+| `09_deployment/` | 怎么运行和部署 | [环境与配置](09_deployment/01_环境与配置说明.md) · [Lightsail 指南](../deploy/lightsail/README.md) · [Lightsail 实测发布记录](09_deployment/04_Lightsail发布记录.md) · [历史 Railway 方案](09_deployment/02_部署设计.md) · [新手上手指南](09_deployment/03_新手上手指南.md) |
 | `10_development/` | 怎么开发 | [开发规范](10_development/01_开发规范.md) · [Git 规范](10_development/02_Git版本管理规范.md) · [开发执行计划](10_development/03_开发执行计划.md) |
 | `99_management/` | 现在到哪了、为什么这样 | [项目长期记忆](99_management/01_项目长期记忆.md) · [未完成事项](99_management/02_未完成事项.md) · [已知问题与技术债](99_management/03_已知问题与技术债.md) · [设计决策记录 ADR](99_management/04_设计决策记录.md) · [变更记录](99_management/05_变更记录.md) |
 
