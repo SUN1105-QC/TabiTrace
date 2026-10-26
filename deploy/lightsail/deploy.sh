@@ -8,7 +8,9 @@ export RELEASE_TAG
 RELEASE_TAG=$(git rev-parse --short=12 HEAD)
 compose=(sudo env "RELEASE_TAG=$RELEASE_TAG" docker compose --env-file "$env_file" -f compose.production.yml)
 "${compose[@]}" config --quiet
-"${compose[@]}" build --pull
+for service in web api worker; do
+  "${compose[@]}" build --pull "$service"
+done
 "${compose[@]}" up -d --wait --wait-timeout 300
 curl --fail --silent --show-error --max-time 10 http://127.0.0.1:18080/actuator/health
 curl --fail --silent --show-error --max-time 10 http://127.0.0.1:13000/health
