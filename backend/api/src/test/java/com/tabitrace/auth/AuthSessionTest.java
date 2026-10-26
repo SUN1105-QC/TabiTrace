@@ -2,6 +2,7 @@ package com.tabitrace.auth;
 
 import com.tabitrace.auth.entity.RefreshTokenEntity;
 import com.tabitrace.verification.service.EmailVerificationService;
+import com.tabitrace.auth.service.LoginThrottleService;
 import com.tabitrace.auth.mapper.RefreshTokenMapper;
 import com.tabitrace.auth.service.AuthService;
 import com.tabitrace.auth.service.UserAgentLabel;
@@ -21,7 +22,7 @@ import static org.mockito.Mockito.*;
 class AuthSessionTest {
     final JwtService jwt = new JwtService("0123456789012345678901234567890123456789", 15, 30);
     final RefreshTokenMapper tokens = mock(RefreshTokenMapper.class);
-    final AuthService service = new AuthService(mock(UserMapper.class), tokens, mock(PasswordEncoder.class), jwt, mock(EmailVerificationService.class));
+    final AuthService service = new AuthService(mock(UserMapper.class), tokens, mock(PasswordEncoder.class), jwt, mock(EmailVerificationService.class), mock(LoginThrottleService.class));
 
     @Test
     void accessTokenCarriesSessionIdOfItsRefreshToken() {

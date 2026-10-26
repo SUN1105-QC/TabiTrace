@@ -1,6 +1,8 @@
 package com.tabitrace.verification.service;
 
 import com.tabitrace.common.BusinessException;
+import com.tabitrace.common.Hashing;
+import com.tabitrace.user.entity.UserEntity;
 import com.tabitrace.mail.MailDeliveryException;
 import com.tabitrace.mail.MailService;
 import com.tabitrace.user.mapper.UserMapper;
@@ -14,17 +16,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
-import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Base64;
 import java.util.EnumSet;
-import java.util.HexFormat;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -39,8 +36,8 @@ import java.util.Set;
  */
 @Service
 public class EmailVerificationService {
-    /** 当前开放的用途；RESET_PASSWORD / CHANGE_EMAIL 接入对应流程时加进来即可 */
-    static final Set<VerificationPurpose> ENABLED = EnumSet.of(VerificationPurpose.REGISTER);
+    /** 当前开放的用途；CHANGE_EMAIL 接入对应流程时加进来即可 */
+    static final Set<VerificationPurpose> ENABLED = EnumSet.of(VerificationPurpose.REGISTER, VerificationPurpose.RESET_PASSWORD);
     static final long HOUR = 3600;
 
     private final EmailVerificationMapper mapper;
@@ -48,6 +45,7 @@ public class EmailVerificationService {
     private final MailService mail;
     private final byte[] secret;
     private final String loginUrl;
+    private final String registerUrl;
     final long codeTtlSeconds;
     final long resendAfterSeconds;
     final int maxAttempts;
@@ -68,6 +66,7 @@ public class EmailVerificationService {
         this.mapper = mapper; this.users = users; this.mail = mail;
         this.secret = secret.getBytes(StandardCharsets.UTF_8);
         this.loginUrl = publicUrl.replaceAll("/$", "") + "/login";
+        this.registerUrl = publicUrl.replaceAll("/$", "") + "/register";
         this.codeTtlSeconds = codeTtlSeconds; this.resendAfterSeconds = resendAfterSeconds; this.maxAttempts = maxAttempts;
         this.tokenTtlSeconds = tokenTtlSeconds; this.emailHourlyLimit = emailHourlyLimit; this.ipHourlyLimit = ipHourlyLimit;
     }
@@ -83,17 +82,24 @@ public class EmailVerificationService {
         String ipHash = hmacHex("ip:" + (clientIp == null ? "" : clientIp));
         enforceRateLimit(email, purpose, ipHash);
 
-        // 注册用途下邮箱已存在：不发验证码，改发“已有账号”提醒；对外响应保持一致，避免被用来探测邮箱是否注册
-        boolean alreadyRegistered = purpose == VerificationPurpose.REGISTER && users.findByEmail(email) != null;
+        // 是否真的发验证码由账号状态决定；不发时改发提醒邮件（或不发邮件），但对外响应完全一致，避免被用来探测邮箱是否注册：
+        //   REGISTER       已注册 → “已有账号，请直接登录”提醒
+        //   RESET_PASSWORD 未注册 → “这个邮箱还没有旅迹账号”提醒；账号不可用 → 不发任何邮件
+        UserEntity user = users.findByEmail(email);
+        VerificationEmails.Mail notice = null;
+        boolean issueCode = true;
+        if (purpose == VerificationPurpose.REGISTER && user != null) { issueCode = false; notice = VerificationEmails.accountExists(loginUrl); }
+        if (purpose == VerificationPurpose.RESET_PASSWORD && user == null) { issueCode = false; notice = VerificationEmails.noAccount(registerUrl); }
+        if (purpose == VerificationPurpose.RESET_PASSWORD && user != null && !"ACTIVE".equals(user.status)) issueCode = false;
         String code = generateCode();
 
         EmailVerificationEntity e = new EmailVerificationEntity();
         e.email = email;
         e.purpose = purpose.name();
-        e.codeHash = alreadyRegistered ? hmacHex("unusable:" + generateToken()) : codeHash(purpose, email, code);
+        e.codeHash = issueCode ? codeHash(purpose, email, code) : hmacHex("unusable:" + generateToken());
         e.maxAttempts = maxAttempts;
         e.requesterIpHash = ipHash;
-        e.invalidatedAt = alreadyRegistered ? LocalDateTime.now(ZoneOffset.UTC) : null;
+        e.invalidatedAt = issueCode ? null : LocalDateTime.now(ZoneOffset.UTC);
         mapper.insert(e, codeTtlSeconds);
         // 并发的重复请求：两个都通过了上面的预检查时，较晚插入的一方在这里被拦下
         if (mapper.countEarlierSendsWithin(email, purpose.name(), e.id, resendAfterSeconds) > 0) {
@@ -101,17 +107,15 @@ public class EmailVerificationService {
             throw limited("RESEND_TOO_SOON", "请在 " + resendAfterSeconds + " 秒后重新获取验证码", resendAfterSeconds);
         }
 
-        VerificationEmails.Mail message = alreadyRegistered
-            ? VerificationEmails.accountExists(loginUrl)
-            : VerificationEmails.code(purpose, code, codeTtlSeconds);
+        VerificationEmails.Mail message = issueCode ? VerificationEmails.code(purpose, code, codeTtlSeconds) : notice;
         try {
-            mail.send(email, message.subject(), message.text(), message.html());
+            if (message != null) mail.send(email, message.subject(), message.text(), message.html());
         } catch (MailDeliveryException ex) {
             mapper.markFailed(e.id);
             throw new BusinessException("EMAIL_SEND_FAILED", "验证码邮件发送失败，请稍后重试", HttpStatus.SERVICE_UNAVAILABLE);
         }
         mapper.markSent(e.id);
-        if (!alreadyRegistered) mapper.invalidateOthers(email, purpose.name(), e.id);
+        if (issueCode) mapper.invalidateOthers(email, purpose.name(), e.id);
         return new SendResult(codeTtlSeconds, resendAfterSeconds);
     }
 
@@ -215,20 +219,9 @@ public class EmailVerificationService {
         return hmacHex(purpose.name() + ":" + email + ":" + code);
     }
 
-    private String hmacHex(String value) {
-        try {
-            Mac mac = Mac.getInstance("HmacSHA256");
-            mac.init(new SecretKeySpec(secret, "HmacSHA256"));
-            return HexFormat.of().formatHex(mac.doFinal(value.getBytes(StandardCharsets.UTF_8)));
-        } catch (GeneralSecurityException ex) { throw new IllegalStateException(ex); }
-    }
+    private String hmacHex(String value) { return Hashing.hmacSha256Hex(secret, value); }
 
-    static String sha256Hex(String value) {
-        try { return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8))); }
-        catch (GeneralSecurityException ex) { throw new IllegalStateException(ex); }
-    }
+    static String sha256Hex(String value) { return Hashing.sha256Hex(value); }
 
-    private static boolean constantTimeEquals(String a, String b) {
-        return b != null && MessageDigest.isEqual(a.getBytes(StandardCharsets.US_ASCII), b.getBytes(StandardCharsets.US_ASCII));
-    }
+    private static boolean constantTimeEquals(String a, String b) { return Hashing.constantTimeEquals(a, b); }
 }

@@ -13,6 +13,7 @@ import type { CheckinView, PhotoView } from '@/services/tabitrace-api'
 import type { Plan } from '@/types/video'
 import { photoTime } from '@/utils/video-autoselect'
 import { VideoProGate } from '../VideoProGate'
+import { photoThumb } from '@/utils/photo-variants'
 
 const dayKey = (t: number) => {
   const d = new Date(t)
@@ -71,6 +72,8 @@ export function MaterialPicker({ tripId, photos, checkins, selected, max, plan, 
           <Sparkles size={13} /> 智能选片
         </button>
       </div>
+      {selected.length === 0 && <p className="vs-hint is-warn vs-count-hint">至少选择 1 张照片才能生成视频，可以点「智能选片」一键挑选。</p>}
+      {selected.length >= max && !limitHit && <p className="vs-hint vs-count-hint">已选满 {max} 张（{plan === 'PRO' ? 'Trip Pro' : 'Free'} 上限），想换照片请先取消一张。</p>}
 
       <div className="vs-chips" role="tablist">
         {tabs.map(([key, label]) => (
@@ -88,7 +91,7 @@ export function MaterialPicker({ tripId, photos, checkins, selected, max, plan, 
             return (
               <button key={p.id} type="button" className={`vs-tile${index >= 0 ? ' is-selected' : ''}`} aria-pressed={index >= 0}
                 onClick={() => toggle(p.id)} aria-label={`${index >= 0 ? '取消选择' : '选择'}照片${place ? `：${place}` : ''}`}>
-                <img src={p.imageUrl} alt="" loading="lazy" />
+                <img src={photoThumb(p)} alt="" loading="lazy" decoding="async" />
                 {index >= 0 ? <span className="vs-tile-no">{index + 1}</span> : <span className="vs-tile-ring" />}
                 {p.featured && <span className="vs-tile-star" title="精选"><Star size={10} /></span>}
                 {place && <span className="vs-tile-place">{place}</span>}

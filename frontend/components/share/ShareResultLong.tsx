@@ -5,6 +5,7 @@
 
 import type { AchievementView, PhotoView, TimelineDay, TripSummary, TripView } from '@/services/tabitrace-api'
 import { coverPhoto, galleryPhotos } from '@/utils/share-long'
+import { photoMedium } from '@/utils/photo-variants'
 import { ShareResultCover } from './ShareResultCover'
 import { ShareResultStats } from './ShareResultStats'
 import { ShareResultMood } from './ShareResultMood'
@@ -22,7 +23,8 @@ export function ShareResultLong({ trip, summary, timeline, photos, achievements 
   const cover = coverPhoto(trip, photos)
   const picks = galleryPhotos(photos, 6)
   // 结尾背景尽量不和封面重复
-  const ending = picks.find(p => p.imageUrl !== cover)?.imageUrl ?? cover
+  const endingPhoto = picks.find(p => p.imageUrl !== cover && photoMedium(p) !== cover)
+  const ending = endingPhoto ? photoMedium(endingPhoto) : cover
 
   return (
     <article className="sl-card">

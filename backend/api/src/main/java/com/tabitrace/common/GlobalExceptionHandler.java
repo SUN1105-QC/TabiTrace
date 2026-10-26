@@ -1,6 +1,8 @@
 package com.tabitrace.common;
 
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -54,6 +56,13 @@ public class GlobalExceptionHandler {
         if (ex instanceof NoResourceFoundException) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error("NOT_FOUND", "接口不存在"));
         if (ex instanceof HttpRequestMethodNotSupportedException) return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(ApiResponse.error("METHOD_NOT_ALLOWED", "不支持该请求方法"));
         return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(ApiResponse.error("UNSUPPORTED_MEDIA_TYPE", "不支持该请求内容类型"));
+    }
+    /** 数据库约束：唯一键冲突 → 409；超长、越界、外键等 → 400。具体原因只写日志，不返回给前端 */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponse<Void>> dataIntegrity(DataIntegrityViolationException ex) {
+        log.warn("Data integrity violation: {}", ex.getMostSpecificCause().getMessage());
+        if (ex instanceof DuplicateKeyException) return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error("DUPLICATE_RESOURCE", "数据已存在，请刷新后重试"));
+        return ResponseEntity.badRequest().body(ApiResponse.error("INVALID_DATA", "提交的数据不符合要求，请检查后重试"));
     }
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> unknown(Exception ex) {

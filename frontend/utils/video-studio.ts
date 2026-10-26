@@ -1,10 +1,11 @@
 /**
- * Travel Story 工作台的展示规则：视觉风格、音乐分类、素材建议。
+ * Travel Story 工作台的展示规则：视觉风格、素材建议（音乐分类与推荐见 utils/video-music）。
  * 素材建议完全基于真实数据的规则判断（同一地点照片过多、连拍、素材过少/过多），不是模型推断。
  */
 
 import type { CheckinView, PhotoView } from '@/services/tabitrace-api'
-import type { VideoMusic, VisualStyle } from '@/types/video'
+import type { VisualStyle } from '@/types/video'
+import { toDate, zonedParts } from '@/lib/time'
 
 /** 视觉风格：filter 用于网页预览，成片由 video-worker 用对应的 FFmpeg 滤镜调色（见 FfmpegRenderer.gradeFilter） */
 export const VISUAL_STYLES: { code: VisualStyle; name: string; en: string; desc: string; filter: string }[] = [
@@ -16,24 +17,12 @@ export const VISUAL_STYLES: { code: VisualStyle; name: string; en: string; desc:
 
 export const styleOf = (code?: string | null) => VISUAL_STYLES.find(s => s.code === code) ?? VISUAL_STYLES[0]
 
-/** 音乐分类标签：「推荐」把当前模板推荐的曲目排在最前 */
-export const MUSIC_TABS: { key: string; label: string }[] = [
-  { key: 'REC', label: '推荐' },
-  { key: 'WARM', label: '治愈' },
-  { key: 'FRESH', label: '日系' },
-  { key: 'CITY', label: '城市' },
-  { key: 'CHILL', label: 'Chill' },
-  { key: 'CINEMATIC', label: '电影感' }
-]
-
-export function musicFor(tab: string, music: VideoMusic[], templateCode: string) {
-  const tracks = music.filter(m => m.code !== 'NONE')
-  if (tab !== 'REC') return tracks.filter(m => m.category === tab)
-  return [...tracks.filter(m => m.recommendedTemplate === templateCode), ...tracks.filter(m => m.recommendedTemplate !== templateCode)]
+/** 已选照片的拍摄时段（用户时区的小时），用于推荐夜晚 / 黄昏 / 清晨音乐 */
+export function photoHours(ids: number[], photos: PhotoView[]) {
+  const set = new Set(ids)
+  return photos.filter(p => set.has(p.id) && p.capturedAt).map(p => zonedParts(toDate(p.capturedAt)!).hour)
 }
 
-/** 02:48 形式的时长 */
-export const clock = (s?: number | null) => (s && Number.isFinite(s) ? `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(Math.floor(s % 60)).padStart(2, '0')}` : '--:--')
 
 /** 已选照片涉及的打卡地点数 */
 export function placeCount(ids: number[], photosById: Map<number, PhotoView>) {

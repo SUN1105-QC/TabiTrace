@@ -10,6 +10,15 @@ final class VerificationEmails {
 
     static final String CODE_SUBJECT = "【旅迹】你的邮箱验证码";
 
+    /** “不是本人操作”时会发生什么（按用途） */
+    private static String safeIgnore(VerificationPurpose purpose) {
+        return switch (purpose) {
+            case REGISTER -> "你的邮箱不会被用于注册。";
+            case RESET_PASSWORD -> "你的密码不会被修改。";
+            case CHANGE_EMAIL -> "你的账号不会有任何变化。";
+        };
+    }
+
     private static String action(VerificationPurpose purpose) {
         return switch (purpose) {
             case REGISTER -> "创建旅迹账号";
@@ -31,10 +40,10 @@ final class VerificationEmails {
             验证码 %d 分钟内有效，只能使用一次。
 
             安全提示：旅迹的工作人员不会向你索要验证码，请不要把它告诉任何人。
-            如果这不是你本人的操作，请忽略这封邮件，你的邮箱不会被用于注册。
+            如果这不是你本人的操作，请忽略这封邮件，%s
 
             —— 旅迹 TabiTrace
-            """.formatted(action, code, minutes);
+            """.formatted(action, code, minutes, safeIgnore(purpose));
         String html = """
             <div style="margin:0;padding:32px 16px;background:#F8F4EE;font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;color:#26221E">
               <div style="max-width:480px;margin:0 auto;padding:32px 28px;border-radius:20px;background:#FFFDFA;border:1px solid #EBE1D5">
@@ -43,11 +52,11 @@ final class VerificationEmails {
                 <p style="margin:14px 0 0;font-size:14px;line-height:1.7;color:#5F574F">你正在%s，请在页面中输入下面的验证码：</p>
                 <p style="margin:20px 0;padding:16px 0;border-radius:14px;background:#FCEDE0;text-align:center;font-size:32px;font-weight:700;letter-spacing:.3em;color:#26221E">%s</p>
                 <p style="margin:0;font-size:13px;line-height:1.7;color:#5F574F">验证码 <b>%d 分钟</b>内有效，只能使用一次。</p>
-                <p style="margin:18px 0 0;padding-top:16px;border-top:1px solid #EFE6DA;font-size:12.5px;line-height:1.7;color:#8A8078">安全提示：旅迹的工作人员不会向你索要验证码，请不要把它告诉任何人。如果这不是你本人的操作，请忽略这封邮件，你的邮箱不会被用于注册。</p>
+                <p style="margin:18px 0 0;padding-top:16px;border-top:1px solid #EFE6DA;font-size:12.5px;line-height:1.7;color:#8A8078">安全提示：旅迹的工作人员不会向你索要验证码，请不要把它告诉任何人。如果这不是你本人的操作，请忽略这封邮件，%s</p>
                 <p style="margin:18px 0 0;font-size:13px;color:#5F574F">—— 旅迹 TabiTrace</p>
               </div>
             </div>
-            """.formatted(action, code, minutes);
+            """.formatted(action, code, minutes, safeIgnore(purpose));
         return new Mail(CODE_SUBJECT, text, html);
     }
 
@@ -80,5 +89,33 @@ final class VerificationEmails {
             </div>
             """.formatted(loginUrl);
         return new Mail("【旅迹】这个邮箱已经有旅迹账号", text, html);
+    }
+
+    /** 忘记密码时邮箱还没有注册：不发验证码，只告诉邮箱主人这里没有账号（接口响应与正常发送一致） */
+    static Mail noAccount(String registerUrl) {
+        String text = """
+            你好，
+
+            有人（可能是你自己）正在为这个邮箱重置旅迹密码，但这个邮箱还没有旅迹账号，所以我们没有发送验证码。
+
+            如果你想开始使用旅迹，可以在这里创建账号：%s
+
+            如果这不是你本人的操作，请忽略这封邮件。
+
+            —— 旅迹 TabiTrace
+            """.formatted(registerUrl);
+        String html = """
+            <div style="margin:0;padding:32px 16px;background:#F8F4EE;font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;color:#26221E">
+              <div style="max-width:480px;margin:0 auto;padding:32px 28px;border-radius:20px;background:#FFFDFA;border:1px solid #EBE1D5">
+                <p style="margin:0;font-size:12px;font-weight:700;letter-spacing:.18em;color:#E97A33">TABITRACE · 旅迹</p>
+                <h1 style="margin:10px 0 0;font-size:22px;font-weight:600">这个邮箱还没有旅迹账号</h1>
+                <p style="margin:14px 0 0;font-size:14px;line-height:1.7;color:#5F574F">有人（可能是你自己）正在为这个邮箱重置旅迹密码。因为这个邮箱还没有注册，我们没有发送验证码。</p>
+                <p style="margin:22px 0"><a href="%s" style="display:inline-block;padding:12px 22px;border-radius:12px;background:#E97A33;color:#fff;font-size:14px;font-weight:700;text-decoration:none">创建旅迹账号</a></p>
+                <p style="margin:0;padding-top:16px;border-top:1px solid #EFE6DA;font-size:12.5px;line-height:1.7;color:#8A8078">如果这不是你本人的操作，请忽略这封邮件。</p>
+                <p style="margin:18px 0 0;font-size:13px;color:#5F574F">—— 旅迹 TabiTrace</p>
+              </div>
+            </div>
+            """.formatted(registerUrl);
+        return new Mail("【旅迹】这个邮箱还没有旅迹账号", text, html);
     }
 }

@@ -19,6 +19,10 @@ public interface TripMapper {
     @Update("UPDATE trips SET status='COMPLETED',updated_at=UTC_TIMESTAMP() WHERE id=#{id}") int complete(Long id);
     @Update("UPDATE trips SET status=#{status},updated_at=UTC_TIMESTAMP() WHERE id=#{id}") int updateStatus(@Param("id") Long id,@Param("status") String status);
     @Update("UPDATE trips SET plan_type=#{planType},updated_at=UTC_TIMESTAMP() WHERE id=#{id}") int updatePlan(@Param("id") Long id,@Param("planType") String planType);
+    /** 终身 Pro：账号下所有旅行升级为 PRO（含已归档的） */
+    @Update("UPDATE trips SET plan_type='PRO',updated_at=UTC_TIMESTAMP() WHERE user_id=#{userId} AND plan_type<>'PRO'") int upgradeAllOfUser(Long userId);
+    /** 账号是否已买断终身 Pro（新建旅行直接是 PRO） */
+    @Select("SELECT COUNT(*) FROM users WHERE id=#{userId} AND lifetime_pro_at IS NOT NULL") int hasLifetimePro(Long userId);
     @Update("UPDATE trips SET visibility=#{visibility},updated_at=UTC_TIMESTAMP() WHERE id=#{id}") int updateVisibility(@Param("id") Long id,@Param("visibility") String visibility);
     @Delete("DELETE FROM trips WHERE id=#{id}") int delete(Long id);
     @Update("UPDATE trips SET cover_image=#{url},updated_at=UTC_TIMESTAMP() WHERE id=#{id}") int updateCover(@Param("id") Long id,@Param("url") String url);

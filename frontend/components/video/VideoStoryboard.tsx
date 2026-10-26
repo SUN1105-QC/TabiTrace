@@ -7,12 +7,13 @@
  */
 
 import { useState } from 'react'
-import { ArrowDown, ArrowUp, Eye, EyeOff, GripVertical, Map as MapIcon, MapPin, PencilLine, Sparkles, Trophy, Flag, Info } from 'lucide-react'
+import { ArrowDown, ArrowUp, Eye, EyeOff, GripVertical, MapPin, PencilLine, Sparkles, Trophy, Flag, Info } from 'lucide-react'
 import type { SegmentOverride, Scene, Storyboard } from '@/types/video'
 import type { PhotoView } from '@/services/tabitrace-api'
 import { SCENE_LABEL, timecode } from '@/utils/video-status'
+import { photoThumb } from '@/utils/photo-variants'
 
-const ICON = { OPENING: Sparkles, MAP: MapIcon, PLACE: MapPin, ACHIEVEMENTS: Trophy, ENDING: Flag }
+const ICON: Record<string, typeof MapPin> = { OPENING: Sparkles, PLACE: MapPin, ACHIEVEMENTS: Trophy, ENDING: Flag }
 
 /** 把本地的段落覆盖先套到分镜上，编辑后立刻看到顺序和开关变化（时长在重新预览后更新）。 */
 export function applySegments(scenes: Scene[], segments: SegmentOverride[]): Scene[] {
@@ -48,7 +49,7 @@ export function VideoStoryboard({
   if (!storyboard) {
     return (
       <div className="ts-storyboard-empty">
-        <p>选好照片后点击「生成分镜」，旅迹会按打卡时间自动编排开场、地图、地点和结尾。</p>
+        <p>选好照片后点击「生成分镜」，旅迹会按打卡时间自动编排开场、地点和结尾。</p>
         <button type="button" className="hero-ghost-button" onClick={onRefresh} disabled={loading}>{loading ? '正在编排…' : '生成分镜'}</button>
       </div>
     )
@@ -132,12 +133,11 @@ export function VideoStoryboard({
                   </button>
                 )}
                 {s.subtitle && <small>{s.subtitle}</small>}
-                {s.type === 'MAP' && s.meta.points && <small>{s.meta.points.map(p => p.name).join(' → ')}</small>}
                 {s.type === 'ACHIEVEMENTS' && s.meta.items && <small>{s.meta.items.join(' · ')}</small>}
               </span>
               {s.photoIds.length > 0 && (
                 <span className="ts-scene-thumbs">
-                  {s.photoIds.slice(0, 3).map(id => photosById.get(id) && <img key={id} src={photosById.get(id)!.imageUrl} alt="" />)}
+                  {s.photoIds.slice(0, 3).map(id => photosById.get(id) && <img key={id} src={photoThumb(photosById.get(id)!)} alt="" loading="lazy" decoding="async" />)}
                   {s.photoIds.length > 3 && <em>+{s.photoIds.length - 3}</em>}
                 </span>
               )}

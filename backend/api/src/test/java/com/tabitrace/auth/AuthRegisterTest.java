@@ -9,6 +9,7 @@ import com.tabitrace.user.entity.UserEntity;
 import com.tabitrace.user.mapper.UserMapper;
 import com.tabitrace.verification.VerificationPurpose;
 import com.tabitrace.verification.service.EmailVerificationService;
+import com.tabitrace.auth.service.LoginThrottleService;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,7 @@ class AuthRegisterTest {
     final UserMapper users = mock(UserMapper.class);
     final PasswordEncoder encoder = mock(PasswordEncoder.class);
     final EmailVerificationService verifications = mock(EmailVerificationService.class);
-    final AuthService service = new AuthService(users, mock(RefreshTokenMapper.class), encoder, jwt, verifications);
+    final AuthService service = new AuthService(users, mock(RefreshTokenMapper.class), encoder, jwt, verifications, mock(LoginThrottleService.class));
     final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
     static RegisterRequest req(String email, String password, String nickname) { return new RegisterRequest(email, password, nickname, "token-1"); }
@@ -51,6 +52,24 @@ class AuthRegisterTest {
     void blankNicknameFallsBackToEmailPrefixCappedAt30() {
         assertEquals("traveler", captureInserted(req("Traveler@Example.test", "password1", " ")).nickname);
         assertEquals("x".repeat(30), captureInserted(req("x".repeat(40) + "@example.test", "password1", null)).nickname);
+    }
+
+    @Test
+    void registerKeepsTheLanguageAndTimezoneTheVisitorWasUsing() {
+        UserEntity u = captureInserted(new RegisterRequest("en@example.test", "password1", "n", "token-1", "en-US", "Europe/London"));
+        assertEquals("en-US", u.locale);
+        assertEquals("Europe/London", u.timezone);
+        assertFalse(u.emailNotifications, "通知邮件尚未开通，新账户不应标记为已开启");
+    }
+
+    @Test
+    void unsupportedRegisterPreferencesFallBackToDefaults() {
+        UserEntity u = captureInserted(new RegisterRequest("fr@example.test", "password1", "n", "token-1", "fr-FR", "+09:00"));
+        assertEquals("zh-CN", u.locale);
+        assertEquals("Asia/Tokyo", u.timezone);
+        UserEntity legacy = captureInserted(req("old@example.test", "password1", "n"));
+        assertEquals("zh-CN", legacy.locale);
+        assertEquals("Asia/Tokyo", legacy.timezone);
     }
 
     @Test

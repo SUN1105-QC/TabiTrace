@@ -3,12 +3,13 @@
 /**
  * 推荐探索：来自官方城市地点库（/official-cities/{code}/places），
  * 过滤掉当前旅行已加入的地点，按商圈去重后取前 3 条，全部是真实数据。
+ * 配图只用后端的官方高清图（640 档）；没有照片的地点显示文字封面，不按名称或顺序借用别处的照片。
  */
 
 import Link from 'next/link'
 import { ArrowRight, ChevronRight } from 'lucide-react'
 import type { PlaceView } from '@/services/tabitrace-api'
-import { placeImage } from '@/lib/placeImage'
+import { PlaceCover } from '@/components/explore/PlaceCover'
 
 export function ExploreRecommendations({ places, cityCode = 'tokyo' }: { places: PlaceView[]; cityCode?: string }) {
   const exploreHref = `/explore/${cityCode.toLowerCase()}`
@@ -27,11 +28,11 @@ export function ExploreRecommendations({ places, cityCode = 'tokyo' }: { places:
         </div>
       ) : (
         <ul className="m-explore-list">
-          {places.map((place, index) => (
+          {places.map(place => (
             <li key={place.id}>
-              <Link href={exploreHref}>
+              <Link href={`${exploreHref}#place-${place.id}`}>
                 <span className="m-explore-thumb">
-                  <img src={placeImage(place, index)} alt={place.name} loading="lazy" />
+                  <PlaceCover place={place} className="is-thumb" sizes="104px" />
                 </span>
                 <span className="m-explore-body">
                   <b>{place.name}</b>

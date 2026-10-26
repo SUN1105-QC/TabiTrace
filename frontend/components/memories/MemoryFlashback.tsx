@@ -4,6 +4,7 @@
 
 import Link from 'next/link'
 import { ArrowRight, Images } from 'lucide-react'
+import { memorySrcSet } from '@/services/memories'
 import type { Flashback } from '@/services/memories'
 import { dateRange, flashbackHeadline, flashbackKicker } from '@/utils/memories'
 import { MemoryCover } from './MemoryCover'
@@ -16,7 +17,7 @@ export function MemoryFlashback({ flashback: f }: { flashback: Flashback }) {
         <MemoryCover src={f.cover ?? f.moments[0]?.imageUrl} city={f.city} title={f.title} className="is-main" />
         {shots.length > 0 && (
           <div className="mm-flashback-shots">
-            {shots.map(m => <img key={m.id} src={m.imageUrl} alt="" loading="lazy" />)}
+            {shots.map(m => <img key={m.id} src={m.imageUrl} srcSet={memorySrcSet(m)} sizes="(max-width: 767px) 33vw, 15vw" alt="" loading="lazy" decoding="async" />)}
           </div>
         )}
       </div>

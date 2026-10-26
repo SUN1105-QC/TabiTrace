@@ -14,11 +14,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/auth/email-verification")
 public class EmailVerificationController {
     private final EmailVerificationService service;
-    public EmailVerificationController(EmailVerificationService service) { this.service = service; }
+    private final ClientIp clientIp;
+    public EmailVerificationController(EmailVerificationService service, ClientIp clientIp) { this.service = service; this.clientIp = clientIp; }
 
     @PostMapping("/send")
     public ApiResponse<SendCodeResponse> send(@Valid @RequestBody SendCodeRequest r, HttpServletRequest request) {
-        EmailVerificationService.SendResult res = service.send(r.email(), VerificationPurpose.parse(r.purpose()), ClientIp.resolve(request));
+        EmailVerificationService.SendResult res = service.send(r.email(), VerificationPurpose.parse(r.purpose()), clientIp.resolve(request));
         return ApiResponse.ok(new SendCodeResponse(res.expiresIn(), res.resendAfter()));
     }
 

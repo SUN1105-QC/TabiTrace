@@ -9,6 +9,7 @@
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { ArrowRight, Film, Image as ImageIcon, MapPin, MoreHorizontal, Share2, Trophy } from 'lucide-react'
+import { memorySrcSet } from '@/services/memories'
 import type { MemoryTrip } from '@/services/memories'
 import { dateRange, statLine, statusLabel } from '@/utils/memories'
 import { MemoryCover } from './MemoryCover'
@@ -34,7 +35,7 @@ export function MemoryMoments({ trip }: { trip: MemoryTrip }) {
       <div className="mm-moments-row">
         {trip.moments.map((m, i) => (
           <Link key={m.id} href={`/trips/${trip.id}/gallery`} className="mm-moment" aria-label={`查看「${trip.title}」的照片`}>
-            <img src={m.imageUrl} alt="" loading="lazy" />
+            <img src={m.imageUrl} srcSet={memorySrcSet(m)} sizes="(max-width: 767px) 33vw, 12vw" alt="" loading="lazy" decoding="async" />
             {i === trip.moments.length - 1 && trip.moreMoments > 0 && <span>+{trip.moreMoments}</span>}
           </Link>
         ))}

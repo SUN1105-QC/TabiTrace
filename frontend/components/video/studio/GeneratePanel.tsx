@@ -8,8 +8,11 @@
 import { useState, type ReactNode } from 'react'
 import { ChevronDown, Clock3, Save, Sparkles, TriangleAlert } from 'lucide-react'
 
-export function GeneratePanel({ items, blocker, busy, saving, editingDraft, storyboard, onSave, onGenerate }: {
+export function GeneratePanel({ items, rows, compact = false, blocker, busy, saving, editingDraft, storyboard, onSave, onGenerate }: {
   items: string[]
+  /** compact（移动端）：只显示确认摘要，生成按钮在底部固定操作栏里 */
+  rows?: [string, string][]
+  compact?: boolean
   blocker: string
   busy: boolean
   saving: boolean
@@ -20,29 +23,35 @@ export function GeneratePanel({ items, blocker, busy, saving, editingDraft, stor
 }) {
   const [open, setOpen] = useState(false)
   return (
-    <div className="vs-generate">
-      <ul className="vs-generate-summary">
-        {items.map(i => <li key={i}>{i}</li>)}
-      </ul>
+    <div className={`vs-generate${compact ? ' is-compact' : ''}`}>
+      {compact && rows ? (
+        <dl className="vs-confirm">
+          {rows.map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}
+        </dl>
+      ) : (
+        <ul className="vs-generate-summary">
+          {items.map(i => <li key={i}>{i}</li>)}
+        </ul>
+      )}
       <p className="vs-generate-eta"><Clock3 size={13} /> 预计生成时间约 1～3 分钟，生成时可以离开页面，完成后会出现在「我的视频」。</p>
 
       <div className="vs-disclosure">
         <button type="button" onClick={() => setOpen(o => !o)} aria-expanded={open}>
-          <ChevronDown size={14} className={open ? 'is-open' : ''} /> 调整分镜段落 <small>可选 · 调整开场、地图、地点、结尾的顺序与标题</small>
+          <ChevronDown size={14} className={open ? 'is-open' : ''} /> 调整分镜段落 <small>可选 · 调整开场、地点、结尾的顺序与标题</small>
         </button>
         {open && <div className="vs-disclosure-body">{storyboard}</div>}
       </div>
 
       {blocker && <p className="vs-blocker"><TriangleAlert size={14} /> {blocker}</p>}
 
-      <div className="vs-generate-actions">
+      {!compact && <div className="vs-generate-actions">
         <button type="button" className="vs-btn" onClick={onSave} disabled={saving || busy}>
           <Save size={14} /> {saving ? '保存中…' : editingDraft ? '更新草稿' : '保存草稿'}
         </button>
         <button type="button" className="vs-btn is-primary is-big" onClick={onGenerate} disabled={Boolean(blocker) || busy}>
           <Sparkles size={16} /> {busy ? '正在提交…' : '生成旅行视频'}
         </button>
-      </div>
+      </div>}
     </div>
   )
 }

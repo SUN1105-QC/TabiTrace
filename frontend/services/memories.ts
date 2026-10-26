@@ -1,9 +1,11 @@
 /** 旅行回忆中心接口（与 backend MemoryDtos 一一对应）。只统计已完成 / 已归档的旅行。 */
 
 import { api } from './api'
+import { photoSrcSet } from '@/utils/photo-variants'
 
 export type MemoryOverview = { archivedTrips: number; cities: number; photos: number; creations: number }
-export type Moment = { id: number; imageUrl: string }
+/** imageUrl 为默认显示地址；thumbUrl / mediumUrl / originalUrl 与宽高用于 srcset */
+export type Moment = { id: number; imageUrl: string; thumbUrl?: string | null; mediumUrl?: string | null; originalUrl?: string | null; width?: number | null; height?: number | null }
 
 export type MemoryTrip = {
   id: number
@@ -44,7 +46,7 @@ export type Creation = {
   views?: number | null
 }
 
-export type MemoryPhoto = { id: number; tripId: number; tripTitle: string; imageUrl: string; featured: boolean; takenAt?: string | null }
+export type MemoryPhoto = { id: number; tripId: number; tripTitle: string; imageUrl: string; thumbUrl?: string | null; mediumUrl?: string | null; originalUrl?: string | null; width?: number | null; height?: number | null; featured: boolean; takenAt?: string | null }
 export type MemoryAchievement = { code: string; name: string; description?: string | null; tripId?: number | null; tripTitle?: string | null; earnedAt?: string | null }
 
 export type Flashback = {
@@ -78,3 +80,7 @@ export const memoryApi = {
   memories: (limit = 6) => api<MemoriesView>(`/me/memories?limit=${limit}`),
   trips: (offset: number, limit = 6) => api<{ trips: MemoryTrip[]; hasMore: boolean }>(`/me/memories/trips?offset=${offset}&limit=${limit}`)
 }
+
+/** 回忆照片的 srcset（原图 + 各档） */
+export const memorySrcSet = (m: Moment | MemoryPhoto) =>
+  photoSrcSet({ imageUrl: m.originalUrl ?? m.imageUrl, thumbUrl: m.thumbUrl, mediumUrl: m.mediumUrl, width: m.width, height: m.height })

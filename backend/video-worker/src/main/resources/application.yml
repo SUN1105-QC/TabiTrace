@@ -8,9 +8,13 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
 worker:
   poll-ms: ${VIDEO_WORKER_POLL_MS:5000}
+  # 停机（SIGTERM）时等待当前视频完成的秒数，超时则中断并放回队列；Railway drainingSeconds 需大于它 + 10
+  shutdown-grace-seconds: ${WORKER_SHUTDOWN_GRACE_SECONDS:20}
   ffmpeg-binary: ${FFMPEG_BINARY:ffmpeg}
   work-dir: ${VIDEO_WORK_DIR:../../frontend/public/generated-videos}
-  music-dir: ${VIDEO_MUSIC_DIR:../../frontend/public/music}
+  # 背景音乐：本地存储根目录（按对象路径 music/... 读取）；r2 模式从存储桶下载到 music-cache-dir
+  music-dir: ${VIDEO_MUSIC_DIR:../api/.tabitrace/uploads}
+  music-cache-dir: ${WORKER_MUSIC_CACHE_DIR:${java.io.tmpdir}/tabitrace-music}
   storage:
     mode: ${STORAGE_MODE:mock}
     local:
@@ -20,4 +24,6 @@ worker:
       access-key: ${R2_ACCESS_KEY:}
       secret-key: ${R2_SECRET_KEY:}
       bucket: ${R2_BUCKET:}
+      # 背景音乐原曲所在的私有桶（可选；不配置时从 R2_BUCKET 读取）
+      music-bucket: ${R2_MUSIC_BUCKET:}
       public-base-url: ${R2_PUBLIC_BASE_URL:}

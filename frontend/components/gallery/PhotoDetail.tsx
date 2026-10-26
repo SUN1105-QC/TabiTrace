@@ -11,6 +11,7 @@ import { useEffect, useId, useState } from 'react'
 import { ChevronLeft, ChevronRight, Download, Film, Image as ImageIcon, Loader2, Share2, Star, Trash2, X } from 'lucide-react'
 import type { CheckinView } from '@/services/tabitrace-api'
 import { TIME_SOURCE_LABEL, type GalleryItem } from '@/utils/gallery'
+import { photoMedium, photoSrcSet } from '@/utils/photo-variants'
 
 export function PhotoDetail({ tripId, item, position, total, checkins, isCover, readOnly, onClose, onPrev, onNext, onToggleFeatured, onCover, onDelete, onLink }: {
   tripId: number
@@ -72,7 +73,7 @@ export function PhotoDetail({ tripId, item, position, total, checkins, isCover, 
       <div className="modal-panel gl-detail" role="dialog" aria-modal="true" aria-labelledby={titleId}>
         <div className="gl-detail-media">
           {!loaded && <div className="gl-detail-loading"><Loader2 size={22} className="gl-spin" /> 正在加载原图…</div>}
-          <img src={photo.imageUrl} alt={checkin ? `${checkin.placeName} 的照片` : '旅行照片'} onLoad={() => setLoaded(true)} onError={() => setLoaded(true)} className={loaded ? '' : 'is-hidden'} />
+          <img src={photoMedium(photo)} srcSet={photoSrcSet(photo)} sizes="(max-width: 767px) 100vw, 80vw" alt={checkin ? `${checkin.placeName} 的照片` : '旅行照片'} onLoad={() => setLoaded(true)} onError={() => setLoaded(true)} className={loaded ? '' : 'is-hidden'} />
           {total > 1 && <>
             <button type="button" className="gl-nav is-prev" onClick={onPrev} aria-label="上一张"><ChevronLeft size={20} /></button>
             <button type="button" className="gl-nav is-next" onClick={onNext} aria-label="下一张"><ChevronRight size={20} /></button>

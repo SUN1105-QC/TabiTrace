@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { TripView } from '@/services/tabitrace-api'
 import { dotDate } from '@/utils/trip'
 import { TripMoreMenu } from './TripMoreMenu'
+import { hdSrcSet } from '@/utils/place-images'
 
 export function TripHero({ trip, onChanged, onToast }: { trip: TripView; onChanged: (t: TripView) => void; onToast: (msg: string) => void }) {
   const [failed, setFailed] = useState(false)
@@ -25,7 +26,7 @@ export function TripHero({ trip, onChanged, onToast }: { trip: TripView; onChang
     <section className={`td-hero${cover ? '' : ' is-blank'}`}>
       {cover
         // 首屏最大的图片，不做 lazy，避免拖慢 LCP
-        ? <img ref={img} src={cover} alt="" fetchPriority="high" onError={() => setFailed(true)} />
+        ? <img ref={img} src={cover} srcSet={hdSrcSet(cover)} sizes="(max-width: 1023px) 100vw, 80vw" alt="" fetchPriority="high" onError={() => setFailed(true)} />
         : <span className="td-hero-mark" aria-hidden="true">{Array.from(trip.destinationName || '旅')[0]}</span>}
       <div className="td-hero-shade" aria-hidden="true" />
       <TripMoreMenu trip={trip} onChanged={onChanged} onToast={onToast} />

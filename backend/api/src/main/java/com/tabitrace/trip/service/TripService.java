@@ -26,8 +26,10 @@ public class TripService {
     @Transactional
     public TripView create(Long userId,CreateTripRequest r){
         validateDates(r.startDate(),r.endDate());
-        if(mapper.countFreeTrips(userId)>=FREE_ACTIVE_TRIP_LIMIT) throw new BusinessException("FREE_TRIP_LIMIT","免费版同时只能保留 1 个 FREE 旅行，请升级已有旅行或归档后再创建");
-        TripEntity t=new TripEntity(); t.userId=userId;t.title=r.title().strip();t.destinationName=r.destinationName().strip();t.countryCode=blankToNull(r.countryCode());t.city=blankToNull(r.city());t.startDate=r.startDate();t.endDate=r.endDate();t.peopleCount=r.peopleCount()==null?1:r.peopleCount();t.coverImage=blankToNull(r.coverImage());t.planType="FREE";t.status="PLANNING";t.visibility="PRIVATE";
+        // 已买断终身 Pro：新建的旅行直接是 PRO，不受 Free 旅行数量限制
+        boolean lifetime=mapper.hasLifetimePro(userId)>0;
+        if(!lifetime&&mapper.countFreeTrips(userId)>=FREE_ACTIVE_TRIP_LIMIT) throw new BusinessException("FREE_TRIP_LIMIT","免费版同时只能保留 1 个 FREE 旅行，请升级已有旅行或归档后再创建");
+        TripEntity t=new TripEntity(); t.userId=userId;t.title=r.title().strip();t.destinationName=r.destinationName().strip();t.countryCode=blankToNull(r.countryCode());t.city=blankToNull(r.city());t.startDate=r.startDate();t.endDate=r.endDate();t.peopleCount=r.peopleCount()==null?1:r.peopleCount();t.coverImage=blankToNull(r.coverImage());t.planType=lifetime?"PRO":"FREE";t.status="PLANNING";t.visibility="PRIVATE";
         mapper.insert(t);
         // 目的地有官方探索内容（official_cities）且用户选择加入时，把该城市的官方地点加入旅行
         OfficialCityEntity official=Boolean.TRUE.equals(r.joinOfficialExplore())?officialCityOf(t):null;

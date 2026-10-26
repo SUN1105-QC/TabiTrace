@@ -6,6 +6,7 @@
 import Link from 'next/link'
 import { ArrowRight, Check, MapPin, Play } from 'lucide-react'
 import { HERO_DEMO, LANDING_IMAGES } from './landingDemo'
+import { hdSrcSet } from '@/utils/place-images'
 
 export function LandingHero() {
   const img = LANDING_IMAGES
@@ -24,7 +25,7 @@ export function LandingHero() {
 
       <div className="ld-hero-visual" aria-hidden="true">
         <figure className="ld-hv-main">
-          <img src={img.heroMain.src} alt="" fetchPriority="high" width={416} height={322} />
+          <img src={img.heroMain.src} srcSet={hdSrcSet(img.heroMain.src)} sizes="(max-width: 1023px) 90vw, 520px" alt="" fetchPriority="high" width={416} height={322} />
         </figure>
         <div className="ld-hv-place">
           <span className="ld-hv-dot"><MapPin size={14} /></span>
@@ -41,10 +42,10 @@ export function LandingHero() {
           </svg>
           <p>{HERO_DEMO.route.join(' → ')}</p>
         </div>
-        <figure className="ld-hv-polaroid is-a"><img src={img.heroPhotoA.src} alt="" width={426} height={286} /></figure>
-        <figure className="ld-hv-polaroid is-b"><img src={img.heroPhotoB.src} alt="" width={380} height={244} /></figure>
+        <figure className="ld-hv-polaroid is-a"><img src={img.heroPhotoA.src} srcSet={hdSrcSet(img.heroPhotoA.src)} sizes="(max-width: 767px) 45vw, 240px" alt="" width={426} height={286} decoding="async" /></figure>
+        <figure className="ld-hv-polaroid is-b"><img src={img.heroPhotoB.src} srcSet={hdSrcSet(img.heroPhotoB.src)} sizes="(max-width: 767px) 45vw, 240px" alt="" width={380} height={244} decoding="async" /></figure>
         <div className="ld-hv-story">
-          <img src={img.storyFrame.src} alt="" width={288} height={512} />
+          <img src={img.storyFrame.src} srcSet={img.storyFrame.srcSet} sizes="(max-width: 767px) 20vw, 113px" alt="" width={img.storyFrame.width} height={img.storyFrame.height} />
           <span className="ld-hv-play"><Play size={14} /></span>
         </div>
       </div>

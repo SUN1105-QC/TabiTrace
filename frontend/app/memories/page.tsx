@@ -6,6 +6,7 @@
  * 所有数据来自 /me/memories 的真实聚合；没有数据的模块整块隐藏，不用 0 或假数据占位。
  */
 
+import { PageContainer } from '@/components/common/PageContainer'
 import { useCallback, useEffect, useState } from 'react'
 import { ChevronDown, RefreshCcw, TriangleAlert } from 'lucide-react'
 import { SiteHeader } from '@/components/common/SiteHeader'
@@ -69,14 +70,14 @@ export default function MemoriesPage() {
     return (
       <main>
         <SiteHeader />
-        <div className="mm-page">
+        <PageContainer variant="wide" className="mm-page">
           <div className="mm-card mm-error" role="alert">
             <TriangleAlert size={22} />
             <p>旅行回忆加载失败</p>
             <small>{error}</small>
             <button type="button" className="mm-btn is-primary" onClick={() => void load()}><RefreshCcw size={14} /> 重新加载</button>
           </div>
-        </div>
+        </PageContainer>
       </main>
     )
   }
@@ -94,7 +95,7 @@ export default function MemoriesPage() {
   return (
     <main>
       <SiteHeader />
-      <div className="mm-page">
+      <PageContainer variant="wide" className="mm-page">
         <MemoriesHero featured={featured} chips={chips} onJump={jump} />
 
         {!empty && (
@@ -130,14 +131,14 @@ export default function MemoriesPage() {
         )}
 
         <MemoryClosing achievements={data.achievements} total={data.achievementCount} achievementsHref={empty ? '/trips' : achievementsHref} />
-      </div>
+      </PageContainer>
     </main>
   )
 }
 
 function MemoriesSkeleton() {
   return (
-    <div className="mm-page" aria-busy="true" aria-label="正在加载旅行回忆">
+    <PageContainer variant="wide" className="mm-page" aria-busy="true" aria-label="正在加载旅行回忆">
       <div className="mm-hero">
         <div className="mm-hero-text">
           <div className="skeleton" style={{ width: 140, height: 12, borderRadius: 6 }} />
@@ -151,6 +152,6 @@ function MemoriesSkeleton() {
       <div className="mm-overview">{[0, 1, 2, 3].map(i => <div key={i} className="skeleton" style={{ height: 86, borderRadius: 16 }} />)}</div>
       <div className="mm-trips" style={{ marginTop: 40 }}>{[0, 1].map(i => <div key={i} className="skeleton" style={{ height: 460, borderRadius: 18 }} />)}</div>
       <div className="mm-photos" style={{ marginTop: 40 }}>{Array.from({ length: 5 }, (_, i) => <div key={i} className={`skeleton mm-photo${i === 0 ? ' is-lead' : ''}`} />)}</div>
-    </div>
+    </PageContainer>
   )
 }

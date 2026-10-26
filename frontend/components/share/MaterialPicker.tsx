@@ -2,11 +2,10 @@
 
 /**
  * 分享素材面板的公共部件（海报素材、九宫格素材共用）：
- * 日期选择条、按「哪天 · 哪个打卡地点」分组的照片点选网格。
+ * 面板外壳、日期选择条、按「哪天 · 哪个打卡地点」把照片分组。
  */
 
 import type { ReactNode } from 'react'
-import { RotateCcw, Star } from 'lucide-react'
 import type { PhotoView, TimelineDay } from '@/services/tabitrace-api'
 import { timeOfDay } from '@/lib/time'
 import { dotDate, weekdayOf } from '@/utils/share-long'
@@ -66,70 +65,5 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
     <button onClick={onClick} className={`rounded-full px-3 py-1.5 text-[11px] transition ${active ? 'bg-ink text-white' : 'border border-black/10 bg-white/60 text-black/60 hover:border-black/25'}`}>
       {children}
     </button>
-  )
-}
-
-/**
- * 照片点选：按点选顺序记录，徽标显示该照片在成品里的角色（roleOf），选满后其余照片变灰。
- * 精选照片右下角带星标。
- */
-export function PhotoPicker({ groups, selected, max, roleOf, hint, empty, onChange }: {
-  groups: PhotoGroup[]
-  selected: number[]
-  max: number
-  roleOf: (index: number) => string
-  hint: ReactNode
-  empty: ReactNode
-  onChange: (ids: number[]) => void
-}) {
-  const full = selected.length >= max
-  function toggle(id: number) {
-    const has = selected.includes(id)
-    if (!has && full) return
-    onChange(has ? selected.filter(x => x !== id) : [...selected, id])
-  }
-  return (
-    <>
-      <div className="mt-5 flex items-center justify-between gap-2">
-        <h3 className="text-xs font-semibold text-black/70">照片 <span className="font-normal text-black/40">{selected.length}/{max}</span></h3>
-        {selected.length > 0 && (
-          <button onClick={() => onChange([])} className="inline-flex items-center gap-1 text-[11px] text-black/45 hover:text-ink">
-            <RotateCcw size={11} /> 恢复自动挑选
-          </button>
-        )}
-      </div>
-      <p className="mt-1 text-[11px] leading-5 text-black/45">{hint}</p>
-      {groups.length === 0 ? (
-        <p className="mt-3 rounded-xl bg-black/[.03] p-3 text-[11px] leading-5 text-black/50">{empty}</p>
-      ) : (
-        <div className="mt-3 max-h-[360px] space-y-3 overflow-y-auto pr-1">
-          {groups.map(g => (
-            <div key={g.key}>
-              <p className="truncate text-[11px] text-black/50">{g.title}</p>
-              <div className="mt-1.5 grid grid-cols-4 gap-1.5">
-                {g.photos.map(p => {
-                  const order = selected.indexOf(p.id)
-                  const isOn = order >= 0
-                  return (
-                    <button
-                      key={p.id}
-                      onClick={() => toggle(p.id)}
-                      disabled={!isOn && full}
-                      aria-pressed={isOn}
-                      title={isOn ? `${roleOf(order)}（再点一次取消）` : p.featured ? '精选照片' : '选用这张照片'}
-                      className={`relative aspect-square overflow-hidden rounded-lg bg-black/5 transition ${isOn ? 'ring-2 ring-[#27362F] ring-offset-1' : 'hover:opacity-90'} ${!isOn && full ? 'opacity-35' : ''}`}
-                    >
-                      <img src={p.imageUrl} alt="" className="h-full w-full object-cover" />
-                      {isOn && <span className="absolute left-1 top-1 rounded-full bg-[#27362F] px-1.5 py-0.5 text-[9px] text-white">{roleOf(order)}</span>}
-                      {p.featured && <Star size={11} className="absolute bottom-1 right-1 fill-[#F2B84B] text-[#F2B84B] drop-shadow" />}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </>
   )
 }

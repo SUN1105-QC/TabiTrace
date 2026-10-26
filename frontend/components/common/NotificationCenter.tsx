@@ -9,6 +9,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Bell, Clock3, Film, Share2, Trophy, TriangleAlert } from 'lucide-react'
 import { relativeTime, toDate, localDateKey } from '@/lib/time'
+import { tr } from '@/i18n'
+import { useT } from '@/components/common/PreferencesProvider'
 import type { AchievementView, ShareLinkView, TripSummary, TripView, UserView, VideoProjectView } from '@/services/tabitrace-api'
 
 export type NotificationItem = { id: string; icon: 'trophy' | 'film' | 'share' | 'clock' | 'warn'; title: string; body: string; at: string | null; href: string }
@@ -31,32 +33,32 @@ export function buildNotifications(input: {
   if (!trip) return items
 
   achievements.filter(a => a.earned && a.earnedAt).forEach(a => {
-    items.push({ id: `ach-${a.id}`, icon: 'trophy', title: `解锁成就「${a.name}」`, body: a.description || '继续记录可以解锁更多成就', at: a.earnedAt!, href: `/trips/${trip.id}/achievements` })
+    items.push({ id: `ach-${a.id}`, icon: 'trophy', title: tr('notify.achievementTitle', { name: a.name }), body: a.description || tr('notify.achievementBody'), at: a.earnedAt!, href: `/trips/${trip.id}/achievements` })
   })
 
   videos.forEach(v => {
     if (v.status === 'COMPLETED' && v.completedAt) {
-      items.push({ id: `video-${v.id}`, icon: 'film', title: 'Travel Story 生成完成', body: `${v.templateCode} 模板 · ${v.photoIds.length} 张照片`, at: v.completedAt, href: `/trips/${trip.id}/video` })
+      items.push({ id: `video-${v.id}`, icon: 'film', title: tr('notify.storyDoneTitle'), body: tr('notify.storyDoneBody', { template: v.templateCode, photos: v.photoIds.length }), at: v.completedAt, href: `/trips/${trip.id}/video` })
     }
     if (v.status === 'FAILED') {
-      items.push({ id: `video-fail-${v.id}`, icon: 'warn', title: 'Travel Story 生成失败', body: v.errorMessage || '可以在旅行视频页重新生成', at: v.createdAt, href: `/trips/${trip.id}/video` })
+      items.push({ id: `video-fail-${v.id}`, icon: 'warn', title: tr('notify.storyFailTitle'), body: v.errorMessage || tr('notify.storyFailBody'), at: v.createdAt, href: `/trips/${trip.id}/video` })
     }
   })
 
   shares.filter(s => s.status === 'ACTIVE' && s.viewCount > 0).forEach(s => {
-    items.push({ id: `share-${s.id}`, icon: 'share', title: `分享链接被访问 ${s.viewCount} 次`, body: '有人看过你的旅行故事', at: s.createdAt, href: `/trips/${trip.id}/share` })
+    items.push({ id: `share-${s.id}`, icon: 'share', title: tr('notify.shareTitle', { count: s.viewCount }), body: tr('notify.shareBody'), at: s.createdAt, href: `/trips/${trip.id}/share` })
   })
 
   const today = localDateKey(new Date())
   if (tripReminder && trip.status !== 'ARCHIVED' && trip.status !== 'COMPLETED') {
-    if (today < trip.startDate) items.push({ id: `trip-soon-${trip.id}`, icon: 'clock', title: `「${trip.title}」即将开始`, body: `出发日期 ${trip.startDate}`, at: trip.createdAt || null, href: `/trips/${trip.id}` })
-    else if (today > trip.endDate) items.push({ id: `trip-end-${trip.id}`, icon: 'clock', title: `「${trip.title}」已经结束`, body: '可以标记完成并生成旅行成果', at: trip.createdAt || null, href: `/trips/${trip.id}/summary` })
+    if (today < trip.startDate) items.push({ id: `trip-soon-${trip.id}`, icon: 'clock', title: tr('notify.tripSoonTitle', { title: trip.title }), body: tr('notify.tripSoonBody', { date: trip.startDate }), at: trip.createdAt || null, href: `/trips/${trip.id}` })
+    else if (today > trip.endDate) items.push({ id: `trip-end-${trip.id}`, icon: 'clock', title: tr('notify.tripEndTitle', { title: trip.title }), body: tr('notify.tripEndBody'), at: trip.createdAt || null, href: `/trips/${trip.id}/summary` })
   }
 
   // 免费额度提醒不受分类开关影响
   if (trip.planType === 'FREE' && summary) {
-    if (summary.places >= 8) items.push({ id: `limit-place-${trip.id}`, icon: 'warn', title: '免费打卡额度接近上限', body: `已记录 ${summary.places} 个地点，上限 10 个`, at: null, href: '/pricing' })
-    if (summary.photos >= 8) items.push({ id: `limit-photo-${trip.id}`, icon: 'warn', title: '免费照片额度接近上限', body: `已保存 ${summary.photos} 张照片，上限 10 张`, at: null, href: '/pricing' })
+    if (summary.places >= 8) items.push({ id: `limit-place-${trip.id}`, icon: 'warn', title: tr('notify.limitPlaceTitle'), body: tr('notify.limitPlaceBody', { count: summary.places }), at: null, href: '/pricing' })
+    if (summary.photos >= 8) items.push({ id: `limit-photo-${trip.id}`, icon: 'warn', title: tr('notify.limitPhotoTitle'), body: tr('notify.limitPhotoBody', { count: summary.photos }), at: null, href: '/pricing' })
   }
 
   return items.sort((a, b) => (toDate(b.at)?.getTime() || 0) - (toDate(a.at)?.getTime() || 0)).slice(0, 12)
@@ -67,6 +69,7 @@ const ICONS = { trophy: Trophy, film: Film, share: Share2, clock: Clock3, warn: 
 
 export function NotificationCenter({ items }: { items: NotificationItem[] }) {
   const router = useRouter()
+  const t = useT()
   const [open, setOpen] = useState(false)
   const [readAt, setReadAt] = useState<number>(0)
   const ref = useRef<HTMLDivElement | null>(null)
@@ -92,15 +95,15 @@ export function NotificationCenter({ items }: { items: NotificationItem[] }) {
 
   return (
     <div className="relative" ref={ref}>
-      <button className="icon-button" onClick={toggle} aria-label={unread ? `通知，${unread} 条未读` : '通知'}>
+      <button className="icon-button" onClick={toggle} aria-label={unread ? t('notify.buttonUnread', { count: unread }) : t('notify.button')}>
         <Bell size={17} />
         {unread > 0 && <i className="icon-dot" />}
       </button>
       {open && (
-        <div className="popover" role="dialog" aria-label="通知列表">
-          <div className="popover-head"><b>通知</b><span>{items.length} 条</span></div>
+        <div className="popover" role="dialog" aria-label={t('notify.list')}>
+          <div className="popover-head"><b>{t('notify.title')}</b><span>{t('notify.count', { count: items.length })}</span></div>
           {items.length === 0 ? (
-            <p className="popover-empty">还没有新的旅行动态。完成一次打卡后，这里会出现提醒。</p>
+            <p className="popover-empty">{t('notify.empty')}</p>
           ) : (
             <div className="popover-list">
               {items.map(item => {

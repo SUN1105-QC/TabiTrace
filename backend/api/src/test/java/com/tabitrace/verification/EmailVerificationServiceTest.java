@@ -142,8 +142,37 @@ class EmailVerificationServiceTest {
     }
 
     @Test
+    void resetPasswordSendsCodesOnlyToActiveAccountsWithTheSameResponse() {
+        VerificationPurpose RESET = VerificationPurpose.RESET_PASSWORD;
+        doAnswer(inv -> { ((EmailVerificationEntity) inv.getArgument(0)).id = 40L; return 1; }).when(mapper).insert(any(), anyLong());
+        UserEntity active = new UserEntity(); active.status = "ACTIVE";
+        UserEntity disabled = new UserEntity(); disabled.status = "DISABLED";
+        when(users.findByEmail("me@example.com")).thenReturn(active);
+        when(users.findByEmail("off@example.com")).thenReturn(disabled);
+
+        EmailVerificationService.SendResult a = service.send("me@example.com", RESET, "1.1.1.1");
+        EmailVerificationService.SendResult b = service.send("none@example.com", RESET, "1.1.1.1");
+        EmailVerificationService.SendResult c = service.send("off@example.com", RESET, "1.1.1.1");
+        assertEquals(a, b);
+        assertEquals(a, c);
+
+        ArgumentCaptor<String> text = ArgumentCaptor.forClass(String.class);
+        verify(mail).send(eq("me@example.com"), eq("【旅迹】你的邮箱验证码"), text.capture(), anyString());
+        assertTrue(text.getValue().contains("重置旅迹账号密码") && text.getValue().contains("你的密码不会被修改"));
+        verify(mail).send(eq("none@example.com"), eq("【旅迹】这个邮箱还没有旅迹账号"), argThat(t -> !Pattern.compile("\\b\\d{6}\\b").matcher(t).find()), contains("http://localhost:3000/register"));
+        verify(mail, never()).send(eq("off@example.com"), any(), any(), any());
+
+        ArgumentCaptor<EmailVerificationEntity> rows = ArgumentCaptor.forClass(EmailVerificationEntity.class);
+        verify(mapper, times(3)).insert(rows.capture(), eq(600L));
+        assertNull(rows.getAllValues().get(0).invalidatedAt, "有效账号的验证码可以使用");
+        assertNotNull(rows.getAllValues().get(1).invalidatedAt);
+        assertNotNull(rows.getAllValues().get(2).invalidatedAt);
+        verify(mapper, times(3)).markSent(40L);
+    }
+
+    @Test
     void onlyEnabledPurposesAndValidEmails() {
-        assertEquals("PURPOSE_NOT_SUPPORTED", assertThrows(BusinessException.class, () -> service.send("a@example.com", VerificationPurpose.RESET_PASSWORD, "1.1.1.1")).getCode());
+        assertEquals("PURPOSE_NOT_SUPPORTED", assertThrows(BusinessException.class, () -> service.send("a@example.com", VerificationPurpose.CHANGE_EMAIL, "1.1.1.1")).getCode());
         assertEquals("INVALID_EMAIL", assertThrows(BusinessException.class, () -> service.send("not-an-email", REG, "1.1.1.1")).getCode());
         assertEquals(VerificationPurpose.REGISTER, VerificationPurpose.parse("register"));
         assertThrows(BusinessException.class, () -> VerificationPurpose.parse("admin"));

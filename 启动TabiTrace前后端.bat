@@ -161,7 +161,8 @@ rem Rendered videos go to the frontend's public folder so the dev server serves 
 rem ---------------------------------------------------------------------------
 :start_worker
 if not defined VIDEO_WORK_DIR set "VIDEO_WORK_DIR=%FRONTEND%\public\generated-videos"
-if not defined VIDEO_MUSIC_DIR set "VIDEO_MUSIC_DIR=%FRONTEND%\public\music"
+rem Background music lives in the local storage directory (published by backend\scripts\music\music-sync.mjs --publish-local).
+if not defined VIDEO_MUSIC_DIR set "VIDEO_MUSIC_DIR=%BACKEND%\api\.tabitrace\uploads"
 if not defined VIDEO_PUBLIC_BASE_URL set "VIDEO_PUBLIC_BASE_URL=http://localhost:3000/generated-videos"
 set "STORAGE_MODE=local"
 start "TabiTrace Video Worker - Local Dev" cmd /k "cd /d ""%BACKEND%"" && call %MVN% -pl video-worker spring-boot:run"

@@ -10,6 +10,7 @@ import {
 } from '@/services/tabitrace-api'
 import { useQuickCheckIn } from '@/components/checkin/QuickCheckInProvider'
 import { dateKeyOf, toDate } from '@/lib/time'
+import { photoMedium, photoThumb } from '@/utils/photo-variants'
 
 export type ActivityKind = 'checkin' | 'photo' | 'itinerary' | 'video' | 'trip' | 'achievement'
 export type Activity = { id: string; kind: ActivityKind; title: string; detail: string; at: string | null; href: string; thumbnail?: string }
@@ -52,7 +53,7 @@ export function useHomeData(enabled: boolean) {
     let cancelled = false
     setLoading(true); setError('')
 
-    ;(async () => {
+    void (async () => {
       try {
         const [user, trips] = await Promise.all([userApi.me(), tripApi.list()])
         const stored = Number(localStorage.getItem('tabitrace-live-trip-id') || 0)
@@ -145,8 +146,8 @@ function buildActivities(input: {
   const tripId = activeTrip?.id
   const items: Activity[] = []
   const cover = activeTrip?.coverImage || undefined
-  const photoOfCheckin = (id: number) => photos.find(p => p.checkinId === id)?.imageUrl
-  const newestPhoto = photos[photos.length - 1]?.imageUrl
+  const photoOfCheckin = (id: number) => { const p = photos.find(x => x.checkinId === id); return p ? photoThumb(p) : undefined }
+  const newestPhoto = photos.length ? photoMedium(photos[photos.length - 1]) : undefined
 
   checkins.forEach(c => items.push({
     id: `checkin-${c.id}`, kind: 'checkin',
@@ -171,7 +172,7 @@ function buildActivities(input: {
       detail: list.some(p => p.featured) ? '其中包含精选素材' : '旅行相册已更新',
       at: latest.createdAt || latest.capturedAt || null,
       href: tripId ? `/trips/${tripId}/gallery` : '/trips',
-      thumbnail: latest.imageUrl
+      thumbnail: photoThumb(latest)
     })
   })
 
@@ -190,7 +191,7 @@ function buildActivities(input: {
     detail: `${v.templateCode} · ${v.photoIds.length} 张照片`,
     at: v.completedAt || v.createdAt,
     href: tripId ? `/trips/${tripId}/video` : '/trips',
-    thumbnail: photos.find(p => p.id === v.photoIds[0])?.imageUrl || newestPhoto || cover
+    thumbnail: (() => { const p = photos.find(x => x.id === v.photoIds[0]); return p ? photoThumb(p) : undefined })() || newestPhoto || cover
   }))
 
   achievements.filter(a => a.earned && a.earnedAt).forEach(a => items.push({

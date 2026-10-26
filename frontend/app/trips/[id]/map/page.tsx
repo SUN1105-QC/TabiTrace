@@ -6,6 +6,7 @@
  * 保存后 checkinVersion 变化即静默刷新数据（不整页刷新）。
  */
 
+import { PageContainer } from '@/components/common/PageContainer'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { Camera, Plus, RefreshCcw, TriangleAlert } from 'lucide-react'
@@ -68,6 +69,12 @@ export default function TripMapWorkspace() {
   }, [tripId, showToast])
 
   useEffect(() => { localStorage.setItem('tabitrace-live-trip-id', String(tripId)); void load() }, [tripId, load])
+  // 从快速打卡「查看时间轴」进入（#tm-timeline-title）：数据加载完、时间轴渲染出来后再滚过去
+  useEffect(() => {
+    if (loading || window.location.hash !== '#tm-timeline-title') return
+    const id = window.setTimeout(() => document.getElementById('tm-timeline-title')?.scrollIntoView({ block: 'start' }), 150)
+    return () => window.clearTimeout(id)
+  }, [loading])
   // 快速打卡保存成功 → 刷新 Marker、面板和时间轴
   useEffect(() => {
     if (checkinVersion === seenVersion.current) return
@@ -132,14 +139,14 @@ export default function TripMapWorkspace() {
   if (loadError) {
     return (
       <main><SiteHeader />
-        <section className="tm-page">
+        <PageContainer variant="wide" className="tm-page">
           <div className="tm-fail" role="alert">
             <TriangleAlert size={22} />
             <p>旅行地图加载失败</p>
             <small>{loadError}</small>
             <button type="button" className="tm-btn is-primary" onClick={() => void load()}><RefreshCcw size={14} /> 重新加载</button>
           </div>
-        </section>
+        </PageContainer>
       </main>
     )
   }
@@ -147,7 +154,7 @@ export default function TripMapWorkspace() {
   return (
     <main>
       <SiteHeader />
-      <section className="tm-page">
+      <PageContainer variant="wide" className="tm-page">
         <header className="tm-head">
           <p className="tm-eyebrow">TRAVEL MAP</p>
           <h1>{trip?.title ?? '旅行地图'}</h1>
@@ -208,7 +215,7 @@ export default function TripMapWorkspace() {
           </>
         )}
         {toast && <div className="ts-toast" role="status" aria-live="polite">{toast}</div>}
-      </section>
+      </PageContainer>
     </main>
   )
 }

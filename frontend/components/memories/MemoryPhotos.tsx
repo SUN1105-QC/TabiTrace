@@ -6,6 +6,7 @@
 import Link from 'next/link'
 import type { CSSProperties } from 'react'
 import { Star } from 'lucide-react'
+import { memorySrcSet } from '@/services/memories'
 import type { MemoryPhoto } from '@/services/memories'
 
 /**
@@ -36,7 +37,7 @@ export function MemoryPhotos({ photos, year }: { photos: MemoryPhoto[]; year: nu
           const style = { '--span': last ? s.last : s.lead ? 1 : 4 / photos.length, '--span-m': last ? s.lastM : 1 } as CSSProperties
           return (
             <Link key={p.id} href={`/trips/${p.tripId}/gallery`} className={`mm-photo${i === 0 && s.lead ? ' is-lead' : ''}`} style={style} aria-label={`查看「${p.tripTitle}」的照片`}>
-              <img src={p.imageUrl} alt="" loading="lazy" />
+              <img src={p.imageUrl} srcSet={memorySrcSet(p)} sizes={p.featured ? '(max-width: 767px) 100vw, 50vw' : '(max-width: 767px) 50vw, 25vw'} alt="" loading="lazy" decoding="async" />
               {p.featured && <span className="mm-photo-star" title="精选"><Star size={11} /></span>}
               <span className="mm-photo-caption">{p.tripTitle}</span>
             </Link>

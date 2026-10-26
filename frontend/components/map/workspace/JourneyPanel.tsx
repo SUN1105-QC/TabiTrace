@@ -8,6 +8,7 @@
 import { useEffect, useRef } from 'react'
 import { Camera, Check, Clock3, MapPin, Navigation, Plus, Trash2 } from 'lucide-react'
 import { dayLabel, dayTitle, navigationUrl, type DayKey, type JourneyStop } from '@/utils/travel-map'
+import { photoThumb } from '@/utils/photo-variants'
 
 export function DaySelector({ days, value, onChange }: { days: string[]; value: DayKey; onChange: (d: DayKey) => void }) {
   const ref = useRef<HTMLDivElement | null>(null)
@@ -130,7 +131,7 @@ export function JourneyPanel({ days, day, stops, next, distance, selectedKey, re
                         <b>{s.name}</b>
                         <small>{[s.area, statusText(s)].filter(Boolean).join(' · ')}{s.photos.length ? ` · ${s.photos.length} 张照片` : ''}</small>
                       </span>
-                      {s.photos[0] && <img className="tm-item-thumb" src={s.photos[0].imageUrl} alt="" loading="lazy" width={40} height={40} />}
+                      {s.photos[0] && <img className="tm-item-thumb" src={photoThumb(s.photos[0])} alt="" loading="lazy" width={40} height={40} />}
                       {!s.photos[0] && s.status === 'done' && <span className="tm-item-thumb is-empty"><Camera size={14} aria-hidden="true" /></span>}
                     </button>
                     <div className="tm-item-actions">

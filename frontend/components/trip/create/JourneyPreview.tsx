@@ -9,6 +9,7 @@
 import { useState } from 'react'
 import { CalendarDays, Camera, Clock3, Map as MapIcon, Sparkles, Users } from 'lucide-react'
 import { calculateTripDuration, formatTripDateRange, timezoneOffsetLabel, type PickedDestination } from '@/utils/journey'
+import { hdSrcSet } from '@/utils/place-images'
 
 export function JourneyPreview({ title, destination, startDate, endDate, travelers, joinOfficial, compact = false }: {
   title: string
@@ -31,7 +32,7 @@ export function JourneyPreview({ title, destination, startDate, endDate, travele
     <section className={`cj-preview${compact ? ' is-compact' : ''}`} aria-label="旅行预览" aria-live="polite">
       <div className={`cj-cover${cover ? '' : ' is-blank'}`}>
         {cover
-          ? <img src={cover} alt="" onError={() => setBroken(cover)} />
+          ? <img src={cover} srcSet={hdSrcSet(cover)} sizes="(max-width: 767px) 100vw, 480px" alt="" onError={() => setBroken(cover)} />
           : <span className="cj-cover-mark" aria-hidden="true">{Array.from(destination?.name || '旅')[0]}</span>}
         <div className="cj-cover-shade" aria-hidden="true" />
         <div className="cj-cover-info">

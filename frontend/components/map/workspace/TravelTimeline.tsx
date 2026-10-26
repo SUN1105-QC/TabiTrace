@@ -8,6 +8,7 @@
 import { useState } from 'react'
 import { Undo2 } from 'lucide-react'
 import { dayLabel, dayTitle, type JourneyStop } from '@/utils/travel-map'
+import { photoThumb } from '@/utils/photo-variants'
 
 const PAGE = 30
 
@@ -44,12 +45,12 @@ export function TravelTimeline({ days, stops, selectedKey, readOnly, onSelect, o
               <li key={s.key} id={`tl-${s.key}`} className={`is-${s.status}${selectedKey === s.selectKey ? ' is-selected' : ''}`}>
                 <span className="tm-tl-dot" aria-hidden="true" />
                 <div className="tm-tl-body">
-                  <p className="tm-tl-time">{timeLine(s)}</p>
+                  <p className="tm-tl-time">{timeLine(s)}{s.weather && <span className="tm-tl-weather"> · {s.weather}</span>}</p>
                   <button type="button" className="tm-tl-name" onClick={() => onSelect(s.selectKey)}>{s.name}{s.area ? <small> · {s.area}</small> : null}</button>
                   {s.note && <p className="tm-tl-note">{s.note}</p>}
                   {s.photos.length > 0 && (
                     <div className="tm-tl-photos">
-                      {s.photos.slice(0, 4).map(p => <img key={p.id} src={p.imageUrl} alt="" loading="lazy" width={72} height={72} />)}
+                      {s.photos.slice(0, 4).map(p => <img key={p.id} src={photoThumb(p)} alt="" loading="lazy" decoding="async" width={72} height={72} />)}
                       {s.photos.length > 4 && <span>+{s.photos.length - 4}</span>}
                     </div>
                   )}

@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { useQuickCheckIn } from '@/components/checkin/QuickCheckInProvider'
+import { ApiError } from '@/services/api'
 import { tripApi, type RecentRecord, type TripSummary, type TripView } from '@/services/tabitrace-api'
 
 export function useTripDetailData(id: number) {
@@ -16,9 +17,11 @@ export function useTripDetailData(id: number) {
   const [recent, setRecent] = useState<RecentRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  /** 旅行不存在（已删除、不属于当前账号）：与临时的加载失败分开处理，重试没有意义 */
+  const [notFound, setNotFound] = useState(false)
 
   const load = useCallback(async (quiet = false) => {
-    if (!quiet) { setLoading(true); setError('') }
+    if (!quiet) { setLoading(true); setError(''); setNotFound(false) }
     try {
       const [t, s, r] = await Promise.all([
         tripApi.get(id),
@@ -27,15 +30,20 @@ export function useTripDetailData(id: number) {
         tripApi.recentRecords(id, 3).catch(() => [] as RecentRecord[])
       ])
       setTrip(t); setSummary(s); setRecent(r); setError('')
+      // 只有真正打开了这段旅行，才把它记为“当前旅行”
+      localStorage.setItem('tabitrace-live-trip-id', String(id))
     } catch (e) {
-      if (!quiet) setError(e instanceof Error && e.message ? e.message : '请稍后再试')
+      if (!quiet) {
+        setNotFound(e instanceof ApiError && e.status === 404)
+        setError(e instanceof Error && e.message ? e.message : '请稍后再试')
+      }
     } finally {
       if (!quiet) setLoading(false)
     }
   }, [id])
 
-  useEffect(() => { localStorage.setItem('tabitrace-live-trip-id', String(id)); void load() }, [id, load])
+  useEffect(() => { void load() }, [id, load])
   useEffect(() => { if (checkinVersion) void load(true) }, [checkinVersion, load])
 
-  return { trip, setTrip, summary, recent, loading, error, reload: load }
+  return { trip, setTrip, summary, recent, loading, error, notFound, reload: load }
 }

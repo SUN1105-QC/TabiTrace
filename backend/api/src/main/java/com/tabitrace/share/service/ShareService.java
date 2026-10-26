@@ -52,7 +52,7 @@ public class ShareService {
     static List<TimelineDay> coarsen(List<TimelineDay> days){
         return days.stream().map(d->new TimelineDay(d.date(),d.items().stream().map(i->{
             CheckinView c=i.checkin();
-            return new TimelineItem(new CheckinView(c.id(),c.tripId(),c.placeId(),c.itineraryItemId(),c.checkinType(),c.checkinTime(),round(c.latitude()),round(c.longitude()),c.placeName(),c.area(),c.note(),c.createdAt()),i.photos());
+            return new TimelineItem(new CheckinView(c.id(),c.tripId(),c.placeId(),c.itineraryItemId(),c.checkinType(),c.checkinTime(),round(c.latitude()),round(c.longitude()),c.placeName(),c.area(),c.note(),c.createdAt(),c.timezone(),c.weatherCode(),c.weatherText(),c.temperatureC(),c.weatherObservedAt()),i.photos());
         }).toList())).toList();
     }
 

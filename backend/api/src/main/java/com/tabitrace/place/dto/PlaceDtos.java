@@ -1,5 +1,8 @@
 package com.tabitrace.place.dto;
 
+import com.tabitrace.common.validation.Latitude;
+import com.tabitrace.common.validation.Longitude;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
@@ -17,5 +20,8 @@ public final class PlaceDtos {
     /** 官方专题路线：placeIds 为游览顺序 */
     public record OfficialRouteView(Long id,String code,String title,String englishTitle,String description,String durationHint,String season,String coverImage,List<Long> placeIds) {}
     public record AddPlaceRequest(Long placeId,Integer sortOrder) {}
-    public record CustomPlaceRequest(@NotBlank @Size(max=200) String name,@Size(max=10) String countryCode,@Size(max=100) String country,@Size(max=100) String city,@Size(max=100) String area,@Size(max=500) String address,BigDecimal latitude,BigDecimal longitude,@Size(max=50) String category,@Size(max=2000) String description,Integer sortOrder) {}
+    public record CustomPlaceRequest(@NotBlank @Size(max=200) String name,@Size(max=10) String countryCode,@Size(max=100) String country,@Size(max=100) String city,@Size(max=100) String area,@Size(max=500) String address,@Latitude BigDecimal latitude,@Longitude BigDecimal longitude,@Size(max=50) String category,@Size(max=2000) String description,Integer sortOrder) {
+        /** 经纬度要么同时提供，要么都不提供 */
+        @AssertTrue(message="经纬度需要同时提供") public boolean isCoordinatePair(){return (latitude==null)==(longitude==null);}
+    }
 }

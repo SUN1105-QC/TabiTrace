@@ -16,7 +16,7 @@ import java.util.List;
 @Component
 public class VideoMockRenderer {
     /** 与真实 Worker 相同的阶段顺序和进度，前端的阶段展示逻辑因此只有一套 */
-    private static final List<String> STAGES = List.of("PREPARING", "MAP", "STORY", "MUSIC", "EXPORTING");
+    private static final List<String> STAGES = List.of("PREPARING", "STORY", "MUSIC", "EXPORTING");
     private static final List<Integer> PROGRESS = List.of(10, 30, 55, 75, 90);
 
     private final VideoProjectMapper mapper;

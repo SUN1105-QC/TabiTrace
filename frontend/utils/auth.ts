@@ -2,7 +2,8 @@ import { ApiError } from '@/services/api'
 
 /**
  * 登录表单的前端校验与错误归类。
- * 后端真实错误：INVALID_CREDENTIALS(401) / USER_DISABLED(403) / VALIDATION_ERROR(400, message 形如 "email: ...")，
+ * 后端真实错误：INVALID_CREDENTIALS(401，邮箱不存在与密码错误相同) / TOO_MANY_ATTEMPTS(429，带 retryAfter) /
+ * USER_DISABLED(403) / VALIDATION_ERROR(400, message 形如 "email: ...")，
  * 网络失败由 services/api 抛出 NETWORK_ERROR(status 0)，其余一律视为服务暂不可用，不把后端原文展示给用户。
  */
 
@@ -16,9 +17,10 @@ export const LOGIN_MESSAGES = {
   emailRequired: '请输入邮箱',
   emailInvalid: '邮箱格式不正确',
   passwordRequired: '请输入密码',
-  invalidCredentials: '邮箱或密码不正确',
+  invalidCredentials: '邮箱或密码不正确，请重新输入。',
+  tooManyAttempts: '尝试次数过多，请稍后再试。',
   userDisabled: '该账号当前不可用',
-  network: '暂时无法登录，请检查网络后重试。',
+  network: '网络异常，请检查网络后重试。',
   unavailable: '登录服务暂时不可用，请稍后再试。'
 } as const
 
@@ -34,6 +36,10 @@ export function validateLoginForm(values: { email: string; password: string }): 
 export function mapLoginError(error: unknown): LoginErrorResult {
   if (error instanceof ApiError) {
     if (error.code === 'INVALID_CREDENTIALS') return { fields: {}, form: LOGIN_MESSAGES.invalidCredentials }
+    if (error.code === 'TOO_MANY_ATTEMPTS') {
+      const minutes = Math.ceil((Number(error.details?.retryAfter) || 0) / 60)
+      return { fields: {}, form: minutes > 0 ? `尝试次数过多，请约 ${minutes} 分钟后再试。` : LOGIN_MESSAGES.tooManyAttempts }
+    }
     if (error.code === 'USER_DISABLED') return { fields: {}, form: LOGIN_MESSAGES.userDisabled }
     if (error.code === 'NETWORK_ERROR' || error.status === 0) return { fields: {}, form: LOGIN_MESSAGES.network }
     if (error.code === 'VALIDATION_ERROR') {
@@ -186,3 +192,43 @@ export function mapVerifyCodeError(error: unknown): { message: string; needResen
 
 /** 倒计时文案：100 秒以内显示秒，更长显示分钟 */
 export const formatCooldown = (seconds: number) => (seconds < 100 ? `${seconds}s` : `${Math.ceil(seconds / 60)} 分钟`)
+
+// ---------------- 忘记密码 ----------------
+// 规则与后端一致：PasswordResetRequest(@Email email, @NotBlank @Size(8,100) newPassword) + purpose=reset_password 的邮箱验证令牌
+
+export type ResetField = 'email' | 'code' | 'password'
+export type ResetFieldErrors = Partial<Record<ResetField, string>>
+
+export function validateResetForm(values: { email: string; password: string }, emailVerified: boolean): ResetFieldErrors {
+  const errors: ResetFieldErrors = {}
+  const email = values.email.trim()
+  if (!email) errors.email = REGISTER_MESSAGES.emailRequired
+  else if (!EMAIL_PATTERN.test(email)) errors.email = REGISTER_MESSAGES.emailInvalid
+  if (!errors.email && !emailVerified) errors.code = REGISTER_MESSAGES.verificationRequired
+  const pw = values.password
+  if (!pw) errors.password = '请设置新密码'
+  else if (pw.length < REGISTER_RULES.passwordMin) errors.password = REGISTER_MESSAGES.passwordTooShort
+  else if (pw.length > REGISTER_RULES.passwordMax) errors.password = REGISTER_MESSAGES.passwordTooLong
+  else if (!pw.trim()) errors.password = REGISTER_MESSAGES.passwordBlank
+  return errors
+}
+
+export function mapResetError(error: unknown): { fields: ResetFieldErrors; form: string; resetVerification: boolean } {
+  const none = { fields: {}, form: '', resetVerification: false }
+  if (error instanceof ApiError) {
+    const tokenMessage: Record<string, string> = {
+      EMAIL_VERIFICATION_REQUIRED: REGISTER_MESSAGES.verificationRequired, EMAIL_TOKEN_EXPIRED: REGISTER_MESSAGES.tokenExpired,
+      EMAIL_TOKEN_USED: REGISTER_MESSAGES.tokenUsed, EMAIL_TOKEN_INVALID: REGISTER_MESSAGES.tokenInvalid, EMAIL_TOKEN_MISMATCH: REGISTER_MESSAGES.tokenMismatch
+    }
+    if (error.code && tokenMessage[error.code]) return { ...none, fields: { code: tokenMessage[error.code] }, resetVerification: true }
+    if (error.code === 'VALIDATION_ERROR') {
+      const field = error.message.split(':')[0]?.trim()
+      if (field === 'newPassword') return { ...none, fields: { password: REGISTER_MESSAGES.passwordTooShort } }
+      if (field === 'email') return { ...none, fields: { email: REGISTER_MESSAGES.emailInvalid } }
+    }
+    if (error.code === 'NETWORK_ERROR' || error.status === 0) return { ...none, form: '网络异常，请检查网络后重试。' }
+    return { ...none, form: '暂时无法重置密码，请稍后再试。' }
+  }
+  if (error instanceof TypeError) return { ...none, form: '网络异常，请检查网络后重试。' }
+  return { ...none, form: '暂时无法重置密码，请稍后再试。' }
+}

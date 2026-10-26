@@ -28,7 +28,17 @@ public class LocalStorageService implements StorageService {
     @Override public boolean exists(String storageKey){return Files.isRegularFile(resolve(storageKey));}
     public boolean verifyUpload(String key,Long expires,String signature){if(key==null||expires==null||signature==null||expires<Instant.now().getEpochSecond())return false;return MessageDigest.isEqual(sign(key,expires).getBytes(StandardCharsets.UTF_8),signature.getBytes(StandardCharsets.UTF_8));}
     public void write(String key,byte[] data){Path path=resolve(key);try{Files.createDirectories(path.getParent());Files.write(path,data,StandardOpenOption.CREATE,StandardOpenOption.TRUNCATE_EXISTING);}catch(Exception e){throw new BusinessException("LOCAL_UPLOAD_FAILED","本地图片写入失败");}}
-    public byte[] read(String key){try{return Files.readAllBytes(resolve(key));}catch(Exception e){throw new BusinessException("LOCAL_FILE_NOT_FOUND","本地图片不存在");}}
+    @Override public void delete(String storageKey){try{Files.deleteIfExists(resolve(storageKey));}catch(BusinessException e){throw e;}catch(Exception e){throw new BusinessException("STORAGE_DELETE_FAILED","文件删除失败，请稍后重试");}}
+    @Override public void deletePrefix(String prefix){StorageService.requireDirectoryPrefix(prefix);Path dir=resolve(prefix.substring(0,prefix.length()-1));if(!Files.isDirectory(dir))return;
+        try(var paths=Files.walk(dir)){for(Path p:paths.sorted(java.util.Comparator.reverseOrder()).toList())Files.deleteIfExists(p);}
+        catch(Exception e){throw new BusinessException("STORAGE_DELETE_FAILED","文件删除失败，请稍后重试");}}
+    @Override public String keyOf(String publicUrl){String prefix=apiUrl+"/api/v1/local-storage/file?key=";return publicUrl!=null&&publicUrl.startsWith(prefix)?java.net.URLDecoder.decode(publicUrl.substring(prefix.length()),StandardCharsets.UTF_8):null;}
+    @Override public byte[] read(String key){try{return Files.readAllBytes(resolve(key));}catch(Exception e){throw new BusinessException("LOCAL_FILE_NOT_FOUND","本地图片不存在",org.springframework.http.HttpStatus.NOT_FOUND);}}
+    /** 私有文件的限时读取地址：签名与上传签名分开（前缀 read:），上传地址不能拿来读取 */
+    @Override public String signedReadUrl(String key,long ttlSeconds){long expires=Instant.now().getEpochSecond()+ttlSeconds;return apiUrl+"/api/v1/local-storage/file?key="+URLEncoder.encode(key,StandardCharsets.UTF_8)+"&expires="+expires+"&signature="+sign("read:"+key,expires);}
+    public boolean verifyRead(String key,Long expires,String signature){if(key==null||expires==null||signature==null||expires<Instant.now().getEpochSecond())return false;return MessageDigest.isEqual(sign("read:"+key,expires).getBytes(StandardCharsets.UTF_8),signature.getBytes(StandardCharsets.UTF_8));}
+    /** 本地文件路径（流式返回、支持 Range）；路径校验同 resolve */
+    public Path path(String key){return resolve(key);}
     String sign(String key,long expires){try{Mac mac=Mac.getInstance("HmacSHA256");mac.init(new SecretKeySpec(uploadSigningKey,"HmacSHA256"));return HexFormat.of().formatHex(mac.doFinal((key+"\n"+expires).getBytes(StandardCharsets.UTF_8)));}catch(Exception e){throw new IllegalStateException("Cannot sign local upload",e);}}
     private Path resolve(String key){if(key==null||key.isBlank()||key.contains("..")||key.startsWith("/")||key.startsWith("\\"))throw new BusinessException("INVALID_STORAGE_KEY","图片存储路径不合法");Path p=root.resolve(key).normalize();if(!p.startsWith(root))throw new BusinessException("INVALID_STORAGE_KEY","图片存储路径不合法");return p;}
 }

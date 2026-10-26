@@ -13,6 +13,13 @@ import { AlertCircle, CheckCircle2, KeyRound, Loader2, Mail } from 'lucide-react
 import { authApi, type EmailVerificationPurpose } from '@/services/tabitrace-api'
 import { CODE_LENGTH, formatCooldown, isValidEmail, mapSendCodeError, mapVerifyCodeError, sanitizeCode } from '@/utils/auth'
 
+/** 发送成功后的补充说明：接口对“邮箱是否注册”给出同样的响应，真实情况只写在邮件里 */
+const NOTICE_HINT: Record<EmailVerificationPurpose, string> = {
+  register: '如果这个邮箱已经注册过，邮件里会提示你直接登录。',
+  reset_password: '如果这个邮箱还没有旅迹账号，邮件里会告诉你。',
+  change_email: '如果没有收到，请确认邮箱地址是否正确。'
+}
+
 export function useEmailVerification(purpose: EmailVerificationPurpose) {
   const [email, setEmailValue] = useState('')
   const [code, setCode] = useState('')
@@ -138,13 +145,13 @@ export function EmailVerificationFields({ v, idPrefix, emailRef, emailError, cod
   return (
     <>
       <div>
-        <label htmlFor={emailId} className="text-sm font-medium text-ink/80">邮箱</label>
-        <div className="au-row mt-2">
+        <div className="au-label-row"><label htmlFor={emailId} className="au-label">邮箱</label></div>
+        <div className="au-row">
           <div className="au-input-wrap">
             <Mail size={17} aria-hidden="true" className="au-icon" />
             <input
               ref={emailRef} id={emailId} name="email" type="email" inputMode="email" autoComplete="email"
-              autoCapitalize="none" autoCorrect="off" spellCheck={false} placeholder="name@example.com" enterKeyHint="next"
+              autoCapitalize="none" autoCorrect="off" spellCheck={false} placeholder="你的邮箱" enterKeyHint="next"
               value={v.email} onChange={e => v.setEmail(e.target.value)} disabled={disabled} readOnly={readOnly}
               aria-invalid={Boolean(shownEmailError)} aria-describedby={emailDescribed} className="au-input"
             />
@@ -158,8 +165,8 @@ export function EmailVerificationFields({ v, idPrefix, emailRef, emailError, cod
       </div>
 
       <div>
-        <label htmlFor={codeId} className="text-sm font-medium text-ink/80">验证码</label>
-        <div className="au-row mt-2">
+        <div className="au-label-row"><label htmlFor={codeId} className="au-label">验证码</label></div>
+        <div className="au-row">
           <div className="au-input-wrap">
             <KeyRound size={17} aria-hidden="true" className="au-icon" />
             <input
@@ -186,7 +193,7 @@ export function EmailVerificationFields({ v, idPrefix, emailRef, emailError, cod
             : shownCodeError
               ? <p className="au-error"><AlertCircle size={13} aria-hidden="true" className="shrink-0" /><span>{shownCodeError}</span></p>
               : v.notice
-                ? <p className="au-hint">{v.notice}没收到的话请查看垃圾邮件；如果这个邮箱已经注册过，邮件里会提示你直接登录。</p>
+                ? <p className="au-hint">{v.notice}没收到的话请查看垃圾邮件；{NOTICE_HINT[v.purpose]}</p>
                 : null}
         </div>
       </div>

@@ -1,7 +1,6 @@
 package com.tabitrace.worker;
 
 import java.awt.*;
-import java.awt.geom.Path2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -30,17 +29,46 @@ final class ScenePainter {
     private static final String SANS_FAMILY = pick(SANS);
     private static final String SERIF_FAMILY = pick(SERIF);
 
-    record MapPoint(String name, String time, double lat, double lng) {}
+    /** 片尾音乐署名（CC BY 要求注明作者、作品与授权）：画面底部半透明条 + 白字，最多两行 */
+    static void creditOverlay(BufferedImage img, String text) {
+        if (text == null || text.isBlank()) return;
+        Graphics2D g = img.createGraphics();
+        try {
+            g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            int w = img.getWidth(), h = img.getHeight();
+            // 按短边取字号：横屏不会因为画面更宽而把署名放大
+            Font font = new Font(SANS_FAMILY, Font.PLAIN, Math.max(14, Math.round(Math.min(w, h) * 0.027f)));
+            g.setFont(font);
+            FontMetrics fm = g.getFontMetrics();
+            List<String> lines = wrap(text, fm, (int) (w * 0.86), 2);
+            int lineH = fm.getHeight();
+            int band = lineH * lines.size() + lineH;
+            int top = h - band - Math.round(h * 0.035f);
+            g.setPaint(new GradientPaint(0, top - lineH, new Color(0, 0, 0, 0), 0, top + band / 2f, new Color(0, 0, 0, 150)));
+            g.fillRect(0, top - lineH, w, h - top + lineH);
+            g.setColor(new Color(255, 255, 255, 225));
+            int y = top + lineH / 2 + fm.getAscent();
+            for (String line : lines) { g.drawString(line, (w - fm.stringWidth(line)) / 2, y); y += lineH; }
+        } finally {
+            g.dispose();
+        }
+    }
 
     private final int w, h;
+    /** 按短边缩放（1080 为基准）：9:16 / 4:5 / 16:9 的文字与元素大小一致 */
     private final double k;
     private final String template;
     private final boolean watermark;
+    /** 版式：PORTRAIT 9:16、FEED 4:5、LANDSCAPE 16:9。竖向位置按「距顶部 / 距底部」锚定，横屏改为左右分栏 */
+    private final boolean landscape, feed;
 
     ScenePainter(int width, int height, String template, boolean watermark) {
         this.w = width;
         this.h = height;
-        this.k = width / 1080.0;
+        this.k = Math.min(width, height) / 1080.0;
+        this.landscape = width > height;
+        this.feed = !landscape && height < width * 1.5;
         this.template = template == null ? "JOURNAL" : template.toUpperCase(Locale.ROOT);
         this.watermark = watermark;
     }
@@ -50,27 +78,41 @@ final class ScenePainter {
     BufferedImage opening(BufferedImage cover, String kicker, String title, String subtitle, String destination) {
         BufferedImage img = canvas();
         Graphics2D g = graphics(img);
+        int textW = textWidth();
         if ("MINIMAL".equals(template)) {
             paper(g);
-            if (cover != null) framedPhoto(g, cover, s(90), s(200), w - s(180), s(1180));
-            text(g, kicker, serif(Font.PLAIN, 28), MUTED, s(90), s(1500), w - s(180), 1, 0.3f);
-            text(g, title, serif(Font.BOLD, 72), INK, s(90), s(1600), w - s(180), 2, 0);
-            text(g, subtitle, sans(Font.PLAIN, 30), MUTED, s(90), s(1790), w - s(180), 1, 0);
+            if (landscape) {
+                // 横屏：左侧照片，右侧文字
+                int pw = (int) (w * 0.56), x = s(80) + pw + s(90), tw = w - x - s(90);
+                if (cover != null) framedPhoto(g, cover, s(80), s(80), pw, h - s(160));
+                int y = (int) (h * 0.40);
+                text(g, kicker, serif(Font.PLAIN, 28), MUTED, x, y, tw, 1, 0.3f);
+                int n = text(g, title, serif(Font.BOLD, 72), INK, x, y + s(100), tw, 3, 0);
+                text(g, subtitle, sans(Font.PLAIN, 30), MUTED, x, y + s(100) + s(90) * Math.max(1, n) + s(20), tw, 2, 0);
+            } else {
+                int top = s(feed ? 110 : 200);
+                if (cover != null) framedPhoto(g, cover, s(90), top, w - s(180), h - top - s(520));
+                text(g, kicker, serif(Font.PLAIN, 28), MUTED, s(90), h - s(420), w - s(180), 1, 0.3f);
+                text(g, title, serif(Font.BOLD, 72), INK, s(90), h - s(320), w - s(180), 2, 0);
+                text(g, subtitle, sans(Font.PLAIN, 30), MUTED, s(90), h - s(130), w - s(180), 1, 0);
+            }
         } else {
             if (cover != null) cover(g, cover, 0, 0, w, h); else paper(g);
             boolean city = "CITY".equals(template);
-            gradient(g, city ? 0 : h * 0.35, h, city ? 150 : 40, 215);
+            gradient(g, city ? 0 : h * (landscape ? 0.25 : 0.35), h, city ? 150 : 40, 215);
             if (city) {
-                int y = s(760);
-                text(g, destination == null ? "" : destination.toUpperCase(Locale.ROOT), sans(Font.BOLD, 150), Color.WHITE, s(80), y, w - s(160), 1, 0);
+                int y = landscape ? (int) (h * 0.32) : feed ? (int) (h * 0.36) : s(760);
+                text(g, destination == null ? "" : destination.toUpperCase(Locale.ROOT), sans(Font.BOLD, 150), Color.WHITE, s(80), y, textW, 1, 0);
                 bar(g, s(80), y + s(40), s(160), s(12));
-                text(g, title, sans(Font.BOLD, 58), Color.WHITE, s(80), y + s(150), w - s(160), 2, 0);
-                text(g, subtitle, sans(Font.PLAIN, 32), new Color(255, 255, 255, 215), s(80), y + s(330), w - s(160), 1, 0);
+                text(g, title, sans(Font.BOLD, 58), Color.WHITE, s(80), y + s(150), textW, 2, 0);
+                text(g, subtitle, sans(Font.PLAIN, 32), new Color(255, 255, 255, 215), s(80), y + s(330), textW, 1, 0);
             } else {
-                text(g, kicker, sans(Font.BOLD, 30), BRAND, s(90), s(1330), w - s(180), 1, 0.35f);
-                text(g, title, serif(Font.BOLD, 88), Color.WHITE, s(90), s(1450), w - s(180), 2, 0);
-                text(g, subtitle, sans(Font.PLAIN, 34), new Color(255, 255, 255, 225), s(90), s(1690), w - s(180), 1, 0);
-                if (destination != null && !destination.isBlank()) pill(g, destination, s(90), s(1745));
+                text(g, kicker, sans(Font.BOLD, 30), BRAND, s(90), h - s(590), textW, 1, 0.35f);
+                // 副标题跟在标题实际行数之后（单行标题时不留大空白）
+                int n = Math.max(1, text(g, title, serif(Font.BOLD, 88), Color.WHITE, s(90), h - s(470), textW, 2, 0));
+                int sub = h - s(470) + s(100) * n + s(40);
+                text(g, subtitle, sans(Font.PLAIN, 34), new Color(255, 255, 255, 225), s(90), sub, textW, 1, 0);
+                if (destination != null && !destination.isBlank()) pill(g, destination, s(90), sub + s(55));
             }
         }
         finish(g, img);
@@ -82,99 +124,49 @@ final class ScenePainter {
     BufferedImage photo(BufferedImage photo, String title, String subtitle, String note, boolean firstShot, int index, int total) {
         BufferedImage img = canvas();
         Graphics2D g = graphics(img);
+        int textW = textWidth();
         switch (template) {
             case "MINIMAL" -> {
                 paper(g);
-                framedPhoto(g, photo, s(90), s(170), w - s(180), s(1330));
-                text(g, title, serif(Font.BOLD, 54), INK, s(90), s(1640), w - s(180), 1, 0);
-                text(g, subtitle, sans(Font.PLAIN, 28), MUTED, s(90), s(1715), w - s(180), 1, 0);
-                if (firstShot) text(g, note, serif(Font.ITALIC, 30), MUTED, s(90), s(1790), w - s(180), 2, 0);
+                if (landscape) {
+                    int pw = (int) (w * 0.6), x = s(80) + pw + s(80), tw = w - x - s(80);
+                    framedPhoto(g, photo, s(80), s(80), pw, h - s(160));
+                    int y = (int) (h * 0.42);
+                    int n = text(g, title, serif(Font.BOLD, 54), INK, x, y, tw, 2, 0);
+                    int sy = y + s(70) * Math.max(1, n) + s(10);
+                    text(g, subtitle, sans(Font.PLAIN, 28), MUTED, x, sy, tw, 2, 0);
+                    if (firstShot) text(g, note, serif(Font.ITALIC, 30), MUTED, x, sy + s(110), tw, 4, 0);
+                } else {
+                    int top = s(feed ? 110 : 170);
+                    framedPhoto(g, photo, s(90), top, w - s(180), h - top - s(420));
+                    text(g, title, serif(Font.BOLD, 54), INK, s(90), h - s(280), w - s(180), 1, 0);
+                    text(g, subtitle, sans(Font.PLAIN, 28), MUTED, s(90), h - s(205), w - s(180), 1, 0);
+                    if (firstShot) text(g, note, serif(Font.ITALIC, 30), MUTED, s(90), h - s(130), w - s(180), 2, 0);
+                }
             }
             case "CITY" -> {
                 cover(g, photo, 0, 0, w, h);
                 gradient(g, 0, h * 0.42, 190, 0);
                 gradient(g, h * 0.78, h, 0, 170);
-                text(g, title, sans(Font.BOLD, 84), Color.WHITE, s(80), s(250), w - s(160), 2, 0);
-                bar(g, s(80), s(290) + (title != null && lines(g, title, sans(Font.BOLD, 84), w - s(160)) > 1 ? s(100) : 0), s(120), s(10));
-                text(g, subtitle, sans(Font.PLAIN, 32), new Color(255, 255, 255, 220), s(80), s(400), w - s(160), 1, 0);
+                text(g, title, sans(Font.BOLD, 84), Color.WHITE, s(80), s(landscape ? 170 : 250), textW, 2, 0);
+                int base = s(landscape ? 210 : 290);
+                bar(g, s(80), base + (title != null && lines(g, title, sans(Font.BOLD, 84), textW) > 1 ? s(100) : 0), s(120), s(10));
+                text(g, subtitle, sans(Font.PLAIN, 32), new Color(255, 255, 255, 220), s(80), base + s(110), textW, 1, 0);
                 text(g, String.format(Locale.ROOT, "%02d / %02d", index, total), sans(Font.BOLD, 30), BRAND, s(80), h - s(110), s(300), 1, 0.1f);
-                if (firstShot) text(g, note, sans(Font.PLAIN, 32), Color.WHITE, s(80), h - s(260), w - s(160), 2, 0);
+                if (firstShot) text(g, note, sans(Font.PLAIN, 32), Color.WHITE, s(80), h - s(260), textW, 2, 0);
             }
             default -> {
                 cover(g, photo, 0, 0, w, h);
-                gradient(g, h * 0.52, h, 0, 205);
-                int y = s(1450);
+                gradient(g, h * (landscape ? 0.45 : 0.52), h, 0, 205);
+                int y = h - s(470);
                 bar(g, s(90), y, s(64), s(8));
-                text(g, title, serif(Font.BOLD, 64), Color.WHITE, s(90), y + s(100), w - s(180), 2, 0);
-                text(g, subtitle, sans(Font.PLAIN, 30), new Color(255, 255, 255, 215), s(90), y + s(185), w - s(180), 1, 0);
+                text(g, title, serif(Font.BOLD, 64), Color.WHITE, s(90), y + s(100), textW, 2, 0);
+                text(g, subtitle, sans(Font.PLAIN, 30), new Color(255, 255, 255, 215), s(90), y + s(185), textW, 1, 0);
                 if (note != null && !note.isBlank()) {
-                    text(g, "“" + note + "”", sans(Font.PLAIN, 32), new Color(255, 255, 255, 235), s(90), y + s(265), w - s(180), 3, 0);
+                    text(g, "“" + note + "”", sans(Font.PLAIN, 32), new Color(255, 255, 255, 235), s(90), y + s(265), textW, landscape ? 2 : 3, 0);
                 }
             }
         }
-        finish(g, img);
-        return img;
-    }
-
-    // ───────────── 地图路线 ─────────────
-
-    /** upto：画到第几个点（含）；-1 表示全部。 */
-    BufferedImage map(List<MapPoint> points, int upto, String title, String subtitle) {
-        BufferedImage img = canvas();
-        Graphics2D g = graphics(img);
-        paper(g);
-        g.setColor(LINE);
-        g.setStroke(new BasicStroke((float) (2 * k)));
-        for (int x = s(90); x < w; x += s(120)) g.drawLine(x, s(300), x, h - s(300));
-        for (int y = s(300); y < h - s(300); y += s(120)) g.drawLine(s(40), y, w - s(40), y);
-
-        text(g, "ROUTE", sans(Font.BOLD, 28), BRAND, s(90), s(170), w - s(180), 1, 0.35f);
-        text(g, title, serif(Font.BOLD, 70), INK, s(90), s(260), w - s(180), 1, 0);
-        text(g, subtitle, sans(Font.PLAIN, 30), MUTED, s(90), s(330), w - s(180), 1, 0);
-
-        int last = upto < 0 ? points.size() - 1 : Math.min(upto, points.size() - 1);
-        double[][] xy = project(points, s(140), s(470), w - s(280), h - s(1020));
-
-        Path2D route = new Path2D.Double();
-        route.moveTo(xy[0][0], xy[0][1]);
-        for (int i = 1; i <= last; i++) route.lineTo(xy[i][0], xy[i][1]);
-        g.setColor(new Color(0xE9, 0x7A, 0x33, 60));
-        g.setStroke(new BasicStroke((float) (26 * k), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-        g.draw(route);
-        g.setColor(BRAND);
-        g.setStroke(new BasicStroke((float) (10 * k), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-        g.draw(route);
-
-        // 先画全部标记，再统一摆标签，标签不会被后画的标记压住
-        double[][] badge = spread(xy, last, s(30));
-        List<Rectangle> occupied = new ArrayList<>();
-        for (int i = 0; i <= last; i++) {
-            boolean current = upto >= 0 && i == last;
-            if (badge[i][0] != xy[i][0] || badge[i][1] != xy[i][1]) {
-                g.setColor(BRAND);
-                g.setStroke(new BasicStroke((float) (3 * k)));
-                g.drawLine((int) xy[i][0], (int) xy[i][1], (int) badge[i][0], (int) badge[i][1]);
-            }
-            marker(g, badge[i][0], badge[i][1], i + 1, current);
-            int r = s(current ? 54 : 34);
-            occupied.add(new Rectangle((int) badge[i][0] - r, (int) badge[i][1] - r, 2 * r, 2 * r));
-        }
-        boolean labelAll = upto < 0 && points.size() <= 10;
-        for (int i = 0; i <= last; i++) {
-            boolean must = i == 0 || i == last;
-            if (labelAll || must) label(g, points.get(i).name(), badge[i][0], badge[i][1], occupied, must);
-        }
-
-        MapPoint focus = points.get(last);
-        int cardY = h - s(470);
-        g.setColor(Color.WHITE);
-        g.fill(new RoundRectangle2D.Double(s(90), cardY, w - s(180), s(210), s(40), s(40)));
-        g.setColor(LINE);
-        g.setStroke(new BasicStroke((float) (2 * k)));
-        g.draw(new RoundRectangle2D.Double(s(90), cardY, w - s(180), s(210), s(40), s(40)));
-        text(g, String.format(Locale.ROOT, "%02d", last + 1), sans(Font.BOLD, 56), BRAND, s(130), cardY + s(120), s(140), 1, 0);
-        text(g, focus.name(), serif(Font.BOLD, 46), INK, s(260), cardY + s(95), w - s(390), 1, 0);
-        text(g, focus.time(), sans(Font.PLAIN, 28), MUTED, s(260), cardY + s(160), w - s(390), 1, 0);
         finish(g, img);
         return img;
     }
@@ -185,18 +177,24 @@ final class ScenePainter {
         BufferedImage img = canvas();
         Graphics2D g = graphics(img);
         paper(g);
-        text(g, "ACHIEVEMENTS", sans(Font.BOLD, 28), BRAND, s(90), s(420), w - s(180), 1, 0.35f);
-        text(g, title, serif(Font.BOLD, 84), INK, s(90), s(540), w - s(180), 1, 0);
-        text(g, subtitle, sans(Font.PLAIN, 32), MUTED, s(90), s(620), w - s(180), 1, 0);
-        int y = s(740);
-        for (String item : items) {
+        int top = landscape ? s(150) : feed ? s(230) : s(420);
+        text(g, "ACHIEVEMENTS", sans(Font.BOLD, 28), BRAND, s(90), top, w - s(180), 1, 0.35f);
+        text(g, title, serif(Font.BOLD, 84), INK, s(90), top + s(120), w - s(180), 1, 0);
+        text(g, subtitle, sans(Font.PLAIN, 32), MUTED, s(90), top + s(200), w - s(180), 1, 0);
+        // 成就卡：竖屏一列；放不下时（4:5、横屏）排成两列，仍放不下的只显示前面的
+        int start = top + s(320), row = s(180), gap = s(40);
+        int perCol = Math.max(1, (h - start - s(110)) / row);
+        int cols = Math.min(landscape ? 3 : 2, (items.size() + perCol - 1) / perCol);
+        int colW = (w - s(180) - (cols - 1) * gap) / cols;
+        List<String> shown = items.subList(0, Math.min(items.size(), perCol * cols));
+        for (int i = 0; i < shown.size(); i++) {
+            int x = s(90) + (i / perCol) * (colW + gap), y = start + (i % perCol) * row;
             g.setColor(Color.WHITE);
-            g.fill(new RoundRectangle2D.Double(s(90), y, w - s(180), s(150), s(36), s(36)));
+            g.fill(new RoundRectangle2D.Double(x, y, colW, s(150), s(36), s(36)));
             g.setColor(BRAND);
-            g.fillOval(s(130), y + s(35), s(80), s(80));
-            text(g, "★", sans(Font.BOLD, 40), Color.WHITE, s(150), y + s(92), s(60), 1, 0);
-            text(g, item, sans(Font.BOLD, 40), INK, s(250), y + s(92), w - s(380), 1, 0);
-            y += s(180);
+            g.fillOval(x + s(40), y + s(35), s(80), s(80));
+            text(g, "★", sans(Font.BOLD, 40), Color.WHITE, x + s(60), y + s(92), s(60), 1, 0);
+            text(g, shown.get(i), sans(Font.BOLD, 40), INK, x + s(160), y + s(92), colW - s(200), 1, 0);
         }
         finish(g, img);
         return img;
@@ -217,7 +215,7 @@ final class ScenePainter {
             g.setColor(new Color(20, 14, 10, 165));
             g.fillRect(0, 0, w, h);
         }
-        int y = s(760);
+        int y = landscape ? (int) (h * 0.27) : feed ? (int) (h * 0.33) : s(760);
         centered(g, title, serif(Font.BOLD, 84), main, y, 2);
         centered(g, subtitle, sans(Font.PLAIN, 38), soft, y + s(130), 1);
         if (stats != null) centered(g, stats, sans(Font.BOLD, 36), BRAND, y + s(210), 1);
@@ -231,6 +229,9 @@ final class ScenePainter {
     // ───────────── 绘制工具 ─────────────
 
     private BufferedImage canvas() { return new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB); }
+
+    /** 文字最大宽度：横屏不铺满整行（太长不好读），约 62% 画面宽 */
+    private int textWidth() { return landscape ? Math.min(w - s(180), (int) (w * 0.62)) : w - s(180); }
 
     private Graphics2D graphics(BufferedImage img) {
         Graphics2D g = img.createGraphics();
@@ -302,106 +303,6 @@ final class ScenePainter {
         g.drawString(label, x + s(28), y + s(42));
     }
 
-    private void marker(Graphics2D g, double x, double y, int number, boolean current) {
-        int r = s(current ? 36 : 26);
-        if (current) {
-            g.setColor(new Color(0xE9, 0x7A, 0x33, 70));
-            g.fillOval((int) x - r - s(18), (int) y - r - s(18), 2 * (r + s(18)), 2 * (r + s(18)));
-        }
-        g.setColor(Color.WHITE);
-        g.fillOval((int) x - r, (int) y - r, 2 * r, 2 * r);
-        g.setColor(BRAND);
-        g.setStroke(new BasicStroke((float) (7 * k)));
-        g.drawOval((int) x - r, (int) y - r, 2 * r, 2 * r);
-        Font f = sans(Font.BOLD, current ? 30 : 24);
-        g.setFont(f);
-        String n = String.valueOf(number);
-        FontMetrics fm = g.getFontMetrics();
-        g.drawString(n, (int) x - fm.stringWidth(n) / 2, (int) y + fm.getAscent() / 2 - s(3));
-    }
-
-    /**
-     * 标签依次尝试右、左、上、下四个位置，取第一个不与已有标签 / 标记重叠且不出画布的位置。
-     * 都放不下时：首尾站点（must）取重叠最少的位置，其余站点省略标签（序号与底部卡片仍能识别）。
-     */
-    private void label(Graphics2D g, String name, double x, double y, List<Rectangle> occupied, boolean must) {
-        if (name == null || name.isBlank()) return;
-        g.setFont(sans(Font.BOLD, 28));
-        String t = name.length() > 10 ? name.substring(0, 10) + "…" : name;
-        int bw = g.getFontMetrics().stringWidth(t) + s(36), bh = s(52), gap = s(46);
-        int[][] candidates = {
-                {(int) x + gap, (int) y - bh / 2},
-                {(int) x - gap - bw, (int) y - bh / 2},
-                {(int) x - bw / 2, (int) y - gap - bh},
-                {(int) x - bw / 2, (int) y + gap}};
-        Rectangle best = null;
-        long bestOverlap = Long.MAX_VALUE;
-        for (int[] c : candidates) {
-            Rectangle rect = new Rectangle(c[0], c[1], bw, bh);
-            if (rect.x < s(30) || rect.y < s(380) || rect.x + bw > w - s(30) || rect.y + bh > h - s(500)) continue;
-            long overlap = 0;
-            for (Rectangle o : occupied) {
-                Rectangle hit = rect.intersection(o);
-                if (!hit.isEmpty()) overlap += (long) hit.width * hit.height;
-            }
-            if (overlap == 0) { best = rect; bestOverlap = 0; break; }
-            if (overlap < bestOverlap) { best = rect; bestOverlap = overlap; }
-        }
-        if (best == null || (bestOverlap > 0 && !must)) return;
-        occupied.add(best);
-        g.setColor(new Color(255, 255, 255, 235));
-        g.fill(new RoundRectangle2D.Double(best.x, best.y, bw, bh, s(20), s(20)));
-        g.setColor(INK);
-        g.drawString(t, best.x + s(18), best.y + s(36));
-    }
-
-    /** 几乎重合的站点把序号标记错开排成一圈，用短线连回真实位置，避免数字叠在一起。 */
-    private static double[][] spread(double[][] xy, int last, int minDistance) {
-        double[][] out = new double[xy.length][2];
-        for (int i = 0; i <= last; i++) {
-            out[i][0] = xy[i][0];
-            out[i][1] = xy[i][1];
-            for (int attempt = 0; attempt < 8 && crowded(out, i, minDistance); attempt++) {
-                double angle = Math.PI / 4 * attempt - Math.PI / 4;
-                out[i][0] = xy[i][0] + Math.cos(angle) * minDistance * 1.9;
-                out[i][1] = xy[i][1] + Math.sin(angle) * minDistance * 1.9;
-            }
-        }
-        return out;
-    }
-
-    private static boolean crowded(double[][] pts, int i, int minDistance) {
-        for (int j = 0; j < i; j++) {
-            if (Math.hypot(pts[i][0] - pts[j][0], pts[i][1] - pts[j][1]) < minDistance * 1.6) return true;
-        }
-        return false;
-    }
-
-    /** 经纬度 → 画布坐标：经度按纬度余弦压缩，保持东西 / 南北比例正确。 */
-    private static double[][] project(List<MapPoint> points, int x, int y, int bw, int bh) {
-        double midLat = points.stream().mapToDouble(MapPoint::lat).average().orElse(0);
-        double cos = Math.cos(Math.toRadians(midLat));
-        double minX = Double.MAX_VALUE, maxX = -Double.MAX_VALUE, minY = Double.MAX_VALUE, maxY = -Double.MAX_VALUE;
-        double[][] raw = new double[points.size()][2];
-        for (int i = 0; i < points.size(); i++) {
-            raw[i][0] = points.get(i).lng() * cos;
-            raw[i][1] = -points.get(i).lat();
-            minX = Math.min(minX, raw[i][0]);
-            maxX = Math.max(maxX, raw[i][0]);
-            minY = Math.min(minY, raw[i][1]);
-            maxY = Math.max(maxY, raw[i][1]);
-        }
-        double spanX = Math.max(maxX - minX, 0.002), spanY = Math.max(maxY - minY, 0.002);
-        double scale = Math.min(bw / spanX, bh / spanY);
-        double offX = x + (bw - spanX * scale) / 2, offY = y + (bh - spanY * scale) / 2;
-        double[][] out = new double[points.size()][2];
-        for (int i = 0; i < points.size(); i++) {
-            out[i][0] = offX + (raw[i][0] - minX) * scale;
-            out[i][1] = offY + (raw[i][1] - minY) * scale;
-        }
-        return out;
-    }
-
     /** 左对齐多行文字，baseline 为第一行基线；letterSpacing 为字距（em）。返回实际行数。 */
     private int text(Graphics2D g, String value, Font font, Color color, int x, int baseline, int maxWidth, int maxLines, float letterSpacing) {
         if (value == null || value.isBlank()) return 0;
@@ -425,7 +326,7 @@ final class ScenePainter {
         g.setFont(font);
         g.setColor(color);
         FontMetrics fm = g.getFontMetrics();
-        List<String> lines = wrap(value, fm, w - s(180), maxLines);
+        List<String> lines = wrap(value, fm, textWidth(), maxLines);
         int lh = (int) (fm.getHeight() * 1.12);
         for (int i = 0; i < lines.size(); i++) {
             String line = lines.get(i);
@@ -443,6 +344,9 @@ final class ScenePainter {
             if (end < rest.length()) {
                 int space = rest.lastIndexOf(' ', end);
                 if (space > end / 2 && isLatin(rest.charAt(end - 1))) end = space;
+                // 中文避头尾：右括号、句读不放在行首（挂在上一行末尾，允许略微超出），左括号不留在行尾
+                while (end < rest.length() && NO_LINE_START.indexOf(rest.charAt(end)) >= 0) end++;
+                while (end > 1 && end < rest.length() && NO_LINE_END.indexOf(rest.charAt(end - 1)) >= 0) end--;
             }
             String line = rest.substring(0, end).trim();
             rest = rest.substring(end).trim();
@@ -457,6 +361,8 @@ final class ScenePainter {
     }
 
     private static boolean isLatin(char c) { return c < 0x2E80; }
+    private static final String NO_LINE_START = "）)］]｝}】」』》〉〕、。，．,.！!？?：:；;…‥·・～ー%％";
+    private static final String NO_LINE_END = "（(［[｛{【「『《〈〔";
 
     private int s(double designPx) { return (int) Math.round(designPx * k); }
 

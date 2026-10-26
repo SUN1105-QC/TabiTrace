@@ -6,17 +6,22 @@ import { ArrowRight, Camera, MapPin, Sparkles } from 'lucide-react'
 import type { TripView, UserView } from '@/services/tabitrace-api'
 import { useQuickCheckIn } from '@/components/checkin/QuickCheckInProvider'
 import { greeting } from '@/lib/time'
+import { BLANK_IMAGE, DEFAULT_HERO_IMAGE, hdSrcSet } from '@/utils/place-images'
 
 export function HeroJourneyCard({ user, trip }: { user: UserView | null; trip: TripView | null }) {
   const { openQuickCheckIn } = useQuickCheckIn()
   const [hello, setHello] = useState('你好')
   useEffect(() => { setHello(greeting()) }, [])
   const name = user?.nickname?.trim() || '旅行中的你'
-  const cover = trip?.coverImage || '/images/hero-scenery.jpg'
+  const cover = trip?.coverImage || DEFAULT_HERO_IMAGE
 
   return (
     <section className="home-hero">
-      <img src={cover} alt={trip ? `${trip.destinationName} 旅行封面` : '旅行风景'} />
+      {/* 这张 Hero 只在桌面显示（手机用 MobileHero）：手机宽度下换成占位图，不下载被隐藏的大图 */}
+      <picture>
+        <source media="(max-width: 767px)" srcSet={BLANK_IMAGE} />
+        <img src={cover} srcSet={hdSrcSet(cover)} sizes="(max-width: 1023px) 100vw, 65vw" alt={trip ? `${trip.destinationName} 旅行封面` : '旅行风景'} />
+      </picture>
       <div className="home-hero-body">
         <p className="home-hero-kicker">MY JOURNEY</p>
         <h1>{hello}，{name} ☀</h1>

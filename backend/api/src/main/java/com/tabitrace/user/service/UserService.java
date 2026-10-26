@@ -27,13 +27,14 @@ import java.util.UUID;
  */
 @Service
 public class UserService {
+    /** 注销冷静期中的账号状态 */
+    public static final String STATUS_DELETION_PENDING = "DELETION_PENDING";
     public static final int NICKNAME_MAX = 30;
     public static final int BIO_MAX = 120;
     public static final Set<String> LOCALES = Set.of("zh-CN", "ja-JP", "en-US");
     public static final Set<String> DISTANCE_UNITS = Set.of("KM", "MI");
     /** 分享链接默认有效期（天），0 表示长期有效 */
     public static final Set<Integer> SHARE_EXPIRY_DAYS = Set.of(0, 7, 30);
-    public static final Set<String> VISIBILITIES = Set.of("PRIVATE", "UNLISTED");
     static final Set<String> AVATAR_TYPES = Set.of("image/jpeg", "image/png", "image/webp");
     static final long AVATAR_MAX_BYTES = 5L * 1024 * 1024;
 
@@ -57,10 +58,8 @@ public class UserService {
         if (r.locale() != null) u.locale = requireLocale(r.locale());
         if (r.timezone() != null) u.timezone = requireTimezone(r.timezone());
         if (r.distanceUnit() != null) u.distanceUnit = requireDistanceUnit(r.distanceUnit());
-        if (r.defaultVisibility() != null) u.defaultVisibility = requireVisibility(r.defaultVisibility());
         if (r.shareExactLocation() != null) u.shareExactLocation = r.shareExactLocation();
         if (r.shareLinkExpiryDays() != null) u.shareLinkExpiryDays = requireExpiryDays(r.shareLinkExpiryDays());
-        if (r.emailNotifications() != null) u.emailNotifications = r.emailNotifications();
         if (r.notifyTripReminder() != null) u.notifyTripReminder = r.notifyTripReminder();
         if (r.notifyStory() != null) u.notifyStory = r.notifyStory();
         if (r.notifyAchievement() != null) u.notifyAchievement = r.notifyAchievement();
@@ -71,14 +70,15 @@ public class UserService {
 
     /** 账户概览：旅行统计 + 每段旅行的 FREE / PRO 状态（Trip Pro 按单段旅行购买） */
     public AccountOverview overview(Long userId) {
-        require(userId);
+        UserEntity me = require(userId);
         List<TripPlanView> plans = accounts.tripPlans(userId).stream()
                 .map(p -> new TripPlanView(p.tripId, p.title, p.destinationName, p.startDate, p.endDate, p.planType, p.status, p.amount, p.currency, p.provider, p.paidAt))
                 .toList();
         int pro = (int) plans.stream().filter(p -> "PRO".equals(p.planType())).count();
         return new AccountOverview(accounts.countTrips(userId), accounts.countPlaces(userId), accounts.countPhotos(userId), pro,
                 accounts.countActiveFreeTrips(userId), TripService.FREE_ACTIVE_TRIP_LIMIT,
-                PaymentService.TRIP_PRO_AMOUNT / 100, PaymentService.TRIP_PRO_CURRENCY, plans);
+                PaymentService.TRIP_PRO_AMOUNT, PaymentService.LIFETIME_AMOUNT, PaymentService.TRIP_PRO_CURRENCY,
+                me.lifetimeProAt != null, plans);
     }
 
     /** 修改密码：校验当前密码，成功后退出其他设备（当前设备保持登录），返回退出的设备数 */
@@ -98,24 +98,45 @@ public class UserService {
         String type = r.contentType().trim().toLowerCase();
         if (!AVATAR_TYPES.contains(type)) throw new BusinessException("INVALID_AVATAR_TYPE", "头像仅支持 JPG、PNG 或 WebP 图片");
         if (r.fileSize() != null && r.fileSize() > AVATAR_MAX_BYTES) throw new BusinessException("AVATAR_TOO_LARGE", "头像图片不能超过 5MB");
-        return storage.presignKey(avatarPrefix(userId) + UUID.randomUUID() + "." + StorageService.extensionFor(type), type);
+        if (r.fileSize() == null || r.fileSize() <= 0) throw new BusinessException("INVALID_AVATAR_SIZE", "缺少图片大小");
+        return storage.presignKey(avatarPrefix(userId) + UUID.randomUUID() + "." + StorageService.extensionFor(type), type, r.fileSize());
     }
 
+    /** smallKey 为 160×160 小图（可选）；与原图一样必须在该用户的头像目录下且已上传 */
     @Transactional
-    public UserView setAvatar(Long userId, String storageKey) {
-        require(userId);
-        if (storageKey == null || !storageKey.startsWith(avatarPrefix(userId)) || storageKey.contains(".."))
-            throw new BusinessException("INVALID_STORAGE_KEY", "头像存储路径不属于当前账户");
-        if (!storage.exists(storageKey)) throw new BusinessException("AVATAR_UPLOAD_MISSING", "请先完成头像上传");
-        mapper.updateAvatar(userId, storage.publicUrl(storageKey));
+    public UserView setAvatar(Long userId, String storageKey, String smallKey) {
+        UserEntity user = require(userId);
+        requireAvatarObject(userId, storageKey);
+        boolean hasSmall = smallKey != null && !smallKey.isBlank();
+        if (hasSmall) {
+            if (smallKey.equals(storageKey)) throw new BusinessException("INVALID_STORAGE_KEY", "头像小图与原图不能是同一个文件");
+            requireAvatarObject(userId, smallKey);
+        }
+        mapper.updateAvatar(userId, storage.publicUrl(storageKey), hasSmall ? storage.publicUrl(smallKey) : null);
+        deleteAvatarObject(user.avatarUrl, userId);
+        deleteAvatarObject(user.avatarSmallUrl, userId);
         return get(userId);
     }
 
     @Transactional
     public UserView removeAvatar(Long userId) {
-        require(userId);
-        mapper.updateAvatar(userId, null);
+        UserEntity user = require(userId);
+        deleteAvatarObject(user.avatarUrl, userId);
+        deleteAvatarObject(user.avatarSmallUrl, userId);
+        mapper.updateAvatar(userId, null, null);
         return get(userId);
+    }
+
+    private void requireAvatarObject(Long userId, String key) {
+        if (key == null || !key.startsWith(avatarPrefix(userId)) || key.contains(".."))
+            throw new BusinessException("INVALID_STORAGE_KEY", "头像存储路径不属于当前账户");
+        if (!storage.exists(key)) throw new BusinessException("AVATAR_UPLOAD_MISSING", "请先完成头像上传");
+    }
+
+    /** 旧头像文件一起删掉；只删属于该用户头像目录的对象 */
+    private void deleteAvatarObject(String avatarUrl, Long userId) {
+        String key = storage.keyOf(avatarUrl);
+        if (key != null && key.startsWith(avatarPrefix(userId)) && !key.contains("..")) storage.delete(key);
     }
 
     static String avatarPrefix(Long userId) { return "users/" + userId + "/avatar/"; }
@@ -150,11 +171,6 @@ public class UserService {
 
     public static String requireDistanceUnit(String v) {
         if (!DISTANCE_UNITS.contains(v)) throw new BusinessException("INVALID_DISTANCE_UNIT", "距离单位不正确");
-        return v;
-    }
-
-    public static String requireVisibility(String v) {
-        if (!VISIBILITIES.contains(v)) throw new BusinessException("INVALID_VISIBILITY", "可见性不正确");
         return v;
     }
 

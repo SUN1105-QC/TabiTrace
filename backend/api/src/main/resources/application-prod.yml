@@ -1,4 +1,7 @@
 app:
+  auth:
+    refresh-cookie:
+      secure: true
   storage:
     mode: r2
   payments:

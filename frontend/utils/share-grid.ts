@@ -3,7 +3,9 @@
  * 与长图一样，只用真实数据，不编造内容。
  */
 
-import type { CheckinView, PhotoView, TimelineDay } from '@/services/tabitrace-api'
+import type { CheckinView, PhotoView, TimelineDay, TripView } from '@/services/tabitrace-api'
+import { timeOfDay, toDate, zonedParts } from '@/lib/time'
+import { dotDate, weekdayOf } from '@/utils/share-long'
 
 export type GridPlace = { checkin: CheckinView; day: number }
 
@@ -110,8 +112,119 @@ export function dailyFeaturedPhotos(photos: PhotoView[], timeline: TimelineDay[]
   return roundRobin([[...loose.filter(p => p.featured), ...loose.filter(p => !p.featured)]], count, picked)
 }
 
-/** 九宫格素材：哪一天（不选 = 整趟旅行、每天精选）、自由点选的照片（按格子顺序） */
-export type GridOptions = { day?: string; photoIds: number[] }
+/** 照片格数量：九宫格 9 格中，左上封面、正中数据、右下品牌收尾，其余 6 格放照片 */
+export const GRID_PHOTO_SLOTS = 6
+
+/** 地点的次级地址：城市 + 区域（如「东京 浅草」）；区域与城市相同或缺失时只显示城市 */
+export function placeAddress(trip: Pick<TripView, 'city' | 'destinationName'>, checkin?: Pick<CheckinView, 'area'> | null) {
+  const city = trip.city?.trim() || trip.destinationName?.trim() || ''
+  const area = checkin?.area?.trim() || ''
+  if (!area) return city || null
+  if (!city || area === city || area.startsWith(city)) return area
+  return `${city} ${area}`
+}
+
+/** 素材列表 / 九宫格照片卡上的一张照片：地点、次级地址、第几天、时间（都来自真实打卡与照片数据） */
+export type GridMaterial = {
+  photo: PhotoView
+  placeName: string | null
+  address: string | null
+  dayNo: number | null
+  /** 照片所在日期（YYYY-MM-DD），用于没有关联打卡的照片 */
+  date: string | null
+  time: string
+  featured: boolean
+}
+
+/** 一张照片的展示信息：地点优先取关联打卡；时间优先取拍摄时间，没有时用打卡时间 */
+export function materialOf(photo: PhotoView, places: Map<number, GridPlace>, trip: Pick<TripView, 'city' | 'destinationName'>): GridMaterial {
+  const place = photo.checkinId != null ? places.get(photo.checkinId) : undefined
+  const when = photo.capturedAt || place?.checkin.checkinTime || null
+  const d = toDate(when)
+  const parts = d ? zonedParts(d) : null
+  return {
+    photo,
+    placeName: place?.checkin.placeName?.trim() || null,
+    address: place ? placeAddress(trip, place.checkin) : null,
+    dayNo: place?.day ?? null,
+    date: parts ? `${parts.year}-${String(parts.month).padStart(2, '0')}-${String(parts.day).padStart(2, '0')}` : null,
+    time: when ? timeOfDay(when) : '',
+    featured: photo.featured
+  }
+}
+
+/** 「DAY 01 · 10:30」；没有关联打卡时用「10.01 · 10:30」，都没有时为空 */
+export function materialWhen(m: Pick<GridMaterial, 'dayNo' | 'date' | 'time'>) {
+  const head = m.dayNo ? `DAY ${String(m.dayNo).padStart(2, '0')}` : m.date ? dotDate(m.date).slice(5) : ''
+  return [head, m.time].filter(Boolean).join(' · ')
+}
+
+export type MaterialGroup = { key: string; title: string; items: GridMaterial[] }
+
+/** 素材列表：按天分组（精选在前）；整趟旅行时，没有关联打卡的照片放在最后一组 */
+export function gridMaterialGroups(photos: PhotoView[], timeline: TimelineDay[], trip: Pick<TripView, 'city' | 'destinationName'>, day?: string): MaterialGroup[] {
+  const places = placeIndex(timeline)
+  const all = scopeTimeline(timeline)
+  const groups: MaterialGroup[] = []
+  const used = new Set<number>()
+  const order = (list: GridMaterial[]) => [...list].sort((a, b) => Number(b.featured) - Number(a.featured) || (a.photo.capturedAt ?? '').localeCompare(b.photo.capturedAt ?? '') || a.photo.id - b.photo.id)
+  scopeTimeline(timeline, day).forEach(d => {
+    const no = all.findIndex(x => x.date === d.date) + 1
+    const ids = new Set(d.items.map(i => i.checkin.id))
+    const list = photos.filter(p => p.checkinId != null && ids.has(p.checkinId)).map(p => materialOf(p, places, trip))
+    list.forEach(m => used.add(m.photo.id))
+    if (list.length) groups.push({ key: d.date, title: `DAY ${String(no).padStart(2, '0')} · ${dotDate(d.date).slice(5)} ${weekdayOf(d.date)}`, items: order(list) })
+  })
+  if (!day) {
+    const loose = photos.filter(p => !used.has(p.id)).map(p => materialOf(p, places, trip))
+    if (loose.length) groups.push({ key: 'loose', title: '未关联打卡的照片', items: order(loose) })
+  }
+  return groups
+}
+
+/**
+ * 把一张照片放进第 slot 格（0 起，按成品里照片格的顺序）：
+ * - 这张照片还没选：slot 处已有照片就替换，否则接在已选的后面（不会留下空格）
+ * - 这张照片已在别的格子：与目标格交换位置
+ */
+export function placeInSlot(selected: number[], photoId: number, slot: number, max = GRID_PHOTO_SLOTS) {
+  const next = [...selected]
+  const target = Math.max(0, Math.min(slot, next.length))
+  const from = next.indexOf(photoId)
+  if (from >= 0) {
+    if (target >= next.length) { next.splice(from, 1); next.push(photoId) } else { next[from] = next[target]; next[target] = photoId }
+    return next.slice(0, max)
+  }
+  if (target < next.length) next[target] = photoId
+  else next.push(photoId)
+  return next.slice(0, max)
+}
+
+/** 交换两个已选格子的顺序（任一格是自动补齐的格子时不变） */
+export function swapSlots(selected: number[], a: number, b: number) {
+  if (a === b || a >= selected.length || b >= selected.length) return selected
+  const next = [...selected]
+  ;[next[a], next[b]] = [next[b], next[a]]
+  return next
+}
+
+/**
+ * 九宫格格式：classic 标准九宫格（3 个信息格 + 6 张照片）；scrapbook 旅行手帐（9 张错落的照片卡）。
+ * 格式只改变排版，素材选择（day / photoIds）两种格式共用。
+ */
+export type GridFormat = 'classic' | 'scrapbook'
+export const GRID_FORMATS: { key: GridFormat; name: string; desc: string }[] = [
+  { key: 'classic', name: '标准', desc: '规整经典' },
+  { key: 'scrapbook', name: '旅行手帐', desc: '错落照片卡 · 地点标签' }
+]
+/** 每种格式的照片数量 */
+export const gridSlotCount = (format: GridFormat = 'classic') => (format === 'scrapbook' ? 9 : GRID_PHOTO_SLOTS)
+
+/**
+ * 九宫格素材：哪一天（不选 = 整趟旅行、每天精选）、自由点选的照片（按格子顺序）。
+ * 旅行手帐另有：coverPhotoId 主图（不设时自动选）、layout 照片卡排版（auto 按横竖自动 / order 按选择顺序）。
+ */
+export type GridOptions = { day?: string; photoIds: number[]; format?: GridFormat; coverPhotoId?: number; layout?: 'auto' | 'order' }
 export const DEFAULT_GRID_OPTIONS: GridOptions = { photoIds: [] }
 
 /**

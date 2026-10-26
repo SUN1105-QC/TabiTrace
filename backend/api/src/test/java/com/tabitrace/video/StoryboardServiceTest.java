@@ -29,7 +29,7 @@ class StoryboardServiceTest {
     void scenesAlwaysAddUpToTheChosenDuration() {
         for (int duration : List.of(15, 30, 60)) {
             StoryboardView sb = service(checkins(true, true, true)).build(1L, trip("FREE"), journal(), duration, "720p", "9:16",
-                    null, StoryboardService.normalize(null, true, true, true), List.of(101L, 102L, 201L, 301L));
+                    null, StoryboardService.normalize(null, true, true), List.of(101L, 102L, 201L, 301L));
             double total = sb.scenes().stream().filter(SceneView::enabled).mapToDouble(SceneView::duration).sum();
             assertEquals(duration, total, 0.02, "总时长必须等于 " + duration + " 秒");
             assertEquals("OPENING", sb.scenes().get(0).type());
@@ -39,42 +39,37 @@ class StoryboardServiceTest {
 
     @Test
     void visualStyleIsNormalizedAndCarriedIntoTheStoryboard() {
-        StorySettings film = new StorySettings(null, null, true, true, true, true, true, true, true, true, "SIMPLE", List.of(), " film ");
+        StorySettings film = new StorySettings(null, null, true, true, true, true, true, true, true, true, List.of(), " film ");
         StoryboardView sb = service(checkins(true, true, true)).build(1L, trip("FREE"), journal(), 30, "720p", "9:16",
-                null, StoryboardService.normalize(film, null, null, null), List.of(101L, 201L, 301L));
+                null, StoryboardService.normalize(film, null, null), List.of(101L, 201L, 301L));
         assertEquals("FILM", sb.grade());
 
-        StorySettings unknown = new StorySettings(null, null, true, true, true, true, true, true, true, true, "SIMPLE", List.of(), "NEON");
-        assertEquals("NATURAL", StoryboardService.normalize(unknown, null, null, null).visualStyle());
-        assertEquals("NATURAL", StoryboardService.normalize(null, true, true, true).visualStyle());
+        StorySettings unknown = new StorySettings(null, null, true, true, true, true, true, true, true, true, List.of(), "NEON");
+        assertEquals("NATURAL", StoryboardService.normalize(unknown, null, null).visualStyle());
+        assertEquals("NATURAL", StoryboardService.normalize(null, true, true).visualStyle());
     }
 
     @Test
-    void mapFollowsCheckinTimeAndSkipsPlacesWithoutCoordinates() {
-        StoryboardView sb = service(checkins(true, false, true)).build(1L, trip("FREE"), journal(), 30, "720p", "9:16",
-                null, StoryboardService.normalize(null, true, true, true), List.of(101L, 201L, 301L));
-        SceneView map = sb.scenes().stream().filter(s -> "MAP".equals(s.type())).findFirst().orElseThrow();
-        @SuppressWarnings("unchecked")
-        List<java.util.Map<String, Object>> points = (List<java.util.Map<String, Object>>) map.meta().get("points");
-        assertEquals(List.of("浅草寺", "东京塔"), points.stream().map(p -> p.get("name")).toList());
-        assertTrue(sb.notices().stream().anyMatch(n -> n.contains("没有坐标")));
-    }
-
-    @Test
-    void mapIsSkippedInsteadOfFailingWhenFewerThanTwoPointsHaveCoordinates() {
-        StoryboardView sb = service(checkins(true, false, false)).build(1L, trip("FREE"), journal(), 30, "720p", "9:16",
-                null, StoryboardService.normalize(null, true, true, true), List.of(101L, 201L));
-        assertTrue(sb.scenes().stream().noneMatch(s -> "MAP".equals(s.type())));
-        assertTrue(StoryboardService.hasPhotoScene(sb));
+    void storyHasNoRouteSceneEvenWithCoordinatesOrAnOldMapOverride() {
+        // 旅行路线动画已移除：打卡有坐标、旧草稿里还留着 "map" 段落覆盖时，也只有开场 / 地点 / 成就 / 结尾
+        StorySettings old = new StorySettings(null, null, true, true, true, true, true, true, true, true,
+                List.of(new SegmentOverride("map", true, "东京路线")), null);
+        for (StorySettings s : java.util.Arrays.asList(null, old)) {
+            StoryboardView sb = service(checkins(true, true, true)).build(1L, trip("PRO"), journal(), 30, "1080p", "9:16",
+                    null, StoryboardService.normalize(s, true, true), List.of(101L, 201L, 301L));
+            assertTrue(sb.scenes().stream().allMatch(x -> List.of("OPENING", "PLACE", "ACHIEVEMENTS", "ENDING").contains(x.type())),
+                    sb.scenes().stream().map(SceneView::type).toList().toString());
+            assertTrue(sb.scenes().stream().noneMatch(x -> x.meta().containsKey("leg") || x.meta().containsKey("route")));
+        }
     }
 
     @Test
     void segmentOverridesReorderDisableAndRename() {
-        StorySettings settings = new StorySettings(null, "东京，下次再见。", true, true, true, true, false, true, false, true, "OFF",
+        StorySettings settings = new StorySettings(null, "东京，下次再见。", true, true, true, true, false, true, false, true,
                 List.of(new SegmentOverride("place-3", true, "夜里的东京塔"), new SegmentOverride("place-1", false, null),
                         new SegmentOverride("opening", null, "我的东京")), null);
         StoryboardView sb = service(checkins(true, true, true)).build(1L, trip("FREE"), journal(), 30, "720p", "9:16",
-                null, StoryboardService.normalize(settings, null, null, null), List.of(101L, 201L, 301L));
+                null, StoryboardService.normalize(settings, null, null), List.of(101L, 201L, 301L));
         List<String> keys = sb.scenes().stream().map(SceneView::key).toList();
         assertEquals(List.of("opening", "place-3", "place-1", "place-2", "ending"), keys);
         assertEquals("我的东京", sb.scenes().get(0).title());
@@ -88,9 +83,9 @@ class StoryboardServiceTest {
     @Test
     void freeTripsGetWatermarkAnd720pResolution() {
         StoryboardView free = service(checkins(true, true, true)).build(1L, trip("FREE"), journal(), 30, "720p", "9:16",
-                null, StoryboardService.normalize(null, true, true, true), List.of(101L));
+                null, StoryboardService.normalize(null, true, true), List.of(101L));
         StoryboardView pro = service(checkins(true, true, true)).build(1L, trip("PRO"), journal(), 30, "1080p", "9:16",
-                null, StoryboardService.normalize(null, true, true, true), List.of(101L));
+                null, StoryboardService.normalize(null, true, true), List.of(101L));
         assertTrue(free.watermark());
         assertEquals("720×1280", free.resolution());
         assertFalse(pro.watermark());

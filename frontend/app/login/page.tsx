@@ -1,18 +1,26 @@
 'use client'
 
 /**
- * 登录页。
- * - Desktop（≥768px）保持原有“左图 + 右表单”布局，样式全部写在 md: 前缀里。
- * - Mobile（<768px）登录优先：紧凑 Hero（200~210px）+ 轻微上叠的登录卡片，第一屏即可完成登录。
- * 表单元素与注册页共用 components/auth/AuthKit；认证仍走 authApi.login，成功后按 ?next= 或 /trips 跳转。
+ * 登录页：“回到自己的旅程”。
+ * 布局来自 AuthShell（variant="memories"）：<1024px 紧凑 Hero + 上叠卡片；≥1024px 左侧暖色面板 + 旅行照片拼贴，右侧登录卡片。
+ * 认证仍走 authApi.login；成功后按 ?next=（登录前所在页面）或 /trips 跳转；已登录用户直接跳走。
+ * 忘记密码走 /forgot-password（邮箱验证码 purpose=reset_password）。
+ * 注册必须先验证邮箱、验证成功才创建用户，所以不存在“已注册但未验证”的账号，登录无需处理 EMAIL_NOT_VERIFIED。
+ * 注销冷静期：?accountDeletion=（设置页注销后跳来）显示删除时间；冷静期内登录会收到 ACCOUNT_DELETION_PENDING，
+ * 用户确认「撤销注销并登录」后带 cancelDeletion 再提交一次。
  */
 
-import { useRef, useState } from 'react'
+import Link from 'next/link'
+import { useRef, useState, useSyncExternalStore } from 'react'
 import { useRouter } from 'next/navigation'
 import { LockKeyhole, Mail } from 'lucide-react'
 import { authApi } from '@/services/tabitrace-api'
+import { ApiError } from '@/services/api'
+import { utcDate } from '@/utils/video-status'
 import { mapLoginError, safeNextPath, validateLoginForm, type LoginField, type LoginFieldErrors } from '@/utils/auth'
-import { AuthCardHeader, AuthField, AuthPage, AuthSubmit, AuthSwitch, FormAlert, PasswordField, readNext, useKeyboardSafe, useNextParam, useSignedInRedirect, withNext } from '@/components/auth/AuthKit'
+import { AuthCard, AuthCardHeader, AuthField, AuthShell, AuthSubmit, AuthSwitch, FormAlert, PasswordField, readNext, useKeyboardSafe, useNextParam, useSignedInRedirect, withNext } from '@/components/auth/AuthKit'
+import { MemoriesVisual } from '@/components/auth/AuthVisuals'
+import { hdImage } from '@/utils/place-images'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -24,6 +32,10 @@ export default function LoginPage() {
   const next = useNextParam()
   const inflight = useRef(false)
   const formRef = useRef<HTMLFormElement>(null)
+  /** 刚申请注销（来自设置页）：删除时间 */
+  const scheduled = useSyncExternalStore(noSubscribe, () => new URLSearchParams(window.location.search).get('accountDeletion'), () => null)
+  /** 登录的账号在注销冷静期：等用户确认是否撤销 */
+  const [pendingDeletion, setPendingDeletion] = useState<string | null>(null)
   const emailRef = useRef<HTMLInputElement>(null)
   const passwordRef = useRef<HTMLInputElement>(null)
   const submitRef = useRef<HTMLButtonElement>(null)
@@ -48,14 +60,24 @@ export default function LoginPage() {
     setFormError('')
     if (errors.email || errors.password) { focusFirstError(errors); return }
 
+    await signIn(false)
+  }
+
+  const signIn = async (cancelDeletion: boolean) => {
     inflight.current = true
     setBusy(true)
     try {
-      await authApi.login({ email: values.email.trim(), password: values.password })
+      await authApi.login({ email: values.email.trim(), password: values.password, ...(cancelDeletion ? { cancelDeletion: true } : {}) })
       setPhase('redirecting')
       router.push(safeNextPath(next ?? readNext()))
       // 跳转期间保持禁用，避免再次提交
     } catch (error) {
+      if (error instanceof ApiError && error.code === 'ACCOUNT_DELETION_PENDING') {
+        setPendingDeletion(String(error.details?.scheduledAt ?? ''))
+        setBusy(false)
+        inflight.current = false
+        return
+      }
       const mapped = mapLoginError(error)
       setFieldErrors(mapped.fields)
       setFormError(mapped.form)
@@ -70,45 +92,47 @@ export default function LoginPage() {
   const formErrorId = formError ? 'login-form-error' : undefined
 
   return (
-    <AuthPage className="mx-auto grid max-w-6xl px-4 pb-10 pt-3 md:min-h-[78vh] md:items-center md:gap-8 md:px-8 md:py-10 lg:grid-cols-[1fr_.88fr]">
-      <div className="relative h-[200px] overflow-hidden rounded-[22px] min-[390px]:h-[210px] md:h-auto md:min-h-[520px] md:rounded-[34px] md:shadow-card">
-        <picture>
-          <source media="(max-width: 767px)" srcSet="/images/explore/ueno-autumn.jpg" />
-          <img src="/images/hero-scenery.jpg" alt="" fetchPriority="high" className="absolute inset-0 h-full w-full object-cover" />
-        </picture>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/35 to-black/5 md:from-black/65 md:via-black/10 md:to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 px-5 pb-9 text-white [text-shadow:0_1px_12px_rgba(0,0,0,.28)] md:p-8 md:[text-shadow:none]">
-          <p className="hidden text-xs font-bold tracking-[.18em] text-white/60 md:block">WELCOME BACK</p>
-          <h1 className="font-serif text-[24px] leading-[1.35] min-[390px]:text-[26px] md:mt-3 md:max-w-xl md:text-5xl md:leading-tight">继续记录，<br className="md:hidden" />那些值得回看的旅程。</h1>
-          <p className="mt-1.5 text-[13px] leading-6 text-white/80 md:mt-4 md:max-w-lg md:text-sm md:leading-7 md:text-white/70">
-            <span className="md:hidden">地图、照片和故事，都在等你回来。</span>
-            <span className="hidden md:inline">地图、照片、时间和一句话，会在旅迹里重新连成完整的旅行故事。</span>
-          </p>
-        </div>
-      </div>
-
-      <form ref={formRef} onSubmit={submit} noValidate aria-labelledby="auth-card-title" aria-busy={locked} className="warm-card relative z-10 -mt-6 p-6 md:mt-0 md:p-9">
-        <AuthCardHeader
-          eyebrow="SIGN IN"
-          title={<><span className="md:hidden">欢迎回来</span><span className="hidden md:inline">登录旅迹</span></>}
-          sub={<p className="mt-1.5 text-sm text-black/50 md:hidden">登录后继续你的旅行记录。</p>}
-        />
+    <AuthShell
+      variant="memories"
+      hero={{
+        eyebrow: 'WELCOME BACK',
+        title: <>继续记录，<br />那些值得回看的旅程。</>,
+        sub: <>地图、照片和故事，<br />都在等你回来。</>,
+        subShort: '地图、照片和故事，都在等你回来。',
+        image: hdImage('20-ueno-park')
+      }}
+      visual={<MemoriesVisual />}
+    >
+      <AuthCard ref={formRef} onSubmit={submit} aria-busy={locked}>
+        <AuthCardHeader eyebrow="SIGN IN" title="欢迎回来" sub="登录后继续你的旅行记录。" />
 
         {formError && <FormAlert id="login-form-error">{formError}</FormAlert>}
+        {scheduled && !pendingDeletion && (
+          <p className="au-notice" role="status">账号已申请注销，将于 {deletionTime(scheduled)} 永久删除。在此之前用这个账号登录，可以撤销注销。</p>
+        )}
+        {pendingDeletion !== null && (
+          <div className="au-notice is-action" role="alert">
+            <p>这个账号已申请注销{pendingDeletion ? `，将于 ${deletionTime(pendingDeletion)} 永久删除` : ''}。撤销注销后，账号和全部数据会恢复正常。</p>
+            <div className="au-notice-actions">
+              <button type="button" className="au-notice-primary" disabled={busy} onClick={() => void signIn(true)}>撤销注销并登录</button>
+              <button type="button" className="au-notice-link" disabled={busy} onClick={() => setPendingDeletion(null)}>暂不登录</button>
+            </div>
+          </div>
+        )}
 
-        <div className="mt-5 space-y-4 md:mt-7">
+        <div className="au-fields">
           <AuthField
             ref={emailRef} id="login-email" name="email" label="邮箱" icon={Mail} type="email" inputMode="email"
-            autoComplete="email" autoCapitalize="none" autoCorrect="off" spellCheck={false} placeholder="请输入邮箱"
+            autoComplete="email" autoCapitalize="none" autoCorrect="off" spellCheck={false} placeholder="请输入邮箱" enterKeyHint="next"
             value={values.email} onChange={e => update('email', e.target.value)}
             disabled={phase !== 'form'} readOnly={busy} error={fieldErrors.email} formErrorId={formErrorId}
           />
-          {/* 项目目前没有找回密码的路由与接口，所以这里不放“忘记密码？” */}
           <PasswordField
             ref={passwordRef} id="login-password" name="password" label="密码" icon={LockKeyhole}
-            autoComplete="current-password" placeholder="请输入密码"
+            autoComplete="current-password" placeholder="请输入密码" enterKeyHint="go"
             value={values.password} onChange={e => update('password', e.target.value)}
             disabled={phase !== 'form'} readOnly={busy} error={fieldErrors.password} formErrorId={formErrorId}
+            labelAside={<Link href={withNext('/forgot-password', next)} className="au-label-link">忘记密码？</Link>}
           />
         </div>
 
@@ -117,7 +141,16 @@ export default function LoginPage() {
           lockedLabel={phase === 'checking' ? '正在确认…' : phase === 'redirecting' ? '正在进入…' : '正在登录…'}
         />
         <AuthSwitch prompt="还没有账号？" href={withNext('/register', next)} label="创建账号" />
-      </form>
-    </AuthPage>
+      </AuthCard>
+    </AuthShell>
   )
+}
+
+/** 地址参数只在首次渲染时读取，不需要订阅变化 */
+const noSubscribe = () => () => {}
+
+/** 后端时间为 UTC（不带时区后缀），按本机时区显示到分钟 */
+function deletionTime(value: string) {
+  const d = utcDate(value)
+  return d && !Number.isNaN(d.getTime()) ? d.toLocaleString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : value
 }

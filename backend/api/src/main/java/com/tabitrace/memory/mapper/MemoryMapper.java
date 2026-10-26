@@ -9,7 +9,7 @@ import java.util.List;
 @Mapper
 public interface MemoryMapper {
 
-    class PhotoRow { public Long id; public Long tripId; public String tripTitle; public String imageUrl; public Boolean featured; public LocalDateTime capturedAt; public LocalDateTime createdAt; }
+    class PhotoRow { public Long id; public Long tripId; public String tripTitle; public String imageUrl; public String thumbUrl; public String mediumUrl; public String originalUrl; public Integer width; public Integer height; public Boolean featured; public LocalDateTime capturedAt; public LocalDateTime createdAt; }
     class NoteRow { public String note; public String placeNameSnapshot; }
     class StoryRow { public Long id; public Long tripId; public String tripTitle; public String name; public String templateCode; public Integer duration; public String outputUrl; public String renderer; public Long coverPhotoId; public LocalDateTime completedAt; public LocalDateTime updatedAt; }
     class ShareRow { public Long id; public Long tripId; public String tripTitle; public String shareToken; public Long viewCount; public LocalDateTime createdAt; }
@@ -24,12 +24,12 @@ public interface MemoryMapper {
 
     /** 某段旅行的照片：精选在前，再按拍摄时间 */
     @Select("""
-      SELECT id,trip_id,image_url,is_featured AS featured,captured_at,created_at FROM photos WHERE trip_id=#{tripId}
+      SELECT id,trip_id,COALESCE(medium_url,image_url) AS image_url,thumb_url,medium_url,image_url AS original_url,width,height,is_featured AS featured,captured_at,created_at FROM photos WHERE trip_id=#{tripId}
       ORDER BY is_featured DESC,COALESCE(captured_at,created_at),id LIMIT #{limit}
       """)
     List<PhotoRow> topPhotos(@Param("tripId") Long tripId, @Param("limit") int limit);
 
-    @Select("SELECT image_url FROM photos WHERE id=#{id}") String photoUrl(Long id);
+    @Select("SELECT COALESCE(medium_url,image_url) FROM photos WHERE id=#{id}") String photoUrl(Long id);
     @Select("SELECT COUNT(*) FROM photos WHERE trip_id=#{tripId}") int countPhotos(Long tripId);
 
     /** 最后一条写了文字的打卡 */
@@ -57,7 +57,7 @@ public interface MemoryMapper {
 
     /** 值得回看的照片：优先指定年份的旅行，再精选优先、越新越前 */
     @Select("""
-      SELECT p.id,p.trip_id,t.title AS trip_title,p.image_url,p.is_featured AS featured,p.captured_at,p.created_at
+      SELECT p.id,p.trip_id,t.title AS trip_title,COALESCE(p.thumb_url,p.medium_url,p.image_url) AS image_url,p.thumb_url,p.medium_url,p.image_url AS original_url,p.width,p.height,p.is_featured AS featured,p.captured_at,p.created_at
       FROM photos p JOIN trips t ON t.id=p.trip_id
       WHERE t.user_id=#{userId} AND t.status IN ('COMPLETED','ARCHIVED')
       ORDER BY (YEAR(t.start_date)=#{year}) DESC,p.is_featured DESC,COALESCE(p.captured_at,p.created_at) DESC,p.id DESC LIMIT #{limit}

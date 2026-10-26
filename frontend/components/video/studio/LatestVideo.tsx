@@ -59,7 +59,7 @@ export function LatestVideo({ project, template, cover, busy, actions, playSigna
 
       {open && playable ? (
         <div className="vs-latest-player">
-          <video ref={videoRef} key={project.id} controls playsInline preload="metadata" poster={cover} src={project.outputUrl!} onError={() => setLoadFailed(true)} />
+          <video ref={videoRef} key={project.id} className={project.aspectRatio === '16:9' ? 'is-16x9' : project.aspectRatio === '4:5' ? 'is-4x5' : undefined} controls playsInline preload="metadata" poster={cover} src={project.outputUrl!} onError={() => setLoadFailed(true)} />
           <button type="button" className="vs-latest-close" onClick={() => setOpen(false)} aria-label="收起播放器"><X size={14} /></button>
         </div>
       ) : (
@@ -88,6 +88,11 @@ export function LatestVideo({ project, template, cover, busy, actions, playSigna
           </div>
         </div>
       )}
+
+      {project.status === 'COMPLETED' && project.renderWarning?.includes('MUSIC_FALLBACK') && (
+        <p className="vs-hint is-warn" role="status"><TriangleAlert size={13} /> 原选择的音乐暂时不可用，本次视频已使用无音乐版本生成。可以换一首音乐后重新生成。</p>
+      )}
+      {project.status === 'COMPLETED' && project.musicCredit && !project.renderWarning?.includes('MUSIC_FALLBACK') && <MusicCredit text={project.musicCredit} />}
 
       {project.status === 'COMPLETED' && isMock(project) && (
         <>
@@ -123,5 +128,20 @@ export function LatestVideo({ project, template, cover, busy, actions, playSigna
         </div>
       )}
     </section>
+  )
+}
+
+/** 背景音乐署名（CC BY 4.0）：片尾已写入视频；发布到 YouTube 等平台时还需要贴进描述，否则会被 Content ID 自动认领 */
+function MusicCredit({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false)
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(text); setCopied(true); window.setTimeout(() => setCopied(false), 2000) } catch { setCopied(false) }
+  }
+  return (
+    <div className="vs-credit-box">
+      <p><b>音乐署名</b>发布时请把这段文字贴进视频描述或文案（YouTube 必须放在描述里）：</p>
+      <code>{text}</code>
+      <button type="button" className="vs-text-btn" onClick={() => void copy()}>{copied ? '已复制' : '复制署名'}</button>
+    </div>
   )
 }

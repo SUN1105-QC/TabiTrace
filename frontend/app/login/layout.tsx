@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next'
+import { NOINDEX } from '@/lib/site'
 
 export const metadata: Metadata = {
+  robots: NOINDEX,
   title: '登录｜旅迹 TabiTrace',
   description: '登录旅迹，继续记录你的旅行地图、照片与故事。'
 }

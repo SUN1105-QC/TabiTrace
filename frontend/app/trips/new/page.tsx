@@ -6,6 +6,7 @@
  * 创建成功后短暂显示真实完成的内容，然后进入新旅行的详情页。
  */
 
+import { PageContainer } from '@/components/common/PageContainer'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
@@ -100,7 +101,7 @@ export default function NewTripPage() {
   return (
     <main>
       <SiteHeader />
-      <section className="cj-page mx-auto max-w-[1180px] px-5 pb-14 sm:px-8">
+      <PageContainer variant="narrow" className="cj-page px-5 pb-14 sm:px-8">
         <header className="cj-heading">
           <p className="cj-eyebrow">CREATE A JOURNEY</p>
           <h1>开启一段新的旅行</h1>
@@ -178,7 +179,7 @@ export default function NewTripPage() {
             </section>
           </form>
         </div>
-      </section>
+      </PageContainer>
 
       {created && <JourneySuccess trip={created.trip} officialAdded={created.officialAdded} onGo={() => { window.clearTimeout(goTimer.current); router.push(`/trips/${created.trip.id}`) }} />}
     </main>

@@ -5,15 +5,17 @@
 import { ArrowRight, Crown } from 'lucide-react'
 import type { AccountOverview, UserView } from '@/services/tabitrace-api'
 import { joinedLabel } from '@/utils/settings'
+import { useT } from '@/components/common/PreferencesProvider'
 import { Avatar } from './SettingsParts'
 
 export function AccountSummaryCard({ user, overview, onOpenProfile, onOpenPro }: { user: UserView; overview: AccountOverview; onOpenProfile: () => void; onOpenPro: () => void }) {
-  const name = user.nickname?.trim() || '旅行中的我'
+  const t = useT()
+  const name = user.nickname?.trim() || t('common.meFallback')
   const pro = overview.proTrips > 0
   return (
-    <aside className="st-summary" aria-label="账户概览">
+    <aside className="st-summary" aria-label={t('settings.summary.label')}>
       <div className="st-summary-id">
-        <Avatar name={name} url={user.avatarUrl} size={64} />
+        <Avatar name={name} user={user} size={64} />
         <div className="min-w-0">
           <h2 title={name}>{name}</h2>
           <p className="st-summary-email" title={user.email}>{user.email}</p>
@@ -21,17 +23,17 @@ export function AccountSummaryCard({ user, overview, onOpenProfile, onOpenPro }:
       </div>
       {user.bio && <p className="st-summary-bio">{user.bio}</p>}
       <p className={`st-plan${pro ? ' is-pro' : ''}`}>
-        {pro ? <><Crown size={13} /> TRIP PRO · {overview.proTrips} 段旅行</> : 'FREE'}
+        {pro ? <><Crown size={13} /> {t('settings.summary.proTrips', { count: overview.proTrips })}</> : 'FREE'}
       </p>
       <dl className="st-stats">
-        <div><dt>旅行</dt><dd>{overview.trips}</dd></div>
-        <div><dt>记录地点</dt><dd>{overview.places}</dd></div>
-        <div><dt>照片</dt><dd>{overview.photos}</dd></div>
+        <div><dt>{t('settings.summary.trips')}</dt><dd>{overview.trips}</dd></div>
+        <div><dt>{t('settings.summary.places')}</dt><dd>{overview.places}</dd></div>
+        <div><dt>{t('settings.summary.photos')}</dt><dd>{overview.photos}</dd></div>
       </dl>
-      {user.createdAt && <p className="st-summary-joined">{joinedLabel(user.createdAt)}</p>}
+      {user.createdAt && <p className="st-summary-joined">{joinedLabel(user.createdAt, t)}</p>}
       <div className="st-summary-links">
-        <button type="button" onClick={onOpenProfile}>查看个人资料 <ArrowRight size={13} /></button>
-        <button type="button" onClick={onOpenPro}>管理 Trip Pro <ArrowRight size={13} /></button>
+        <button type="button" onClick={onOpenProfile}>{t('settings.summary.openProfile')} <ArrowRight size={13} /></button>
+        <button type="button" onClick={onOpenPro}>{t('settings.summary.openPro')} <ArrowRight size={13} /></button>
       </div>
     </aside>
   )

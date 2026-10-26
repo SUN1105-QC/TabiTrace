@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ArrowRight, CalendarDays, MapPin, Map as MapIcon, Users } from 'lucide-react'
 import type { ItineraryView, TripSummary, TripView } from '@/services/tabitrace-api'
 import { daysBetween, localDateKey } from '@/lib/time'
+import { TripCoverImage } from '@/components/trip/TripCoverImage'
 
 const STATUS_TEXT: Record<string, string> = { PLANNING: '准备中', ONGOING: '进行中', COMPLETED: '已完成', ARCHIVED: '已归档' }
 
@@ -51,7 +52,7 @@ export function CurrentTripCard({
 
       <div className="trip-card">
         <div className="trip-cover">
-          <img src={trip.coverImage || '/images/cover.jpg'} alt={`${trip.title} 封面`} loading="lazy" />
+          <TripCoverImage trip={trip} alt={`${trip.title} 封面`} sizes="(max-width: 767px) 100vw, (max-width: 1365px) 50vw, 33vw" />
           <span className={`trip-status ${trip.status === 'ONGOING' ? 'live' : ''}`}>{STATUS_TEXT[trip.status] || trip.status}</span>
           <span className="trip-plan">{trip.planType}</span>
         </div>

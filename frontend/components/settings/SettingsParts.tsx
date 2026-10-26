@@ -6,6 +6,8 @@
  */
 
 import type { ReactNode } from 'react'
+import { useT } from '@/components/common/PreferencesProvider'
+import { avatarImage, type AvatarSource } from '@/utils/avatar'
 
 export { ConfirmDialog } from '@/components/common/ConfirmDialog'
 
@@ -49,6 +51,7 @@ export function SettingsRow({ label, description, htmlFor, error, errorId, child
 }
 
 export function Switch({ id, checked, onChange, label, disabled, busy, describedBy }: { id?: string; checked: boolean; onChange: (v: boolean) => void; label: string; disabled?: boolean; busy?: boolean; describedBy?: string }) {
+  const t = useT()
   return (
     <button
       type="button"
@@ -63,14 +66,15 @@ export function Switch({ id, checked, onChange, label, disabled, busy, described
       onClick={() => onChange(!checked)}
     >
       <span className="st-switch-knob" aria-hidden="true" />
-      <span className="st-switch-text" aria-hidden="true">{checked ? '开' : '关'}</span>
+      <span className="st-switch-text" aria-hidden="true">{checked ? t('common.on') : t('common.off')}</span>
     </button>
   )
 }
 
-export function Avatar({ name, url, size = 56 }: { name: string; url?: string | null; size?: number }) {
+export function Avatar({ name, user, size = 56 }: { name: string; user?: AvatarSource | null; size?: number }) {
   const initial = Array.from(name.trim() || '旅')[0]
-  return url
-    ? <img className="st-avatar" src={url} alt="" width={size} height={size} style={{ width: size, height: size }} />
+  const img = avatarImage(user)
+  return img
+    ? <img className="st-avatar" src={img.src} srcSet={img.srcSet} sizes={`${size}px`} alt="" width={size} height={size} style={{ width: size, height: size }} />
     : <span className="st-avatar is-initial" style={{ width: size, height: size, fontSize: Math.round(size * 0.4) }} aria-hidden="true">{initial}</span>
 }

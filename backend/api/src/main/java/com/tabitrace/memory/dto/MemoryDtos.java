@@ -11,7 +11,8 @@ public final class MemoryDtos {
     /** 概览：已归档旅行数、走过的城市数、这些旅行里的照片数、已生成的回忆作品数（可播放的 Travel Story + 有效分享页） */
     public record Overview(int archivedTrips, int cities, int photos, int creations) {}
 
-    public record Moment(Long id, String imageUrl) {}
+    /** imageUrl：默认显示的地址（中图，没有时原图）；thumbUrl / mediumUrl / originalUrl 与宽高供前端按显示尺寸选择（srcset） */
+    public record Moment(Long id, String imageUrl, String thumbUrl, String mediumUrl, String originalUrl, Integer width, Integer height) {}
 
     /** 旅行里自己写下的一句打卡文字（真实内容，没有就为 null） */
     public record Note(String text, String place) {}
@@ -31,7 +32,8 @@ public final class MemoryDtos {
     public record Creation(String type, Long id, Long tripId, String tripTitle, String title, String preview,
                            String url, LocalDateTime createdAt, Integer duration, Long views) {}
 
-    public record MemoryPhoto(Long id, Long tripId, String tripTitle, String imageUrl, boolean featured, LocalDateTime takenAt) {}
+    /** imageUrl：默认显示的地址（缩略图优先）；其余字段同 Moment */
+    public record MemoryPhoto(Long id, Long tripId, String tripTitle, String imageUrl, String thumbUrl, String mediumUrl, String originalUrl, Integer width, Integer height, boolean featured, LocalDateTime takenAt) {}
 
     public record MemoryAchievement(String code, String name, String description, Long tripId, String tripTitle, LocalDateTime earnedAt) {}
 

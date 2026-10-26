@@ -3,8 +3,9 @@
  * 并由此推导地图点位、Marker 样式、每日进度与下一站。页面、地图、面板、时间轴都只用这里的结果。
  */
 
-import type { ItineraryView, PlaceView, TimelineDay, TimelinePhoto, TripView } from '@/services/tabitrace-api'
+import type { CheckinView, ItineraryView, PlaceView, TimelineDay, TimelinePhoto, TripView } from '@/services/tabitrace-api'
 import { parseDay } from '@/utils/journey'
+import { localDateKey, timeOfDay } from '@/lib/time'
 
 export type MarkerVariant = 'checkedIn' | 'planned' | 'saved'
 export type DayKey = 'ALL' | string
@@ -28,6 +29,8 @@ export type JourneyStop = {
   official: boolean
   photos: TimelinePhoto[]
   note?: string
+  /** 打卡时刻的天气快照，例如「晴 22°C」（快速打卡自动记录，拿不到时为空） */
+  weather?: string
 }
 
 export type MapPoint = { key: string; lat: number; lng: number; name: string; area?: string; variant: MarkerVariant; order?: number }
@@ -65,7 +68,7 @@ export function buildStops(itinerary: ItineraryView[], timeline: TimelineDay[], 
       plannedTime: hm(it.plannedTime), actualTime: hit ? localParts(hit.checkin.checkinTime).time : undefined,
       status: it.status === 'DONE' || hit ? 'done' : 'planned', itineraryId: it.id, checkinId: hit?.checkin.id, placeId,
       official: placeId ? placeById.get(placeId)?.sourceType === 'OFFICIAL' : false,
-      photos: hit?.photos ?? [], note: hit?.checkin.note || it.note || undefined
+      photos: hit?.photos ?? [], note: hit?.checkin.note || it.note || undefined, weather: weatherOf(hit?.checkin)
     }
   })
 
@@ -75,12 +78,14 @@ export function buildStops(itinerary: ItineraryView[], timeline: TimelineDay[], 
     stops.push({
       key: `ck-${c.id}`, selectKey: selectKeyOf({ placeId, checkinId: c.id }), date, name: c.placeName || '打卡', area: c.area || undefined,
       ...coords(placeId, [c.latitude, c.longitude]), actualTime: time, status: 'done', checkinId: c.id, placeId,
-      official: placeId ? placeById.get(placeId)?.sourceType === 'OFFICIAL' : false, photos, note: c.note || undefined
+      official: placeId ? placeById.get(placeId)?.sourceType === 'OFFICIAL' : false, photos, note: c.note || undefined, weather: weatherOf(c)
     })
   })
 
   return stops.sort((a, b) => a.date.localeCompare(b.date) || (a.actualTime ?? a.plannedTime ?? '99:99').localeCompare(b.actualTime ?? b.plannedTime ?? '99:99'))
 }
+
+const weatherOf = (c?: CheckinView) => (c?.weatherText ? `${c.weatherText}${c.temperatureC != null ? ` ${Math.round(c.temperatureC)}°C` : ''}` : undefined)
 
 export const stopsOfDay = (stops: JourneyStop[], day: DayKey) => (day === 'ALL' ? stops : stops.filter(s => s.date === day))
 
@@ -154,7 +159,8 @@ export function getNextStop(stops: JourneyStop[], now: Date): { stop: JourneySto
   const pending = stops.filter(s => s.status === 'planned').sort((a, b) => a.date.localeCompare(b.date) || (a.plannedTime ?? '99:99').localeCompare(b.plannedTime ?? '99:99'))
   if (!pending.length) return null
   const cut = new Date(now.getTime() - 3600000)
-  const cutKey = `${cut.getFullYear()}-${String(cut.getMonth() + 1).padStart(2, '0')}-${String(cut.getDate()).padStart(2, '0')} ${String(cut.getHours()).padStart(2, '0')}:${String(cut.getMinutes()).padStart(2, '0')}`
+  // 计划日期与时间都是用户时区里的当地时间，比较时也换算到同一时区
+  const cutKey = `${localDateKey(cut)} ${timeOfDay(cut)}`
   const upcoming = pending.find(s => `${s.date} ${s.plannedTime ?? '23:59'}` >= cutKey)
   return upcoming ? { stop: upcoming, overdue: false } : { stop: pending[0], overdue: true }
 }

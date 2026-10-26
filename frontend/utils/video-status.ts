@@ -1,3 +1,4 @@
+import { formatDateTime as formatUserDateTime } from '@/lib/time'
 /** 视频状态 / 渲染阶段 / 错误码 → 界面文案。状态全部来自后端，这里只做映射，不模拟进度。 */
 
 import type { RenderStage, VideoProject, VideoStatus, Plan } from '@/types/video'
@@ -21,7 +22,6 @@ export const STATUS_TONE: Record<VideoStatus, 'muted' | 'info' | 'brand' | 'succ
 /** 展示给用户的五个阶段；UPLOADING 归入「正在导出 MP4」。 */
 export const RENDER_STEPS: { key: RenderStage; label: string }[] = [
   { key: 'PREPARING', label: '正在准备素材' },
-  { key: 'MAP', label: '正在生成地图动画' },
   { key: 'STORY', label: '正在生成旅行故事' },
   { key: 'MUSIC', label: '正在合成音乐' },
   { key: 'EXPORTING', label: '正在导出 MP4' }
@@ -78,7 +78,6 @@ export const CATEGORY_LABEL: Record<string, string> = {
 
 export const SCENE_LABEL: Record<string, string> = {
   OPENING: '开场',
-  MAP: '地图路线',
   PLACE: '地点',
   ACHIEVEMENTS: '旅行成就',
   ENDING: '结尾'
@@ -93,9 +92,5 @@ export const timecode = (seconds: number) => {
 /** 后端返回的 LocalDateTime 是 UTC，没有时区后缀 */
 export const utcDate = (value?: string | null) => (value ? new Date(/[zZ]|[+-]\d\d:?\d\d$/.test(value) ? value : `${value}Z`) : null)
 
-export const formatDateTime = (value?: string | null) => {
-  const d = utcDate(value)
-  if (!d || Number.isNaN(d.getTime())) return '—'
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}.${pad(d.getMonth() + 1)}.${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
-}
+/** 统一用 lib/time 的格式化（按用户时区），这里只处理空值显示 */
+export const formatDateTime = (value?: string | null) => formatUserDateTime(value) || '—'

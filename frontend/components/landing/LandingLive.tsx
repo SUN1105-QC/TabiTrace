@@ -14,6 +14,7 @@ import { planApi, tripApi, type OfficialRouteView, type PlaceView } from '@/serv
 import { isOneTimePerTrip, planPrice, type TripProPlan } from '@/utils/plan'
 import { formatCurrency } from '@/utils/currency'
 import { LANDING_IMAGES } from './landingDemo'
+import { hdSrcSet } from '@/utils/place-images'
 
 export function useLandingPlan() {
   const [plan, setPlan] = useState<TripProPlan | null>(null)
@@ -55,7 +56,7 @@ export function TokyoSection() {
           <ul className="ld-tokyo-grid">
             {picks.map(p => (
               <li key={p.id}>
-                <img src={p.coverImage!} alt={`${p.name}${p.area ? `（${p.area}）` : ''}`} loading="lazy" />
+                <img src={p.coverImage!} srcSet={hdSrcSet(p.coverImage)} sizes="(max-width: 767px) 50vw, 25vw" alt={`${p.name}${p.area ? `（${p.area}）` : ''}`} loading="lazy" decoding="async" />
                 <div><b>{p.name}</b><small>{[p.area, p.tagline].filter(Boolean).join(' · ')}</small></div>
               </li>
             ))}
@@ -75,7 +76,7 @@ export function TravelStorySection({ plan }: { plan: TripProPlan | null }) {
   return (
     <section className="ld-story" id="travel-story" aria-labelledby="ld-story-title">
       <div className="ld-story-phone">
-        <img src={LANDING_IMAGES.storyFrame.src} alt={LANDING_IMAGES.storyFrame.alt} width={288} height={512} loading="lazy" />
+        <img src={LANDING_IMAGES.storyFrame.src} srcSet={LANDING_IMAGES.storyFrame.srcSet} sizes="(max-width: 767px) 188px, 254px" alt={LANDING_IMAGES.storyFrame.alt} width={LANDING_IMAGES.storyFrame.width} height={LANDING_IMAGES.storyFrame.height} loading="lazy" decoding="async" />
         <span className="ld-story-play" aria-hidden="true"><Play size={18} /></span>
       </div>
       <div className="ld-story-copy">

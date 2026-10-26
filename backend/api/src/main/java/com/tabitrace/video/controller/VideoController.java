@@ -15,7 +15,8 @@ public class VideoController {
 
     // 目录：模板与音乐都来自数据库，前端不再写死
     @GetMapping("/video-templates") public ApiResponse<List<VideoTemplateView>> templates(){return ApiResponse.ok(service.templates());}
-    @GetMapping("/video-music") public ApiResponse<List<VideoMusicView>> music(){return ApiResponse.ok(service.music());}
+    /** 曲库：可按 category（WARM / CITY_NIGHT / MORNING / LOFI / CINEMATIC）、template（推荐模板）、freeOnly 过滤 */
+    @GetMapping("/video-music") public ApiResponse<List<VideoMusicView>> music(@RequestParam(required=false) String category,@RequestParam(required=false) String template,@RequestParam(required=false,defaultValue="false") boolean freeOnly){return ApiResponse.ok(service.music(category,template,freeOnly));}
 
     @PostMapping("/trips/{tripId}/video-projects") public ApiResponse<VideoProjectView> create(@PathVariable Long tripId,@Valid @RequestBody UpsertVideoProjectRequest r){return ApiResponse.ok(service.create(SecurityUtils.currentUser().id(),tripId,r));}
     @GetMapping("/trips/{tripId}/video-projects") public ApiResponse<List<VideoProjectView>> list(@PathVariable Long tripId){return ApiResponse.ok(service.list(SecurityUtils.currentUser().id(),tripId));}

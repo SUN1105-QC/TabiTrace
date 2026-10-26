@@ -8,6 +8,7 @@ import { ArrowRight, Camera, MapPin, Plus } from 'lucide-react'
 import type { TripView, UserView } from '@/services/tabitrace-api'
 import { useQuickCheckIn } from '@/components/checkin/QuickCheckInProvider'
 import { greeting } from '@/lib/time'
+import { BLANK_IMAGE, hdSrcSet } from '@/utils/place-images'
 
 export function MobileHero({ user, trip }: { user: UserView | null; trip: TripView | null }) {
   const { openQuickCheckIn } = useQuickCheckIn()
@@ -15,12 +16,20 @@ export function MobileHero({ user, trip }: { user: UserView | null; trip: TripVi
   useEffect(() => { setHello(greeting()) }, [])
 
   const name = user?.nickname?.trim() || '旅行中的你'
-  const cover = trip?.coverImage || '/images/hero-scenery.jpg'
+  // 没有旅行封面时不再用 hero-scenery.jpg：那张图里画着一台手机和一个「开始旅行」按钮，在 App 里看起来像个点不了的按钮
+  const [coverFailed, setCoverFailed] = useState(false)
+  const cover = !coverFailed ? trip?.coverImage : null
   const city = trip?.city || trip?.destinationName || ''
 
   return (
-    <section className="m-hero">
-      <img src={cover} alt={trip ? `${trip.destinationName} 旅行封面` : '旅行风景'} />
+    <section className={`m-hero${cover ? '' : ' is-plain'}`}>
+      {cover
+        // 这张 Hero 只在手机显示（桌面用 HeroJourneyCard）：桌面宽度下换成占位图，不下载被隐藏的大图
+        ? <picture>
+            <source media="(min-width: 768px)" srcSet={BLANK_IMAGE} />
+            <img src={cover} srcSet={hdSrcSet(cover)} sizes="130vw" alt={`${trip?.destinationName ?? ''} 旅行封面`} onError={() => setCoverFailed(true)} />
+          </picture>
+        : <span className="m-hero-art" aria-hidden="true">{Array.from(city || '旅')[0]}</span>}
 
       {city && (
         <span className="m-hero-script" aria-hidden="true">

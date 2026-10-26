@@ -6,34 +6,38 @@ import { useEffect, useState } from 'react'
 import {
   Compass, Crown, Film, Home, Images, MapPinned, Plus, Settings, Sparkles, Trophy, X
 } from 'lucide-react'
+import { useT } from '@/components/common/PreferencesProvider'
+import { BrandLogo } from '@/components/common/Brand'
+import type { MessageKey } from '@/i18n'
 
 export type SidebarBadges = { explore?: boolean; memories?: boolean }
 
-type Item = { href: string; label: string; icon: any; badge?: 'explore' | 'memories' }
+type Item = { href: string; label: MessageKey; icon: any; badge?: 'explore' | 'memories' }
 
 export function sidebarItems(activeTripId: number | null): { main: Item[]; secondary: Item[] } {
   const trip = (suffix: string) => (activeTripId ? `/trips/${activeTripId}${suffix}` : '/trips')
   return {
     main: [
-      { href: '/', label: '首页', icon: Home },
-      { href: '/trips', label: '我的旅行', icon: MapPinned },
-      { href: '/trips/new', label: '创建旅行', icon: Plus },
-      { href: trip('/map'), label: '地图与打卡', icon: Compass },
-      { href: trip('/gallery'), label: '照片与精选', icon: Images },
-      { href: trip('/video'), label: 'Travel Story', icon: Film },
-      { href: '/explore/tokyo', label: '推荐探索', icon: Sparkles, badge: 'explore' }
+      { href: '/', label: 'nav.home', icon: Home },
+      { href: '/trips', label: 'nav.myTrips', icon: MapPinned },
+      { href: '/trips/new', label: 'nav.createTrip', icon: Plus },
+      { href: trip('/map'), label: 'nav.mapCheckin', icon: Compass },
+      { href: trip('/gallery'), label: 'nav.photos', icon: Images },
+      { href: trip('/video'), label: 'nav.travelStory', icon: Film },
+      { href: '/explore/tokyo', label: 'nav.explore', icon: Sparkles, badge: 'explore' }
     ],
     secondary: [
-      { href: '/memories', label: '旅行回忆', icon: Images, badge: 'memories' },
-      { href: trip('/achievements'), label: '我的成就', icon: Trophy },
-      { href: '/profile', label: '个人设置', icon: Settings }
+      { href: '/memories', label: 'nav.memories', icon: Images, badge: 'memories' },
+      { href: trip('/achievements'), label: 'nav.achievements', icon: Trophy },
+      { href: '/profile', label: 'nav.settings', icon: Settings }
     ]
   }
 }
 
 function SidebarArtwork() {
+  const t = useT()
   return (
-    <svg className="sidebar-artwork" viewBox="0 0 220 96" role="img" aria-label="旅行插画">
+    <svg className="sidebar-artwork" viewBox="0 0 220 96" role="img" aria-label={t('nav.artwork')}>
       <defs>
         <linearGradient id="tt-sky" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#F6DFC9" stopOpacity=".55" />
@@ -57,23 +61,28 @@ function SidebarArtwork() {
 
 export function AppSidebar({ activeTripId, badges, open, onClose }: { activeTripId: number | null; badges: SidebarBadges; open?: boolean; onClose?: () => void }) {
   const pathname = usePathname()
+  const t = useT()
   const { main, secondary } = sidebarItems(activeTripId)
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
 
-  const isActive = (href: string) => {
+  const isActive = ({ href, label }: Item) => {
     if (href === '/') return pathname === '/'
-    if (href === '/trips') return pathname === '/trips'
+    // 没有当前旅行时，地图 / 照片 / Travel Story / 成就会回落到旅行列表；这时只高亮“我的旅行”本身
+    if (href === '/trips') return label === 'nav.myTrips' && pathname === '/trips'
     return pathname.startsWith(href.split('?')[0])
   }
 
-  const link = ({ href, label, icon: Icon, badge }: Item) => (
-    <Link key={label} href={href} className={isActive(href) ? 'active' : ''} onClick={onClose}>
+  const link = (item: Item) => {
+    const { href, label, icon: Icon, badge } = item
+    return (
+    <Link key={label} href={href} className={isActive(item) ? 'active' : ''} onClick={onClose}>
       <Icon aria-hidden="true" />
-      <span>{label}</span>
-      {mounted && badge && badges[badge] ? <i className="nav-dot" aria-label="有新内容" /> : null}
+      <span>{t(label)}</span>
+      {mounted && badge && badges[badge] ? <i className="nav-dot" aria-label={t('nav.newContent')} /> : null}
     </Link>
-  )
+    )
+  }
 
   return (
     <>
@@ -81,22 +90,21 @@ export function AppSidebar({ activeTripId, badges, open, onClose }: { activeTrip
       <aside className={`workspace-sidebar${open ? ' is-open' : ''}`}>
         <div className="sidebar-top">
           <Link href="/" className="workspace-brand" onClick={onClose}>
-            <span className="workspace-mark">旅</span>
-            <span><b>旅迹</b><small>TabiTrace</small></span>
+            <BrandLogo height={52} className="workspace-logo" />
           </Link>
-          {onClose && <button className="sidebar-close" onClick={onClose} aria-label="关闭导航"><X size={18} /></button>}
+          {onClose && <button className="sidebar-close" onClick={onClose} aria-label={t('nav.closeNav')}><X size={18} /></button>}
         </div>
 
-        <nav className="workspace-nav" aria-label="主导航">{main.map(link)}</nav>
+        <nav className="workspace-nav" aria-label={t('nav.mainNav')}>{main.map(link)}</nav>
         <div className="sidebar-divider" />
-        <nav className="workspace-nav" aria-label="次级导航">{secondary.map(link)}</nav>
+        <nav className="workspace-nav" aria-label={t('nav.secondaryNav')}>{secondary.map(link)}</nav>
 
         <div className="workspace-sidebar-bottom">
           <Link href="/pricing" className="sidebar-pro" onClick={onClose}>
             <span className="sidebar-pro-icon"><Crown size={16} /></span>
-            <span><b>升级 Trip Pro</b><small>解锁更多精彩功能</small></span>
+            <span><b>{t('nav.upgradePro')}</b><small>{t('nav.upgradeProSub')}</small></span>
           </Link>
-          <p className="sidebar-tagline">旅行，<br />让每一次出发都有意义。</p>
+          <p className="sidebar-tagline">{t('nav.taglineTop')}<br />{t('nav.taglineBottom')}</p>
           <SidebarArtwork />
         </div>
       </aside>

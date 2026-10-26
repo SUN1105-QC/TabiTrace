@@ -1,0 +1,133 @@
+name: tabi
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: '3'
+
+x-backend-environment: &backend-environment
+  SPRING_PROFILES_ACTIVE: prod
+  DB_URL: jdbc:mysql://mysql:3306/tabitrace?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC&allowPublicKeyRetrieval=true&sslMode=DISABLED
+  DB_USERNAME: tabitrace_app
+  DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in the server env file}
+  STORAGE_MODE: r2
+  R2_ENDPOINT: ${R2_ENDPOINT:-}
+  R2_ACCESS_KEY: ${R2_ACCESS_KEY:-}
+  R2_SECRET_KEY: ${R2_SECRET_KEY:-}
+  R2_BUCKET: ${R2_BUCKET:-}
+  R2_MUSIC_BUCKET: ${R2_MUSIC_BUCKET:-}
+  R2_PUBLIC_BASE_URL: ${R2_PUBLIC_BASE_URL:-}
+
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: tabitrace
+      MYSQL_USER: tabitrace_app
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD}
+      TZ: UTC
+    command: [--character-set-server=utf8mb4, --collation-server=utf8mb4_0900_ai_ci]
+    volumes:
+      - ${MYSQL_DATA_DIR:-/srv/sunows/data/mysql/tabi}:/var/lib/mysql
+    healthcheck:
+      test: [CMD-SHELL, 'MYSQL_PWD="$$MYSQL_ROOT_PASSWORD" mysql -h 127.0.0.1 -u root -Nse "SELECT 1" >/dev/null']
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 40s
+    mem_limit: 1g
+    logging: *logging
+
+  api:
+    image: tabitrace-api:${RELEASE_TAG:-local}
+    build:
+      context: .
+      dockerfile: backend/api/Dockerfile
+    restart: unless-stopped
+    init: true
+    environment:
+      <<: *backend-environment
+      SERVER_ADDRESS: 0.0.0.0
+      PORT: '8080'
+      APP_PUBLIC_URL: ${APP_URL:?Set APP_URL}
+      APP_API_URL: ${APP_URL:?Set APP_URL}
+      CORS_ALLOWED_ORIGINS: ${APP_URL:?Set APP_URL}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET}
+      TRUST_PROXY_HEADERS: 'false'
+      MAIL_PROVIDER: ${MAIL_PROVIDER:-smtp}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      MAIL_HOST: ${MAIL_HOST:-}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_SMTP_AUTH: ${MAIL_SMTP_AUTH:-true}
+      MAIL_SMTP_STARTTLS: ${MAIL_SMTP_STARTTLS:-true}
+      MAIL_SMTP_SSL: ${MAIL_SMTP_SSL:-false}
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-}
+      MAIL_FROM_NAME: 旅迹 TabiTrace
+      PAYMENTS_MODE: stripe
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      VIDEO_MOCK_RENDERER: 'false'
+    ports:
+      - 127.0.0.1:18080:8080
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, curl, --fail, --silent, --max-time, '5', http://127.0.0.1:8080/actuator/health]
+      interval: 15s
+      timeout: 8s
+      retries: 20
+      start_period: 60s
+    stop_grace_period: 30s
+    mem_limit: 1g
+    logging: *logging
+
+  web:
+    image: tabitrace-web:${RELEASE_TAG:-local}
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        APP_URL: ${APP_URL:?Set APP_URL}
+        NEXT_PUBLIC_MAP_STYLE_URL: ${NEXT_PUBLIC_MAP_STYLE_URL:-}
+        NEXT_PUBLIC_MAP_TILE_URL: ${NEXT_PUBLIC_MAP_TILE_URL:-}
+        NEXT_PUBLIC_MAP_ATTRIBUTION: ${NEXT_PUBLIC_MAP_ATTRIBUTION:-}
+        NEXT_PUBLIC_MAP_API_KEY: ${NEXT_PUBLIC_MAP_API_KEY:-}
+    restart: unless-stopped
+    init: true
+    environment:
+      APP_URL: ${APP_URL:?Set APP_URL}
+    ports:
+      - 127.0.0.1:13000:3000
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 8s
+      retries: 10
+      start_period: 30s
+    mem_limit: 768m
+    logging: *logging
+
+  worker:
+    image: tabitrace-worker:${RELEASE_TAG:-local}
+    build:
+      context: .
+      dockerfile: backend/video-worker/Dockerfile
+    restart: unless-stopped
+    init: true
+    environment:
+      <<: *backend-environment
+    depends_on:
+      api:
+        condition: service_healthy
+    stop_grace_period: 40s
+    mem_limit: 2g
+    logging: *logging

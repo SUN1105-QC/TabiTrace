@@ -33,18 +33,24 @@ public class JwtService {
 
     /** sid 为同时签发的 refresh token 的 jti，用于识别“当前设备”的登录会话 */
     public String createAccessToken(Long userId, String email, String sid) {
-        return createToken(userId, email, "ACCESS", UUID.randomUUID().toString(), accessTtl, sid);
+        return createAccessToken(userId, email, sid, null);
+    }
+
+    /** session：登录会话编号（刷新令牌前后不变），每次请求据此确认会话没有被退出或移除 */
+    public String createAccessToken(Long userId, String email, String sid, String session) {
+        return createToken(userId, email, "ACCESS", UUID.randomUUID().toString(), accessTtl, sid, session);
     }
 
     public TokenWithJti createRefreshToken(Long userId, String email) {
         String jti = UUID.randomUUID().toString();
-        return new TokenWithJti(createToken(userId, email, "REFRESH", jti, refreshTtl, null), jti, Instant.now().plus(refreshTtl));
+        return new TokenWithJti(createToken(userId, email, "REFRESH", jti, refreshTtl, null, null), jti, Instant.now().plus(refreshTtl));
     }
 
-    private String createToken(Long userId, String email, String type, String jti, Duration ttl, String sid) {
+    private String createToken(Long userId, String email, String type, String jti, Duration ttl, String sid, String session) {
         Instant now = Instant.now();
         var builder = Jwts.builder();
         if (sid != null) builder.claim("sid", sid);
+        if (session != null) builder.claim("sess", session);
         return builder
                 .subject(String.valueOf(userId))
                 .id(jti)

@@ -27,8 +27,6 @@ class UserSettingsRulesTest {
         assertThrows(BusinessException.class, () -> UserService.requireLocale("fr-FR"));
         assertEquals("MI", UserService.requireDistanceUnit("MI"));
         assertThrows(BusinessException.class, () -> UserService.requireDistanceUnit("mile"));
-        assertEquals("UNLISTED", UserService.requireVisibility("UNLISTED"));
-        assertThrows(BusinessException.class, () -> UserService.requireVisibility("PUBLIC"));
         assertEquals(30, UserService.requireExpiryDays(30));
         assertThrows(BusinessException.class, () -> UserService.requireExpiryDays(3));
     }

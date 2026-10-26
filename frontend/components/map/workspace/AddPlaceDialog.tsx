@@ -79,7 +79,7 @@ export function AddPlaceDialog({ trip, official, days, day, inTrip, hidden, pick
     window.clearTimeout(timer.current)
     const text = value.trim()
     if (!text) { setResults([]); setSearchError(''); setSearching(false); return }
-    timer.current = window.setTimeout(async () => {
+    timer.current = window.setTimeout(() => { void (async () => {
       const mine = ++seq.current
       setSearching(true); setSearchError('')
       try {
@@ -90,7 +90,7 @@ export function AddPlaceDialog({ trip, official, days, day, inTrip, hidden, pick
       } finally {
         if (mine === seq.current) setSearching(false)
       }
-    }, 300)
+    })() }, 300)
   }
 
   const schedule = async (key: string, run: () => Promise<{ selectKey?: string }>, name: string) => {

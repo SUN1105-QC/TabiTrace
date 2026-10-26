@@ -6,6 +6,7 @@
  * 状态、进度文案、行动入口统一由 utils/achievements 决定。
  */
 
+import { PageContainer } from '@/components/common/PageContainer'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { MapPin, RefreshCcw, TriangleAlert } from 'lucide-react'
@@ -95,14 +96,14 @@ export default function AchievementsPage() {
     return (
       <main>
         <SiteHeader />
-        <div className="ac-page">
+        <PageContainer variant="medium" className="ac-page">
           <div className="ac-error" role="alert">
             <TriangleAlert size={22} />
             <p>旅行成就加载失败</p>
             <small>{error || '旅行不存在或无权访问'}</small>
             <button type="button" className="ac-action is-primary" onClick={() => void load()}><RefreshCcw size={14} /> 重新加载</button>
           </div>
-        </div>
+        </PageContainer>
       </main>
     )
   }
@@ -110,7 +111,7 @@ export default function AchievementsPage() {
   return (
     <main>
       <SiteHeader />
-      <div className="ac-page">
+      <PageContainer variant="medium" className="ac-page">
         <LiveTripSubnav tripId={tripId} />
         {items.length === 0 ? (
           <section className="ac-empty">
@@ -156,7 +157,7 @@ export default function AchievementsPage() {
             <AchievementClosing remaining={items.length - counts.unlocked} exploreHref={cities[0]?.explore ?? `/trips/${tripId}/map`} city={cities[0]} />
           </>
         )}
-      </div>
+      </PageContainer>
       {detail && <AchievementDetail achievement={detail} tripId={tripId} tripTitle={tripTitle} onClose={() => setDetail(null)} onCheckin={checkin} />}
     </main>
   )
@@ -164,7 +165,7 @@ export default function AchievementsPage() {
 
 function AchievementsSkeleton() {
   return (
-    <div className="ac-page" aria-busy="true" aria-label="正在加载旅行成就">
+    <PageContainer variant="medium" className="ac-page" aria-busy="true" aria-label="正在加载旅行成就">
       <div className="ac-hero">
         <div className="ac-hero-text">
           <div className="skeleton" style={{ width: 160, height: 12, borderRadius: 6 }} />
@@ -177,6 +178,6 @@ function AchievementsSkeleton() {
       <div className="skeleton" style={{ height: 64, borderRadius: 16, marginTop: 24 }} />
       <div className="ac-next" style={{ marginTop: 40 }}>{[0, 1, 2].map(i => <div key={i} className="skeleton" style={{ height: 190, borderRadius: 16 }} />)}</div>
       <div className="ac-grid" style={{ marginTop: 40 }}>{[0, 1, 2, 3, 4, 5].map(i => <div key={i} className="skeleton" style={{ height: 260, borderRadius: 18 }} />)}</div>
-    </div>
+    </PageContainer>
   )
 }

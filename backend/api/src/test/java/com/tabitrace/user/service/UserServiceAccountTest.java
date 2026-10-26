@@ -56,21 +56,57 @@ class UserServiceAccountTest {
 
     @Test
     void avatarMustLiveInOwnFolderAndBeUploaded() {
-        assertThrows(BusinessException.class, () -> service.setAvatar(7L, "users/8/avatar/x.jpg"));
-        assertThrows(BusinessException.class, () -> service.setAvatar(7L, "users/7/avatar/../../8/x.jpg"));
+        assertThrows(BusinessException.class, () -> service.setAvatar(7L, "users/8/avatar/x.jpg", null));
+        assertThrows(BusinessException.class, () -> service.setAvatar(7L, "users/7/avatar/../../8/x.jpg", null));
         when(storage.exists("users/7/avatar/x.jpg")).thenReturn(false);
-        assertThrows(BusinessException.class, () -> service.setAvatar(7L, "users/7/avatar/x.jpg"));
+        assertThrows(BusinessException.class, () -> service.setAvatar(7L, "users/7/avatar/x.jpg", null));
         when(storage.exists("users/7/avatar/y.jpg")).thenReturn(true);
         when(storage.publicUrl("users/7/avatar/y.jpg")).thenReturn("http://files/y.jpg");
-        service.setAvatar(7L, "users/7/avatar/y.jpg");
-        verify(users).updateAvatar(7L, "http://files/y.jpg");
+        service.setAvatar(7L, "users/7/avatar/y.jpg", null);
+        verify(users).updateAvatar(7L, "http://files/y.jpg", null);
+    }
+
+    @Test
+    void avatarSmallImageFollowsTheSameRules() {
+        when(storage.exists("users/7/avatar/y.jpg")).thenReturn(true);
+        when(storage.exists("users/7/avatar/y-small.jpg")).thenReturn(true);
+        when(storage.publicUrl("users/7/avatar/y.jpg")).thenReturn("http://files/y.jpg");
+        when(storage.publicUrl("users/7/avatar/y-small.jpg")).thenReturn("http://files/y-small.jpg");
+        // 小图不在自己的头像目录、没有上传、或与原图是同一个文件：拒绝，且不改动任何数据
+        assertThrows(BusinessException.class, () -> service.setAvatar(7L, "users/7/avatar/y.jpg", "users/8/avatar/s.jpg"));
+        assertThrows(BusinessException.class, () -> service.setAvatar(7L, "users/7/avatar/y.jpg", "users/7/avatar/missing.jpg"));
+        assertThrows(BusinessException.class, () -> service.setAvatar(7L, "users/7/avatar/y.jpg", "users/7/avatar/y.jpg"));
+        verify(users, never()).updateAvatar(any(), any(), any());
+        service.setAvatar(7L, "users/7/avatar/y.jpg", "users/7/avatar/y-small.jpg");
+        verify(users).updateAvatar(7L, "http://files/y.jpg", "http://files/y-small.jpg");
     }
 
     @Test
     void avatarPresignOnlyAcceptsSmallWebImages() {
         assertThrows(BusinessException.class, () -> service.presignAvatar(7L, new AvatarPresignRequest("a.gif", "image/gif", 100L)));
         assertThrows(BusinessException.class, () -> service.presignAvatar(7L, new AvatarPresignRequest("a.jpg", "image/jpeg", 6L * 1024 * 1024)));
+        assertThrows(BusinessException.class, () -> service.presignAvatar(7L, new AvatarPresignRequest("a.jpg", "image/jpeg", null)));
         service.presignAvatar(7L, new AvatarPresignRequest("a.jpg", "image/jpeg", 200_000L));
-        verify(storage).presignKey(startsWith("users/7/avatar/"), eq("image/jpeg"));
+        // 上传地址按声明的大小签发：对象存储会拒绝更大的文件
+        verify(storage).presignKey(startsWith("users/7/avatar/"), eq("image/jpeg"), eq(200_000L));
+    }
+
+    @Test
+    void replacingOrRemovingAvatarDeletesTheOldObjectOfThisUserOnly() {
+        UserEntity u = new UserEntity(); u.id = 7L; u.email = "a@example.test"; u.avatarUrl = "https://media/users/7/avatar/old.jpg"; u.avatarSmallUrl = "https://media/users/7/avatar/old-small.jpg";
+        when(users.findById(7L)).thenReturn(u);
+        when(storage.keyOf("https://media/users/7/avatar/old.jpg")).thenReturn("users/7/avatar/old.jpg");
+        when(storage.keyOf("https://media/users/7/avatar/old-small.jpg")).thenReturn("users/7/avatar/old-small.jpg");
+        service.removeAvatar(7L);
+        verify(storage).delete("users/7/avatar/old.jpg");
+        verify(storage).delete("users/7/avatar/old-small.jpg");
+        verify(users).updateAvatar(7L, null, null);
+        u.avatarSmallUrl = null;
+
+        // 不属于该用户头像目录的地址不会被删除
+        u.avatarUrl = "https://media/users/8/avatar/other.jpg";
+        when(storage.keyOf("https://media/users/8/avatar/other.jpg")).thenReturn("users/8/avatar/other.jpg");
+        service.removeAvatar(7L);
+        verify(storage, never()).delete("users/8/avatar/other.jpg");
     }
 }

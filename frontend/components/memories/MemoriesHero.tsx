@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { ArrowRight, Clock3, Compass, Plus } from 'lucide-react'
 import type { MemoryTrip } from '@/services/memories'
 import { FeaturedMemoryCard } from './MemoryTripCard'
+import { BrandMark } from '@/components/common/Brand'
 
 export function MemoriesHero({ featured, chips, onJump }: {
   featured: MemoryTrip | null
@@ -42,7 +43,7 @@ export function MemoriesHero({ featured, chips, onJump }: {
       </div>
       {featured ? <FeaturedMemoryCard trip={featured} /> : (
         <div className="mm-card mm-hero-guide">
-          <span className="mm-hero-guide-mark">旅</span>
+          <BrandMark size={56} className="mm-hero-guide-mark" />
           <p>完成一次旅行后，这里会为你保存旅途回忆。</p>
           <small>在旅行页点击「完成旅行」，它就会连同照片、成就、分享成果与 Travel Story 一起归档到这里。</small>
         </div>

@@ -8,6 +8,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -38,6 +40,15 @@ public class SecurityConfig {
     }
 
     @Bean PasswordEncoder passwordEncoder() { return new BCryptPasswordEncoder(); }
+
+    /**
+     * 登录只走 JWT（AuthService），不使用 Spring Security 的用户名密码体系。
+     * 显式声明一个不含任何用户的 UserDetailsService，Spring Boot 就不会再生成默认用户，
+     * 也不会把生成的密码打印到启动日志里。
+     */
+    @Bean UserDetailsService userDetailsService() {
+        return username -> { throw new UsernameNotFoundException("not supported"); };
+    }
 
     @Bean
     CorsConfigurationSource corsConfigurationSource(@Value("${app.cors.allowed-origins:http://localhost:3000}") String origins) {

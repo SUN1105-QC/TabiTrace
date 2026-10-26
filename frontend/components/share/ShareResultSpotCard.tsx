@@ -5,6 +5,7 @@
 
 import type { CheckinView, TimelinePhoto } from '@/services/tabitrace-api'
 import { timeOfDay } from '@/lib/time'
+import { photoMedium } from '@/utils/photo-variants'
 
 export function ShareResultSpotCard({ checkin, photos, reverse }: {
   checkin: CheckinView
@@ -39,10 +40,10 @@ export function ShareResultSpotCard({ checkin, photos, reverse }: {
         <span className="sl-spot-count">{photos.length} 张照片</span>
       </div>
       <div className="sl-spot-media">
-        <img className="sl-spot-main" src={main.imageUrl} crossOrigin="anonymous" alt={checkin.placeName} />
+        <img className="sl-spot-main" src={photoMedium(main)} crossOrigin="anonymous" alt={checkin.placeName} />
         {rest.length > 0 && (
           <div className="sl-spot-thumbs">
-            {rest.slice(0, 4).map(p => <img key={p.id} src={p.imageUrl} crossOrigin="anonymous" alt={checkin.placeName} />)}
+            {rest.slice(0, 4).map(p => <img key={p.id} src={photoMedium(p)} crossOrigin="anonymous" alt={checkin.placeName} />)}
           </div>
         )}
       </div>

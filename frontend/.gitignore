@@ -2,5 +2,9 @@ node_modules
 .next
 out
 .env*
+!.env*.example
 *.log
 .DS_Store
+
+# 景点高清原图（源素材，约 121MB）：不进仓库、不发布；按 assets-src/places/SOURCES.json 可重新下载
+/assets-src/places/*.jpg

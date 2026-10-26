@@ -5,16 +5,19 @@
 
 import type { DistanceUnit, UserSettingsInput, UserView } from '@/services/tabitrace-api'
 import { formatCurrency } from '@/utils/currency'
+import { relativeTime } from '@/lib/time'
+import { DEFAULT_LOCALE, DEFAULT_TIMEZONE, SUPPORTED_LOCALES, deviceTimeZone } from '@/lib/preferences'
+import { LOCALE_NAMES, type MessageKey, type TFunction } from '@/i18n'
 
 export type SettingsTab = 'profile' | 'preferences' | 'privacy' | 'notifications' | 'security' | 'pro'
 
-export const SETTINGS_TABS: { key: SettingsTab; label: string }[] = [
-  { key: 'profile', label: '个人资料' },
-  { key: 'preferences', label: '旅行偏好' },
-  { key: 'privacy', label: '隐私与分享' },
-  { key: 'notifications', label: '通知' },
-  { key: 'security', label: '账户与安全' },
-  { key: 'pro', label: 'Trip Pro' }
+export const SETTINGS_TABS: { key: SettingsTab; label: MessageKey }[] = [
+  { key: 'profile', label: 'settings.tabs.profile' },
+  { key: 'preferences', label: 'settings.tabs.preferences' },
+  { key: 'privacy', label: 'settings.tabs.privacy' },
+  { key: 'notifications', label: 'settings.tabs.notifications' },
+  { key: 'security', label: 'settings.tabs.security' },
+  { key: 'pro', label: 'settings.tabs.pro' }
 ]
 
 export const isSettingsTab = (v: string | null): v is SettingsTab => SETTINGS_TABS.some(t => t.key === v)
@@ -40,8 +43,8 @@ export function draftFromUser(u: UserView): SettingsDraft {
   return {
     nickname: u.nickname ?? '',
     bio: u.bio ?? '',
-    locale: u.locale || 'zh-CN',
-    timezone: u.timezone || 'Asia/Tokyo',
+    locale: u.locale || DEFAULT_LOCALE,
+    timezone: u.timezone || DEFAULT_TIMEZONE,
     distanceUnit: u.distanceUnit === 'MI' ? 'MI' : 'KM',
     shareExactLocation: Boolean(u.shareExactLocation),
     shareLinkExpiryDays: u.shareLinkExpiryDays ?? 0
@@ -67,12 +70,12 @@ const length = (s: string) => Array.from(s).length
 
 export type FieldErrors = Partial<Record<'nickname' | 'bio' | 'timezone', string>>
 
-export function validateDraft(d: SettingsDraft): FieldErrors {
+export function validateDraft(d: SettingsDraft, t: TFunction): FieldErrors {
   const errors: FieldErrors = {}
   const nick = d.nickname.trim()
-  if (!nick) errors.nickname = '昵称不能为空'
-  else if (length(nick) > NICKNAME_MAX) errors.nickname = `昵称最多 ${NICKNAME_MAX} 个字`
-  if (length(d.bio.trim()) > BIO_MAX) errors.bio = `个人简介最多 ${BIO_MAX} 个字`
+  if (!nick) errors.nickname = t('settings.profile.nicknameRequired')
+  else if (length(nick) > NICKNAME_MAX) errors.nickname = t('settings.profile.nicknameTooLong', { max: NICKNAME_MAX })
+  if (length(d.bio.trim()) > BIO_MAX) errors.bio = t('settings.profile.bioTooLong', { max: BIO_MAX })
   return errors
 }
 
@@ -91,62 +94,36 @@ export const TAB_FIELDS: Partial<Record<SettingsTab, readonly (typeof DRAFT_KEYS
   privacy: ['shareExactLocation', 'shareLinkExpiryDays']
 }
 
-export const LOCALES: [string, string][] = [['zh-CN', '简体中文'], ['ja-JP', '日本語'], ['en-US', 'English']]
+/** 语言选项：名称用各自的语言书写，不随界面语言变化 */
+export const LOCALES: [string, string][] = SUPPORTED_LOCALES.map(l => [l, LOCALE_NAMES[l]])
 
 /** 常用旅行时区；用户已保存的值或当前设备时区不在列表里时会被补进来 */
-export const COMMON_TIMEZONES: [string, string][] = [
-  ['Asia/Tokyo', '东京 · 日本'],
-  ['Asia/Shanghai', '北京 / 上海 · 中国'],
-  ['Asia/Hong_Kong', '香港'],
-  ['Asia/Taipei', '台北'],
-  ['Asia/Seoul', '首尔 · 韩国'],
-  ['Asia/Singapore', '新加坡'],
-  ['Asia/Bangkok', '曼谷 · 泰国'],
-  ['Europe/London', '伦敦 · 英国'],
-  ['Europe/Paris', '巴黎 · 法国'],
-  ['America/New_York', '纽约 · 美国东部'],
-  ['America/Los_Angeles', '洛杉矶 · 美国西部'],
-  ['Australia/Sydney', '悉尼 · 澳大利亚'],
-  ['UTC', 'UTC 协调世界时']
-]
+export const COMMON_TIMEZONES = ['Asia/Tokyo', 'Asia/Shanghai', 'Asia/Hong_Kong', 'Asia/Taipei', 'Asia/Seoul', 'Asia/Singapore', 'Asia/Bangkok', 'Europe/London', 'Europe/Paris', 'America/New_York', 'America/Los_Angeles', 'Australia/Sydney', 'UTC'] as const
 
-export function deviceTimezone(): string | null {
-  try { return Intl.DateTimeFormat().resolvedOptions().timeZone || null } catch { return null }
-}
+export const deviceTimezone = deviceTimeZone
 
-export function timezoneOptions(current: string): [string, string][] {
-  const list = [...COMMON_TIMEZONES]
-  const device = deviceTimezone()
-  if (device && !list.some(([v]) => v === device)) list.unshift([device, `${device}（当前设备）`])
+/** 常用时区（名称随界面语言）；用户已保存的值或当前设备时区不在列表里时补进来 */
+export function timezoneOptions(current: string, t: TFunction): [string, string][] {
+  const list: [string, string][] = COMMON_TIMEZONES.map(z => [z, t(`settings.zones.${z}` as MessageKey)])
+  const device = deviceTimeZone()
+  if (device && !list.some(([v]) => v === device)) list.unshift([device, t('settings.prefs.deviceZone', { zone: device })])
   if (current && !list.some(([v]) => v === current)) list.unshift([current, current])
   return list
 }
 
-export const SHARE_EXPIRY_OPTIONS: [number, string][] = [[0, '长期有效'], [7, '7 天后失效'], [30, '30 天后失效']]
+export const SHARE_EXPIRY_OPTIONS: [number, MessageKey][] = [[0, 'settings.privacy.expiryForever'], [7, 'settings.privacy.expiry7'], [30, 'settings.privacy.expiry30']]
 
 /** 2026-09-19T09:28:54 → 2026.09.19 */
 export const dotDate = (iso?: string | null) => (iso ? iso.slice(0, 10).replace(/-/g, '.') : '')
 
-export function joinedLabel(iso?: string | null) {
+export function joinedLabel(iso: string | null | undefined, t: TFunction) {
   if (!iso) return ''
   const [y, m] = iso.slice(0, 7).split('-')
-  return `${y} 年 ${Number(m)} 月加入`
+  return t('settings.summary.joined', { year: y, month: Number(m) })
 }
 
 /** 金额显示统一走 utils/currency.formatCurrency */
 export const formatMoney = formatCurrency
 
-/** 会话时间（后端为 UTC 本地时间字符串）→ 相对描述 */
-export function sessionTime(iso: string) {
-  const t = Date.parse(iso.endsWith('Z') ? iso : iso + 'Z')
-  if (!Number.isFinite(t)) return ''
-  const diff = Date.now() - t
-  const min = Math.round(diff / 60000)
-  if (min < 1) return '刚刚'
-  if (min < 60) return `${min} 分钟前`
-  const h = Math.round(min / 60)
-  if (h < 24) return `${h} 小时前`
-  const d = Math.round(h / 24)
-  if (d < 30) return `${d} 天前`
-  return dotDate(new Date(t).toISOString())
-}
+/** 会话时间（后端为 UTC 时间字符串）→ 按界面语言的相对描述（统一走 lib/time.relativeTime） */
+export const sessionTime = (iso: string) => relativeTime(iso)

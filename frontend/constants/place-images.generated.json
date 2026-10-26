@@ -1,0 +1,912 @@
+{
+  "01-sensoji-kaminarimon": {
+    "subject": "浅草寺·雷门",
+    "original": {
+      "file": "01-sensoji-kaminarimon.jpg",
+      "width": 4032,
+      "height": 3024,
+      "bytes": 1777600
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 480,
+        "bytes": 55148
+      },
+      "1280": {
+        "width": 1280,
+        "height": 960,
+        "bytes": 159860
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1440,
+        "bytes": 340848
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1920,
+        "bytes": 476886
+      }
+    },
+    "author": "Christophe95",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Kaminarimon_at_Sens%C5%8Dji.jpg"
+  },
+  "02-nakamise-street": {
+    "subject": "仲见世商店街",
+    "original": {
+      "file": "02-nakamise-street.jpg",
+      "width": 3194,
+      "height": 2396,
+      "bytes": 1505919
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 480,
+        "bytes": 32656
+      },
+      "1280": {
+        "width": 1280,
+        "height": 960,
+        "bytes": 87342
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1440,
+        "bytes": 171296
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1920,
+        "bytes": 221516
+      }
+    },
+    "author": "そらみみ (Soramimi)",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Nakamise_Street_in_front_of_Hozomon_Gate_of_Sensoji_Temple.jpg"
+  },
+  "03-tokyo-tower": {
+    "subject": "东京塔",
+    "original": {
+      "file": "03-tokyo-tower.jpg",
+      "width": 3000,
+      "height": 4000,
+      "bytes": 3079319
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 853,
+        "bytes": 44634
+      },
+      "1280": {
+        "width": 1280,
+        "height": 1707,
+        "bytes": 154114
+      },
+      "1920": {
+        "width": 1920,
+        "height": 2560,
+        "bytes": 314480
+      },
+      "2560": {
+        "width": 2560,
+        "height": 3413,
+        "bytes": 410414
+      }
+    },
+    "author": "Yoshikazu TAKADA from Tokyo, Japan",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Tokyo_Tower_(4082187401).jpg"
+  },
+  "04-tokyo-skytree": {
+    "subject": "东京晴空塔",
+    "original": {
+      "file": "04-tokyo-skytree.jpg",
+      "width": 2400,
+      "height": 1800,
+      "bytes": 3027905
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 480,
+        "bytes": 31564
+      },
+      "1280": {
+        "width": 1280,
+        "height": 960,
+        "bytes": 100082
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1440,
+        "bytes": 221640
+      },
+      "2560": {
+        "width": 2400,
+        "height": 1800,
+        "bytes": 300414
+      }
+    },
+    "author": "Douglas P. Perkins",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:TokyoSkyTree.jpg"
+  },
+  "05-ginza-wako": {
+    "subject": "银座和光",
+    "original": {
+      "file": "05-ginza-wako.jpg",
+      "width": 4320,
+      "height": 3240,
+      "bytes": 4640596
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 480,
+        "bytes": 51838
+      },
+      "1280": {
+        "width": 1280,
+        "height": 960,
+        "bytes": 131198
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1440,
+        "bytes": 269362
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1920,
+        "bytes": 362084
+      }
+    },
+    "author": "R2d2ki",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Ginza_Wako.jpg"
+  },
+  "06-ginza-six": {
+    "subject": "GINZA SIX",
+    "original": {
+      "file": "06-ginza-six.jpg",
+      "width": 3072,
+      "height": 2048,
+      "bytes": 989933
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 46246
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 119140
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 217552
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1707,
+        "bytes": 278950
+      }
+    },
+    "author": "ITA-ATU",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Ginza_Six_01.jpg"
+  },
+  "07-tokyo-station": {
+    "subject": "东京站·丸之内",
+    "original": {
+      "file": "07-tokyo-station.jpg",
+      "width": 4032,
+      "height": 3024,
+      "bytes": 3779941
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 480,
+        "bytes": 43120
+      },
+      "1280": {
+        "width": 1280,
+        "height": 960,
+        "bytes": 153732
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1440,
+        "bytes": 374946
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1920,
+        "bytes": 552286
+      }
+    },
+    "author": "Funasan",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Tokyo_station.jpg"
+  },
+  "08-imperial-palace": {
+    "subject": "皇居",
+    "original": {
+      "file": "08-imperial-palace.jpg",
+      "width": 3872,
+      "height": 2592,
+      "bytes": 4035712
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 428,
+        "bytes": 47422
+      },
+      "1280": {
+        "width": 1280,
+        "height": 857,
+        "bytes": 137330
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1285,
+        "bytes": 261088
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1714,
+        "bytes": 331232
+      }
+    },
+    "author": "Parag.naik",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Imperial_palace.jpg"
+  },
+  "09-shibuya-crossing": {
+    "subject": "涩谷十字路口",
+    "original": {
+      "file": "09-shibuya-crossing.jpg",
+      "width": 4032,
+      "height": 2268,
+      "bytes": 3228112
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 360,
+        "bytes": 70308
+      },
+      "1280": {
+        "width": 1280,
+        "height": 720,
+        "bytes": 221774
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1080,
+        "bytes": 466454
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1440,
+        "bytes": 675736
+      }
+    },
+    "author": "Joli Rumi",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Shibuya_crossing,_Tokyo,_Japan.jpg"
+  },
+  "10-hachiko-statue": {
+    "subject": "忠犬八公像",
+    "original": {
+      "file": "10-hachiko-statue.jpg",
+      "width": 4032,
+      "height": 2268,
+      "bytes": 4286557
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 360,
+        "bytes": 77136
+      },
+      "1280": {
+        "width": 1280,
+        "height": 720,
+        "bytes": 285194
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1080,
+        "bytes": 643118
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1440,
+        "bytes": 960830
+      }
+    },
+    "author": "Joli Rumi",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:The_Hachiko_statue_at_Shibuya,_Tokyo,_Japan.jpg"
+  },
+  "11-takeshita-street": {
+    "subject": "原宿·竹下通",
+    "original": {
+      "file": "11-takeshita-street.jpg",
+      "width": 4608,
+      "height": 3072,
+      "bytes": 5245238
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 55870
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 132782
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 240626
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1707,
+        "bytes": 302226
+      }
+    },
+    "author": "Dylan McGannon",
+    "license": "CC0",
+    "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Takeshita_Street_in_Harajuku.jpg"
+  },
+  "12-omotesando": {
+    "subject": "表参道",
+    "original": {
+      "file": "12-omotesando.jpg",
+      "width": 4000,
+      "height": 3000,
+      "bytes": 3679653
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 480,
+        "bytes": 59092
+      },
+      "1280": {
+        "width": 1280,
+        "height": 960,
+        "bytes": 194338
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1440,
+        "bytes": 422690
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1920,
+        "bytes": 584210
+      }
+    },
+    "author": "Douglas Paul Perkins",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Omotesando.jpg"
+  },
+  "13-meiji-jingu": {
+    "subject": "明治神宫",
+    "original": {
+      "file": "13-meiji-jingu.jpg",
+      "width": 4032,
+      "height": 3024,
+      "bytes": 3424050
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 480,
+        "bytes": 64292
+      },
+      "1280": {
+        "width": 1280,
+        "height": 960,
+        "bytes": 234938
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1440,
+        "bytes": 520200
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1920,
+        "bytes": 752398
+      }
+    },
+    "author": "MediaByPanda",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Meiji_Jingu_Shrine_Tokyo_Japan.jpg"
+  },
+  "14-yoyogi-park": {
+    "subject": "代代木公园",
+    "original": {
+      "file": "14-yoyogi-park.jpg",
+      "width": 4032,
+      "height": 3024,
+      "bytes": 5964359
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 480,
+        "bytes": 129476
+      },
+      "1280": {
+        "width": 1280,
+        "height": 960,
+        "bytes": 421398
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1440,
+        "bytes": 891758
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1920,
+        "bytes": 1242114
+      }
+    },
+    "author": "Bernie Ongewe",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Yoyogi_Park.jpg"
+  },
+  "15-shinjuku-gyoen": {
+    "subject": "新宿御苑",
+    "original": {
+      "file": "15-shinjuku-gyoen.jpg",
+      "width": 6265,
+      "height": 4177,
+      "bytes": 15444885
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 62154
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 258860
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 631632
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1707,
+        "bytes": 1085328
+      }
+    },
+    "author": "Basile Morin",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Shinjuku_Gyoen_National_Garden_and_NTT_DoCoMo_Yoyogi_Building,_Tokyo,_Japan.jpg"
+  },
+  "16-tokyo-metropolitan-government": {
+    "subject": "东京都厅",
+    "original": {
+      "file": "16-tokyo-metropolitan-government.jpg",
+      "width": 5472,
+      "height": 3648,
+      "bytes": 14695113
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 62308
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 196146
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 409998
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1707,
+        "bytes": 566728
+      }
+    },
+    "author": "雑用部",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Tokyo_Metropolitan_Government_Building_night.jpg"
+  },
+  "17-kabukicho": {
+    "subject": "新宿·歌舞伎町",
+    "original": {
+      "file": "17-kabukicho.jpg",
+      "width": 4940,
+      "height": 3293,
+      "bytes": 13390421
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 426,
+        "bytes": 99220
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 295336
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 598142
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1706,
+        "bytes": 864298
+      }
+    },
+    "author": "dconvertini",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Shinjuku_%26_Kabukich%C5%8D,_Tokyo,_Japan_(48846314748).jpg"
+  },
+  "18-kanda-myojin": {
+    "subject": "神田明神",
+    "original": {
+      "file": "18-kanda-myojin.jpg",
+      "width": 4032,
+      "height": 3024,
+      "bytes": 4645888
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 480,
+        "bytes": 75694
+      },
+      "1280": {
+        "width": 1280,
+        "height": 960,
+        "bytes": 298482
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1440,
+        "bytes": 557448
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1920,
+        "bytes": 1033108
+      }
+    },
+    "author": "Immanuelle",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Kanda_Myojin.jpg"
+  },
+  "19-akihabara": {
+    "subject": "秋叶原电器街",
+    "original": {
+      "file": "19-akihabara.jpg",
+      "width": 6000,
+      "height": 4000,
+      "bytes": 14974976
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 49840
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 165422
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 337990
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1707,
+        "bytes": 528486
+      }
+    },
+    "author": "Benlisquare",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:JR_Akihabara_Station_Electric_Town_entrance_in_August_2025.jpg"
+  },
+  "20-ueno-park": {
+    "subject": "上野公园",
+    "original": {
+      "file": "20-ueno-park.jpg",
+      "width": 2592,
+      "height": 1944,
+      "bytes": 1283644
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 480,
+        "bytes": 111650
+      },
+      "1280": {
+        "width": 1280,
+        "height": 960,
+        "bytes": 341178
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1440,
+        "bytes": 700322
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1920,
+        "bytes": 962202
+      }
+    },
+    "author": "Bernard Gagnon",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Ueno_park.jpg"
+  },
+  "21-ueno-zoo-panda": {
+    "subject": "上野动物园·熊猫",
+    "original": {
+      "file": "21-ueno-zoo-panda.jpg",
+      "width": 1666,
+      "height": 2493,
+      "bytes": 1598621
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 958,
+        "bytes": 54454
+      },
+      "1280": {
+        "width": 1280,
+        "height": 1915,
+        "bytes": 148154
+      },
+      "1920": {
+        "width": 1666,
+        "height": 2493,
+        "bytes": 238204
+      },
+      "2560": {
+        "width": 1666,
+        "height": 2493,
+        "bytes": 209714
+      }
+    },
+    "author": "Cesar I. Martins from Jundiai, Brazil",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Panda_-_Ueno_Zoo_-_Tokyo_-_Japan_(15678355107).jpg"
+  },
+  "22-ameyoko": {
+    "subject": "阿美横丁",
+    "original": {
+      "file": "22-ameyoko.jpg",
+      "width": 2048,
+      "height": 1536,
+      "bytes": 881147
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 480,
+        "bytes": 55190
+      },
+      "1280": {
+        "width": 1280,
+        "height": 960,
+        "bytes": 146586
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1440,
+        "bytes": 268832
+      },
+      "2560": {
+        "width": 2048,
+        "height": 1536,
+        "bytes": 268662
+      }
+    },
+    "author": "Angus Chan（User:HKFumi）",
+    "license": "CC BY-SA 2.5",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.5",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Ameyoko_Ueno_Tokyo_Japan.jpg"
+  },
+  "23-tokyo-national-museum": {
+    "subject": "东京国立博物馆",
+    "original": {
+      "file": "23-tokyo-national-museum.jpg",
+      "width": 3916,
+      "height": 2936,
+      "bytes": 2000964
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 480,
+        "bytes": 25340
+      },
+      "1280": {
+        "width": 1280,
+        "height": 960,
+        "bytes": 84290
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1440,
+        "bytes": 186392
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1919,
+        "bytes": 274088
+      }
+    },
+    "author": "Drivephotographer",
+    "license": "CC0",
+    "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Tokyo_National_Museum.jpg"
+  },
+  "24-rainbow-bridge": {
+    "subject": "彩虹大桥",
+    "original": {
+      "file": "24-rainbow-bridge.jpg",
+      "width": 2560,
+      "height": 1920,
+      "bytes": 2203000
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 480,
+        "bytes": 22862
+      },
+      "1280": {
+        "width": 1280,
+        "height": 960,
+        "bytes": 65342
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1440,
+        "bytes": 131448
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1920,
+        "bytes": 189494
+      }
+    },
+    "author": "Tokumeigakarinoaoshima",
+    "license": "CC0",
+    "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Rainbow_Bridge,Tokyo.JPG"
+  },
+  "25-odaiba-seaside-park": {
+    "subject": "台场海滨公园",
+    "original": {
+      "file": "25-odaiba-seaside-park.jpg",
+      "width": 3648,
+      "height": 2736,
+      "bytes": 5206425
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 480,
+        "bytes": 45904
+      },
+      "1280": {
+        "width": 1280,
+        "height": 960,
+        "bytes": 181548
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1440,
+        "bytes": 395804
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1920,
+        "bytes": 548750
+      }
+    },
+    "author": "Guilhem Vellut from Annecy, France",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Odaiba_Seaside_Park_%40_Odaiba_(9730158335).jpg"
+  },
+  "26-tsukiji-outer-market": {
+    "subject": "筑地场外市场",
+    "original": {
+      "file": "26-tsukiji-outer-market.jpg",
+      "width": 3777,
+      "height": 2833,
+      "bytes": 2209672
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 480,
+        "bytes": 67478
+      },
+      "1280": {
+        "width": 1280,
+        "height": 960,
+        "bytes": 208222
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1440,
+        "bytes": 418136
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1920,
+        "bytes": 558856
+      }
+    },
+    "author": "Christophe95",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Tsukiji_Outer_Market.jpg"
+  }
+}

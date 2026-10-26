@@ -8,7 +8,7 @@ import { timeOfDay } from '@/lib/time'
 import type { GridPlace } from '@/utils/share-grid'
 import { cityEn, dotDate, weekdayOf } from '@/utils/share-long'
 import { cityKanji } from '@/utils/share-poster'
-import { ShareGridTile } from './ShareGridTile'
+import { ShareGridTile, type GridTileEdit } from './ShareGridTile'
 
 /** 地点用完后的补位内容：日期 / 足迹路线 / 城市名 */
 export type GridFiller =
@@ -16,11 +16,11 @@ export type GridFiller =
   | { kind: 'route'; label: string; names: string[] }
   | { kind: 'city' }
 
-export function ShareGridMemoTile({ place, filler, trip }: { place?: GridPlace; filler?: GridFiller; trip: TripView }) {
+export function ShareGridMemoTile({ place, filler, trip, edit }: { place?: GridPlace; filler?: GridFiller; trip: TripView; edit?: GridTileEdit }) {
   if (place) {
     const { checkin, day } = place
     return (
-      <ShareGridTile variant="memo">
+      <ShareGridTile variant="memo" edit={edit}>
         <span className="sg-memo-day">DAY {String(day).padStart(2, '0')} · {timeOfDay(checkin.checkinTime)}</span>
         <h4>{checkin.placeName}</h4>
         {checkin.area && <em className="sg-memo-area">{checkin.area}</em>}
@@ -30,7 +30,7 @@ export function ShareGridMemoTile({ place, filler, trip }: { place?: GridPlace; 
   }
   if (filler?.kind === 'date') {
     return (
-      <ShareGridTile variant="memo">
+      <ShareGridTile variant="memo" edit={edit}>
         <span className="sg-memo-day">{filler.label}</span>
         <h4 className="sg-memo-big">{dotDate(filler.date).slice(5)}</h4>
         <p className="sg-memo-note">{weekdayOf(filler.date)} · {filler.note}</p>
@@ -39,14 +39,14 @@ export function ShareGridMemoTile({ place, filler, trip }: { place?: GridPlace; 
   }
   if (filler?.kind === 'route') {
     return (
-      <ShareGridTile variant="memo">
+      <ShareGridTile variant="memo" edit={edit}>
         <span className="sg-memo-day">{filler.label}</span>
         <ol className="sg-memo-route">{filler.names.slice(0, 5).map((n, i) => <li key={`${n}-${i}`}>{n}</li>)}</ol>
       </ShareGridTile>
     )
   }
   return (
-    <ShareGridTile variant="memo">
+    <ShareGridTile variant="memo" edit={edit}>
       <span className="sg-memo-day">{cityEn(trip).toUpperCase()}</span>
       <h4 className="sg-memo-city">{cityKanji(trip)}</h4>
     </ShareGridTile>

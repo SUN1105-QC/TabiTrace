@@ -34,7 +34,7 @@ export function GlobalSearch({ activeTripId, onClose }: { activeTripId: number |
   useEffect(() => { setTimeout(() => inputRef.current?.focus(), 20) }, [])
 
   useEffect(() => {
-    (async () => {
+    void (async () => {
       try {
         const rows = await tripApi.list()
         setTrips(rows)
@@ -57,12 +57,12 @@ export function GlobalSearch({ activeTripId, onClose }: { activeTripId: number |
     if (q.length < 2) { setOfficial([]); return }
     let cancelled = false
     setSearchingOfficial(true)
-    const timer = setTimeout(async () => {
+    const timer = setTimeout(() => { void (async () => {
       try {
         const rows = await tripApi.searchPlaces(q)
         if (!cancelled) setOfficial(rows.slice(0, 5))
       } catch { if (!cancelled) setOfficial([]) } finally { if (!cancelled) setSearchingOfficial(false) }
-    }, 220)
+    })() }, 220)
     return () => { cancelled = true; clearTimeout(timer) }
   }, [query])
 
@@ -77,7 +77,7 @@ export function GlobalSearch({ activeTripId, onClose }: { activeTripId: number |
     places.filter(p => match(p.name) || match(p.area) || match(p.category)).slice(0, 5)
       .forEach(p => list.push({ group: '地点', label: p.name, hint: [p.area, p.city, p.sourceType === 'OFFICIAL' ? '官方地点' : '自定义地点'].filter(Boolean).join(' · '), href: `/trips/${tripIdFor()}/map`, icon: MapPin }))
     official.filter(p => !places.some(x => x.id === p.id)).slice(0, 4)
-      .forEach(p => list.push({ group: '地点', label: p.name, hint: `官方地点 · ${[p.area, p.city].filter(Boolean).join(' · ')}`, href: '/explore/tokyo', icon: MapPin }))
+      .forEach(p => list.push({ group: '地点', label: p.name, hint: `官方地点 · ${[p.area, p.city].filter(Boolean).join(' · ')}`, href: `/explore/tokyo#place-${p.id}`, icon: MapPin }))
     checkins.filter(c => match(c.placeName) || match(c.area) || match(c.note)).slice(0, 5)
       .forEach(c => list.push({ group: '打卡', label: c.placeName, hint: `${dateKeyOf(c.checkinTime) || ''}${c.area ? ' · ' + c.area : ''}`, href: `/trips/${c.tripId}/map`, icon: MapPin }))
     photos.filter(() => Boolean(q)).slice(0, 4)
@@ -86,7 +86,13 @@ export function GlobalSearch({ activeTripId, onClose }: { activeTripId: number |
     return list.slice(0, 18)
   }, [query, trips, places, checkins, photos, official, activeTripId])
 
-  const go = (href: string) => { onClose(); router.push(href) }
+  const go = (href: string) => {
+    onClose()
+    // 目标就在当前页面、只是锚点不同（例如在推荐探索里搜到另一个地点）：只改 hash，页面通过 hashchange 打开对应内容
+    const [path, hash] = href.split('#')
+    if (hash && path === window.location.pathname) { window.location.hash = hash; return }
+    router.push(href)
+  }
 
   const grouped = results.reduce<Record<string, Result[]>>((acc, r) => { (acc[r.group] ||= []).push(r); return acc }, {})
 

@@ -1,42 +1,191 @@
 /**
- * 推荐探索（东京探索指南）的展示规则：分类筛选、排序、标签文案、文字封面配色、距离，
- * 以及「全部地点」的混排节奏（标准卡 / 专题横幅 / 轻量信息卡）。
- * 地点内容与热度都来自后端官方内容库，这里不编造任何数据。
+ * 推荐探索（东京）的展示规则：页面只请求一次官方地点，其余全部在这里派生——
+ * 分类筛选、搜索、为你推荐、按区域探索、旅行灵感、排序与距离。
+ * 地点、区域、专题与热度都来自后端官方内容库，这里不编造数据；
+ * 唯一的编辑文案是区域的一句定位（AREA_NOTES），数据里没有的区域不会凭空出现。
  */
 
 import type { OfficialRouteView, PlaceView } from '@/services/tabitrace-api'
 
-export type FilterDef = { key: string; label: string; match: (p: PlaceView) => boolean; hidden?: boolean }
+// ───────────── 分类 ─────────────
+
+export type CategoryDef = { key: string; label: string; match: (p: PlaceView) => boolean; hidden?: boolean }
 
 const hasTag = (tag: string) => (p: PlaceView) => Boolean(p.tags?.includes(tag))
 const inCategory = (...cats: string[]) => (p: PlaceView) => cats.includes(p.category ?? '')
 
-/** 主分类（一排胶囊）+ 快捷入口 / 信息卡使用的隐藏分类 */
-export const FILTERS: FilterDef[] = [
+/**
+ * 分类胶囊（Hero 与「全部地点」共用这一份）。后端的类别是自由文本、标签是固定枚举，这里统一映射。
+ * hidden 的分类不显示胶囊，只用于旧链接（如成就页的 ?filter=NIGHT），选中时以可清除的胶囊出现。
+ */
+export const CATEGORIES: CategoryDef[] = [
   { key: 'ALL', label: '全部', match: () => true },
-  { key: 'HOT', label: '热门', match: p => (p.tripCount ?? 0) > 0 },
-  { key: 'LANDMARK', label: '地标', match: inCategory('地标', '城市地标', '观景台') },
-  { key: 'STREET', label: '街区', match: inCategory('街区') },
   { key: 'SHRINE', label: '寺社', match: inCategory('寺院', '神社') },
-  { key: 'MUSEUM', label: '展馆', match: inCategory('博物馆', '文化') },
-  { key: 'WALK', label: '散步', match: hasTag('WALK') },
-  { key: 'NIGHT', label: '夜景', match: hasTag('NIGHT') },
-  { key: 'FOOD', label: '美食', match: hasTag('FOOD') },
+  { key: 'CITY', label: '城市', match: inCategory('地标', '城市地标', '观景台', '街区', '商业') },
+  { key: 'PARK', label: '公园', match: inCategory('公园', '海滨') },
   { key: 'SHOP', label: '购物', match: hasTag('SHOP') },
-  { key: 'NATURE', label: '自然', match: hasTag('NATURE') },
+  { key: 'FOOD', label: '美食', match: hasTag('FOOD') },
+  { key: 'NIGHT', label: '夜景', match: hasTag('NIGHT') },
   { key: 'MUST', label: '必去地标', match: hasTag('MUST'), hidden: true },
+  { key: 'FIRST', label: '第一次来东京', match: hasTag('FIRST'), hidden: true },
   { key: 'PHOTO', label: '拍照出片', match: hasTag('PHOTO'), hidden: true },
+  { key: 'WALK', label: '城市漫步', match: hasTag('WALK'), hidden: true },
+  { key: 'NATURE', label: '自然', match: hasTag('NATURE'), hidden: true },
   { key: 'FREE', label: '免费景点', match: hasTag('FREE'), hidden: true },
   { key: 'RAIN', label: '雨天也适合', match: hasTag('RAIN'), hidden: true },
-  { key: 'FIRST', label: '第一次来东京', match: hasTag('FIRST'), hidden: true }
+  { key: 'MUSEUM', label: '展馆', match: inCategory('博物馆', '文化'), hidden: true }
 ]
-export const filterOf = (key: string) => FILTERS.find(f => f.key === key) ?? FILTERS[0]
+export const categoryOf = (key: string) => CATEGORIES.find(c => c.key === key) ?? CATEGORIES[0]
+
+/** 标签的中文名（卡片最多显示 2 个；MUST / FIRST 这类编辑标签在推荐卡上也有意义） */
+export const TAG_LABELS: Record<string, string> = {
+  CULTURE: '传统文化', PHOTO: '摄影', NIGHT: '夜景', WALK: '散步', FOOD: '美食', SHOP: '购物',
+  NATURE: '自然', FREE: '免费', RAIN: '雨天可去', FIRST: '第一次东京', MUST: '必去'
+}
+/** 卡片上展示的标签：去掉「必去 / 免费 / 雨天」这类不描述地点本身的标签 */
+const DESCRIPTIVE = ['CULTURE', 'PHOTO', 'NIGHT', 'WALK', 'FOOD', 'SHOP', 'NATURE']
+export const placeTags = (p: PlaceView, max = 2) => (p.tags ?? []).filter(t => DESCRIPTIVE.includes(t)).slice(0, max).map(t => TAG_LABELS[t])
+
+// ───────────── 视图模型 ─────────────
+
+export type PlaceStatus = { joined: Set<number>; checkedIn: Set<number>; favorites: Set<number> }
+
+/** 卡片只依赖这一份精简数据，不直接读原始 DTO 的十几个字段 */
+export type ExplorePlace = {
+  id: number
+  name: string
+  area: string
+  category: string
+  summary: string
+  imageUrl?: string
+  tags: string[]
+  joined: boolean
+  checkedIn: boolean
+  favorite: boolean
+  source: PlaceView
+}
+
+export function toExplorePlace(p: PlaceView, s: PlaceStatus): ExplorePlace {
+  return {
+    id: p.id, name: p.name, area: p.area ?? '东京', category: p.category ?? '地点',
+    summary: p.tagline ?? p.description ?? '', imageUrl: p.coverImage, tags: placeTags(p),
+    joined: s.joined.has(p.id), checkedIn: s.checkedIn.has(p.id), favorite: s.favorites.has(p.id), source: p
+  }
+}
+
+/** 推荐卡的一行提示：最佳时间 + 最多 2 个标签（例如「清晨 · 摄影 · 第一次东京」） */
+export function recommendLine(p: PlaceView) {
+  const time = p.bestTime?.split(/[\/／]/)[0]?.trim()
+  const tags = (p.tags ?? []).filter(t => ['PHOTO', 'NIGHT', 'CULTURE', 'FIRST', 'WALK', 'SHOP', 'FOOD'].includes(t)).slice(0, 2).map(t => TAG_LABELS[t])
+  return [time, ...tags].filter(Boolean).join(' · ')
+}
+
+// ───────────── 搜索 ─────────────
+
+const norm = (s: string) => s.toLowerCase().replace(/\s+/g, '')
+
+/** 按地点名、区域、类别、简介、标签与分类名搜索（例如「浅草」「银座」「寺社」「夜景」「公园」） */
+export function searchPlaces(list: PlaceView[], query: string) {
+  const q = norm(query)
+  if (!q) return list
+  return list.filter(p => {
+    const groups = CATEGORIES.filter(c => c.key !== 'ALL' && c.match(p)).map(c => c.label)
+    const text = [p.name, p.area, p.category, p.tagline, ...(p.tags ?? []).map(t => TAG_LABELS[t]), ...groups].filter(Boolean).join('|')
+    return norm(text).includes(q)
+  })
+}
+
+// ───────────── 为你推荐（规则推荐，不随机） ─────────────
+
+/** 推荐时用来保证多样性的大类：传统 / 自然 / 购物美食 / 城市 */
+function kindOf(p: PlaceView) {
+  const c = p.category ?? ''
+  if (['寺院', '神社', '博物馆', '文化'].includes(c)) return 'TRADITION'
+  if (['公园', '海滨'].includes(c)) return 'NATURE'
+  if (['商业', '市场'].includes(c) || p.tags?.includes('SHOP') || p.tags?.includes('FOOD')) return 'SHOPPING'
+  return 'CITY'
+}
+
+/** 分数：编辑排序 > 必去 / 第一次来 > 有真实封面 > 热度；已打卡大幅降权 */
+function score(p: PlaceView, checkedIn: Set<number>) {
+  let s = 0
+  if (p.editorRank != null) s += 100 - p.editorRank * 5
+  if (p.tags?.includes('MUST')) s += 20
+  if (p.tags?.includes('FIRST')) s += 15
+  if (p.coverImage) s += 10
+  s += Math.min(p.tripCount ?? 0, 10)
+  if (checkedIn.has(p.id)) s -= 80
+  return s
+}
+
+/**
+ * 选 n 个推荐地点：优先官方精选、排除已加入当前旅行的地点、已打卡降权；
+ * 贪心挑选时区域与大类都不重复（例如 浅草寺 · 东京塔 · 银座），候选不够时再逐步放宽。
+ */
+export function selectRecommended(places: PlaceView[], status: Pick<PlaceStatus, 'joined' | 'checkedIn'>, n = 3) {
+  const ranked = [...places].sort((a, b) => score(b, status.checkedIn) - score(a, status.checkedIn) || a.id - b.id)
+  const fresh = ranked.filter(p => !status.joined.has(p.id))
+  const pool = fresh.length >= n ? fresh : ranked
+  const picked: PlaceView[] = []
+  const tryPick = (ok: (p: PlaceView) => boolean) => {
+    for (const p of pool) {
+      if (picked.length >= n) return
+      if (!picked.includes(p) && ok(p)) picked.push(p)
+    }
+  }
+  const usedArea = (p: PlaceView) => picked.some(x => x.area === p.area)
+  const usedKind = (p: PlaceView) => picked.some(x => kindOf(x) === kindOf(p))
+  tryPick(p => !usedArea(p) && !usedKind(p))
+  tryPick(p => !usedArea(p))
+  tryPick(() => true)
+  return picked
+}
+
+// ───────────── 按区域探索 ─────────────
+
+/** 区域的一句定位（编辑文案）。只用于数据里真实存在的区域；没写到的区域按地点类别自动生成 */
+const AREA_NOTES: Record<string, string> = {
+  浅草: '传统东京', 上野: '博物馆与公园', 银座: '老铺与精致生活', 涩谷: '潮流与夜晚', 新宿: '不夜城与庭园',
+  原宿: '森林与潮流', 东京站: '红砖站舍与皇居', 台场: '东京湾的夜景', 秋叶原: '动漫与电器', 港区: '铁塔与新地标'
+}
+
+export type AreaView = { name: string; note: string; tags: string[]; count: number; tone: 'sand' | 'green' | 'dusk' | 'peach' }
+
+export function selectAreas(places: PlaceView[]): AreaView[] {
+  const groups = new Map<string, PlaceView[]>()
+  for (const p of places) if (p.area) groups.set(p.area, [...(groups.get(p.area) ?? []), p])
+  return [...groups.entries()]
+    .map(([name, list]) => {
+      const freq = new Map<string, number>()
+      for (const p of list) for (const t of p.tags ?? []) if (DESCRIPTIVE.includes(t)) freq.set(t, (freq.get(t) ?? 0) + 1)
+      const tags = [...freq.entries()].sort((a, b) => b[1] - a[1] || DESCRIPTIVE.indexOf(a[0]) - DESCRIPTIVE.indexOf(b[0])).slice(0, 3).map(([t]) => TAG_LABELS[t])
+      const kinds = list.map(kindOf)
+      const top = ['TRADITION', 'NATURE', 'SHOPPING', 'CITY'].sort((a, b) => kinds.filter(k => k === b).length - kinds.filter(k => k === a).length)[0]
+      const night = list.filter(p => p.tags?.includes('NIGHT')).length * 2 > list.length
+      const tone: AreaView['tone'] = night ? 'dusk' : top === 'TRADITION' ? 'sand' : top === 'NATURE' ? 'green' : 'peach'
+      return { name, note: AREA_NOTES[name] ?? list[0].category ?? '东京街区', tags, count: list.length, tone, first: Math.min(...list.map(p => p.editorRank ?? 99)) }
+    })
+    // 地点多的区域在前；数量相同时按区域里最靠前的编辑精选排序
+    .sort((a, b) => b.count - a.count || a.first - b.first)
+    .map(({ first: _first, ...a }) => a)
+}
+
+// ───────────── 旅行灵感 ─────────────
+
+export const currentSeason = (d = new Date()) => ['冬', '冬', '春', '春', '春', '夏', '夏', '夏', '秋', '秋', '秋', '冬'][d.getMonth()]
+
+/** 官方专题路线：当季专题在前，最多 4 条 */
+export function selectInspirations(routes: OfficialRouteView[], season = currentSeason(), n = 4) {
+  return [...routes].sort((a, b) => Number(b.season === season) - Number(a.season === season)).slice(0, n)
+}
+
+// ───────────── 排序与距离 ─────────────
 
 export type SortKey = 'RECOMMEND' | 'HOT' | 'DISTANCE'
 export const SORTS: { key: SortKey; label: string }[] = [
-  { key: 'RECOMMEND', label: '推荐' },
-  { key: 'HOT', label: '热度' },
-  { key: 'DISTANCE', label: '距离' }
+  { key: 'RECOMMEND', label: '推荐排序' },
+  { key: 'HOT', label: '热门优先' },
+  { key: 'DISTANCE', label: '离我最近' }
 ]
 
 export type Geo = { lat: number; lng: number }
@@ -59,7 +208,7 @@ export function formatKm(km: number, unit: 'KM' | 'MI' = 'KM') {
   return km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(km < 10 ? 1 : 0)} km`
 }
 
-/** 推荐：编辑精选在前 → 热度 → 原始顺序；热度：加入旅行次数；距离：由近到远 */
+/** 推荐：编辑精选在前 → 热度 → 原始顺序；热门：加入旅行次数；距离：由近到远 */
 export function sortPlaces(list: PlaceView[], sort: SortKey, geo: Geo | null) {
   const rank = (p: PlaceView) => p.editorRank ?? 999
   return [...list].sort((a, b) => {
@@ -77,7 +226,7 @@ export function stayLabel(min?: number) {
   return `${Number.isInteger(h) ? h : h.toFixed(1)} 小时`
 }
 
-/** 文字封面的配色：按类别给不同的底色，避免一排都一样 */
+/** 文字封面的配色：按类别给不同的底色 */
 export function coverTone(p: PlaceView) {
   const c = p.category ?? ''
   if (['寺院', '神社'].includes(c)) return 'shrine'
@@ -86,52 +235,4 @@ export function coverTone(p: PlaceView) {
   if (['市场'].includes(c) || p.tags?.includes('FOOD')) return 'food'
   if (p.tags?.includes('NIGHT')) return 'night'
   return 'sand'
-}
-
-export const currentSeason = (d = new Date()) => ['冬', '冬', '春', '春', '春', '夏', '夏', '夏', '秋', '秋', '秋', '冬'][d.getMonth()]
-
-/** 轻量信息卡：只从真实数据里推导，数据不足的卡片不出现 */
-export type InfoCard = { key: string; title: string; hint: string; filter?: string; places: { place: PlaceView; note?: string }[]; action?: 'locate' }
-
-export function infoCards(places: PlaceView[], geo: Geo | null, geoDenied: boolean, unit: 'KM' | 'MI' = 'KM'): InfoCard[] {
-  const byRank = sortPlaces(places, 'RECOMMEND', null)
-  const pick = (f: (p: PlaceView) => boolean) => byRank.filter(f).slice(0, 3).map(place => ({ place }))
-  const cards: InfoCard[] = []
-  if (geo) {
-    const near = [...places].sort((a, b) => distanceKm(geo, a) - distanceKm(geo, b)).slice(0, 3)
-    cards.push({ key: 'NEAR', title: '离你最近', hint: '按你当前的位置计算', places: near.map(place => ({ place, note: formatKm(distanceKm(geo, place), unit) })) })
-  } else if (!geoDenied) {
-    cards.push({ key: 'NEAR', title: '离你最近', hint: '开启定位后，按你所在的位置推荐附近的地点。', places: [], action: 'locate' })
-  }
-  const hot = [...places].filter(p => (p.tripCount ?? 0) > 0).sort((a, b) => (b.tripCount ?? 0) - (a.tripCount ?? 0)).slice(0, 3)
-  if (hot.length) cards.push({ key: 'HOT', title: '最多人加入旅行', hint: '按旅迹用户加入旅行的次数', filter: 'HOT', places: hot.map(place => ({ place, note: `${place.tripCount} 段旅行` })) })
-  const free = places.filter(p => p.tags?.includes('FREE'))
-  if (free.length) cards.push({ key: 'FREE', title: '免费也能玩', hint: `${free.length} 个地点不需要门票`, filter: 'FREE', places: pick(p => Boolean(p.tags?.includes('FREE'))) })
-  const rain = places.filter(p => p.tags?.includes('RAIN'))
-  if (rain.length) cards.push({ key: 'RAIN', title: '下雨天也适合', hint: `${rain.length} 个以室内为主的去处`, filter: 'RAIN', places: pick(p => Boolean(p.tags?.includes('RAIN'))) })
-  const evening = byRank.filter(p => /傍晚|日落|夜/.test(p.bestTime ?? ''))
-  if (evening.length) cards.push({ key: 'EVENING', title: '最适合傍晚前往', hint: '日落前后到达，看城市点灯', filter: 'NIGHT', places: evening.slice(0, 3).map(place => ({ place, note: place.bestTime })) })
-  const first = places.filter(p => p.tags?.includes('FIRST'))
-  if (first.length) cards.push({ key: 'FIRST', title: '适合第一次来东京', hint: '经典又不容易踩雷', filter: 'FIRST', places: pick(p => Boolean(p.tags?.includes('FIRST'))) })
-  return cards
-}
-
-export type ListItem = { kind: 'place'; place: PlaceView } | { kind: 'route'; route: OfficialRouteView } | { kind: 'info'; info: InfoCard }
-
-/**
- * 「全部地点」的混排节奏：3 张标准卡 → 专题横幅 → 2 张标准卡 + 信息卡 → 3 张标准卡 → 信息卡 + 2 张标准卡 → 循环。
- * 专题或信息卡用完后，对应位置直接换成地点卡。
- */
-export function mixedList(places: PlaceView[], routes: OfficialRouteView[], infos: InfoCard[]): ListItem[] {
-  const pattern = ['p', 'p', 'p', 'r', 'p', 'p', 'i', 'p', 'p', 'p', 'i', 'p', 'p']
-  const items: ListItem[] = []
-  let pi = 0, ri = 0, ii = 0, step = 0
-  while (pi < places.length) {
-    const slot = pattern[step % pattern.length]
-    step++
-    if (slot === 'r') { if (ri < routes.length) items.push({ kind: 'route', route: routes[ri++] }); continue }
-    if (slot === 'i' && ii < infos.length) { items.push({ kind: 'info', info: infos[ii++] }); continue }
-    items.push({ kind: 'place', place: places[pi++] })
-  }
-  return items
 }

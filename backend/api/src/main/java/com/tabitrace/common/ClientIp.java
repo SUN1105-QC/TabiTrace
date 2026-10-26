@@ -1,21 +1,36 @@
 package com.tabitrace.common;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 /**
- * 取客户端 IP（用于频率限制）。
- * 生产环境由本机 nginx 反向代理并设置 X-Real-IP（见 deploy/nginx-tabitrace.conf），
- * 只有请求确实来自本机回环地址时才信任该头，外部直接请求伪造的 X-Real-IP 会被忽略。
+ * 取客户端 IP（用于登录 / 验证码的频率限制）。
+ *
+ * - 默认（单机 nginx 部署）：只有请求确实来自本机回环地址时才信任 nginx 设置的 X-Real-IP，外部伪造的头会被忽略。
+ * - app.client-ip.trust-forwarded-for=true（API 只能经由可信代理访问，例如 Railway 私网 + 前端同源代理）：
+ *   取 X-Forwarded-For 最右侧一项——它由平台边缘代理追加，客户端自己写进去的值只会出现在左边。
+ *   API 若同时对公网开放，不能开启此项，否则 IP 可以被伪造。
  */
-public final class ClientIp {
-    private ClientIp() {}
+@Component
+public class ClientIp {
+    private final boolean trustForwardedFor;
 
-    public static String resolve(HttpServletRequest request) {
-        String remote = request.getRemoteAddr();
-        if (isLoopback(remote)) {
-            String real = request.getHeader("X-Real-IP");
-            if (real != null && !real.isBlank() && real.length() <= 64) return real.trim();
+    public ClientIp(@Value("${app.client-ip.trust-forwarded-for:false}") boolean trustForwardedFor) {
+        this.trustForwardedFor = trustForwardedFor;
+    }
+
+    public String resolve(HttpServletRequest request) {
+        return resolve(request.getRemoteAddr(), request.getHeader("X-Real-IP"), request.getHeader("X-Forwarded-For"), trustForwardedFor);
+    }
+
+    static String resolve(String remote, String realIp, String forwardedFor, boolean trustForwardedFor) {
+        if (trustForwardedFor && forwardedFor != null && !forwardedFor.isBlank()) {
+            String[] hops = forwardedFor.split(",");
+            String last = hops[hops.length - 1].trim();
+            if (!last.isEmpty() && last.length() <= 64) return last;
         }
+        if (isLoopback(remote) && realIp != null && !realIp.isBlank() && realIp.length() <= 64) return realIp.trim();
         return remote;
     }
 

@@ -21,12 +21,11 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 /**
- * 把「旅行数据 + 用户设置」自动编排成分镜。
+ * 把「旅行数据 + 用户设置」自动编排成分镜：开场 → 地点照片段落 →（成就）→ 结尾。
  * 预览接口和开始生成都走这里；生成时结果会冻结到 video_projects.storyboard_json，Worker 只按它渲染。
  */
 @Service
 public class StoryboardService {
-    public static final List<String> MAP_MODES = List.of("OFF", "SIMPLE", "FULL");
     public static final String TAGLINE = "Every Journey · A Better You";
 
     private static final DateTimeFormatter DAY = DateTimeFormatter.ofPattern("yyyy.MM.dd");
@@ -55,26 +54,25 @@ public class StoryboardService {
     /** 规范化后的故事设置：所有开关都有确定值。 */
     public record Settings(String title, String endingText, boolean showTitle, boolean showDate, boolean showPlaceNames,
                            boolean showCheckinText, boolean showWeather, boolean showStats, boolean showAchievements,
-                           boolean showEnding, String mapMode, List<SegmentOverride> segments, String visualStyle) {
+                           boolean showEnding, List<SegmentOverride> segments, String visualStyle, int musicVolume) {
         public StorySettings toDto() {
             return new StorySettings(title, endingText, showTitle, showDate, showPlaceNames, showCheckinText, showWeather,
-                    showStats, showAchievements, showEnding, mapMode, segments, visualStyle);
+                    showStats, showAchievements, showEnding, segments, visualStyle, musicVolume);
         }
     }
 
-    /** 新前端传 settings；旧前端只传三个布尔值，这里统一成完整设置。 */
-    public static Settings normalize(StorySettings s, Boolean legacyText, Boolean legacyMap, Boolean legacyAchievements) {
+    /** 新前端传 settings；旧前端只传两个布尔值，这里统一成完整设置。 */
+    public static Settings normalize(StorySettings s, Boolean legacyText, Boolean legacyAchievements) {
         if (s == null) {
-            boolean map = legacyMap == null || legacyMap;
             return new Settings(null, null, true, true, true, legacyText == null || legacyText, true, true,
-                    legacyAchievements == null || legacyAchievements, true, map ? "SIMPLE" : "OFF", List.of(), "NATURAL");
+                    legacyAchievements == null || legacyAchievements, true, List.of(), "NATURAL", MusicCues.DEFAULT_VOLUME);
         }
-        String mode = s.mapMode() == null ? "SIMPLE" : s.mapMode().trim().toUpperCase(Locale.ROOT);
         String style = s.visualStyle() == null ? "NATURAL" : s.visualStyle().trim().toUpperCase(Locale.ROOT);
         return new Settings(trimToNull(s.title()), trimToNull(s.endingText()), on(s.showTitle()), on(s.showDate()),
                 on(s.showPlaceNames()), on(s.showCheckinText()), on(s.showWeather()), on(s.showStats()),
-                on(s.showAchievements()), on(s.showEnding()), mode, s.segments() == null ? List.of() : s.segments(),
-                VISUAL_STYLES.contains(style) ? style : "NATURAL");
+                on(s.showAchievements()), on(s.showEnding()), s.segments() == null ? List.of() : s.segments(),
+                VISUAL_STYLES.contains(style) ? style : "NATURAL",
+                s.musicVolume() == null ? MusicCues.DEFAULT_VOLUME : Math.max(0, Math.min(100, s.musicVolume())));
     }
 
     public static String resolution(String aspectRatio, String quality) {
@@ -110,11 +108,10 @@ public class StoryboardService {
         opening.meta.put("destination", destination);
 
         // ── 中间段落（可排序 / 关闭 / 改标题）──
-        List<Draft> middle = new ArrayList<>();
-        Draft map = buildMap(s, tripCheckins, destination, zone, notices);
-        if (map != null) middle.add(map);
-        middle.addAll(buildPlaces(s, ordered, checkinById, template, zone));
-        if (s.showWeather()) notices.add("这趟旅行的打卡还没有天气数据，已自动跳过天气信息");
+        List<Draft> middle = new ArrayList<>(buildPlaces(s, ordered, checkinById, template, zone));
+        if (s.showWeather() && tripCheckins.stream().noneMatch(c -> c.weatherText != null && !c.weatherText.isBlank())) {
+            notices.add("这趟旅行的打卡还没有天气数据，已自动跳过天气信息");
+        }
         if (s.showAchievements()) {
             List<String> earned = catalog.earnedAchievementNames(userId, trip.id);
             if (earned.isEmpty()) {
@@ -168,41 +165,6 @@ public class StoryboardService {
         return sb.scenes().stream().anyMatch(sc -> sc.enabled() && "PLACE".equals(sc.type()) && !sc.photoIds().isEmpty());
     }
 
-    // ── 地图路线：按真实打卡时间排序，没有坐标的地点自动跳过，不让整个视频失败 ──
-    private Draft buildMap(Settings s, List<CheckinEntity> tripCheckins, String destination, ZoneId zone, List<String> notices) {
-        if ("OFF".equals(s.mapMode())) return null;
-        List<Map<String, Object>> points = new ArrayList<>();
-        int missing = 0;
-        String lastName = null;
-        for (CheckinEntity c : tripCheckins) {
-            if (c.latitude == null || c.longitude == null) { missing++; continue; }
-            double lat = c.latitude.doubleValue(), lng = c.longitude.doubleValue();
-            if (Math.abs(lat) > 90 || Math.abs(lng) > 180) { missing++; continue; }
-            // 同一地点连续打卡多次，只在路线上出现一次
-            if (c.placeNameSnapshot != null && c.placeNameSnapshot.equals(lastName)) continue;
-            lastName = c.placeNameSnapshot;
-            Map<String, Object> p = new LinkedHashMap<>();
-            p.put("name", c.placeNameSnapshot);
-            p.put("area", c.areaSnapshot);
-            p.put("lat", lat);
-            p.put("lng", lng);
-            p.put("time", local(c.checkinTime, zone).format(SHOT_TIME));
-            points.add(p);
-        }
-        if (points.size() < 2) {
-            notices.add(points.isEmpty() ? "打卡还没有坐标，已跳过地图路线动画" : "只有 1 个打卡有坐标，路线动画至少需要 2 个地点，已跳过");
-            return null;
-        }
-        if (missing > 0) notices.add(missing + " 个打卡没有坐标，路线中已跳过这些地点");
-        boolean full = "FULL".equals(s.mapMode());
-        Draft d = new Draft("map", "MAP", false, full ? 1.2 + 0.6 * Math.min(points.size(), 8) : 3.0);
-        d.title = destination + " 路线";
-        d.subtitle = points.size() + " 个地点";
-        d.meta.put("mode", s.mapMode());
-        d.meta.put("points", points);
-        return d;
-    }
-
     // ── 照片段落：照片顺序即镜头顺序，同一次打卡的相邻照片合成一段 ──
     private List<Draft> buildPlaces(Settings s, List<PhotoEntity> ordered, Map<Long, CheckinEntity> checkinById,
                                     VideoTemplateEntity template, ZoneId zone) {
@@ -230,6 +192,8 @@ public class StoryboardService {
                     List<String> sub = new ArrayList<>();
                     if (s.showDate()) sub.add(local(c.checkinTime, zone).format(SHOT_TIME));
                     if (s.showPlaceNames() && c.areaSnapshot != null && !c.areaSnapshot.isBlank()) sub.add(c.areaSnapshot);
+                    String weather = weather(c);
+                    if (s.showWeather() && weather != null) { sub.add(weather); current.meta.put("weather", weather); }
                     current.subtitle = sub.isEmpty() ? null : String.join(" · ", sub);
                     current.meta.put("checkinId", c.id);
                     current.meta.put("placeName", c.placeNameSnapshot);
@@ -248,7 +212,7 @@ public class StoryboardService {
         return out;
     }
 
-    /** 覆盖里的段落按其顺序排在前面，其余按自然顺序追加；已不存在的 key 自动忽略。 */
+    /** 覆盖里的段落按其顺序排在前面，其余按自然顺序追加；已不存在的 key（例如旧版本的地图段落）自动忽略。 */
     private static List<Draft> applyOverrides(List<Draft> natural, List<SegmentOverride> overrides) {
         if (overrides == null || overrides.isEmpty()) return natural;
         Map<String, Draft> byKey = new LinkedHashMap<>();
@@ -321,6 +285,14 @@ public class StoryboardService {
     }
 
     private static boolean on(Boolean b) { return b == null || b; }
+
+    /** 打卡时记录的天气（例如「晴 22°C」）；没有记录时返回 null，不猜 */
+    static String weather(CheckinEntity c) {
+        String text = c.weatherText == null || c.weatherText.isBlank() ? null : c.weatherText.trim();
+        String temp = c.temperatureC == null ? null : Math.round(c.temperatureC.doubleValue()) + "°C";
+        if (text == null && temp == null) return null;
+        return text == null ? temp : temp == null ? text : text + " " + temp;
+    }
 
     private static String trimToNull(String s) { return s == null || s.isBlank() ? null : s.trim(); }
 

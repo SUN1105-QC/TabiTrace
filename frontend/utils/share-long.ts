@@ -4,7 +4,8 @@
  */
 
 import type { AchievementView, CheckinView, PhotoView, TimelineDay, TripSummary, TripView } from '@/services/tabitrace-api'
-import { toDate } from '@/lib/time'
+import { toDate, zonedParts } from '@/lib/time'
+import { photoMedium } from '@/utils/photo-variants'
 
 const WEEKDAYS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
 
@@ -49,7 +50,8 @@ export function daysNights(days: number) {
 
 /** 封面主图：精选照片优先，其次任意照片，最后才用旅行封面（封面图常带有文字，放在最后） */
 export function coverPhoto(trip: TripView, photos: PhotoView[]) {
-  return photos.find(p => p.featured)?.imageUrl ?? photos[0]?.imageUrl ?? trip.coverImage ?? undefined
+  const p = photos.find(x => x.featured) ?? photos[0]
+  return (p ? photoMedium(p) : undefined) ?? trip.coverImage ?? undefined
 }
 
 /** 旅途剪影：精选在前，不足时用其余照片补齐 */
@@ -59,7 +61,8 @@ export function galleryPhotos(photos: PhotoView[], count: number) {
   return [...featured, ...rest].slice(0, count)
 }
 
-const localHour = (c: CheckinView) => toDate(c.checkinTime)?.getHours()
+/** 打卡时刻在用户时区里的小时 */
+const localHour = (c: CheckinView) => { const d = toDate(c.checkinTime); return d ? zonedParts(d).hour : undefined }
 
 /** 旅途关键词：去过的街区、代表地点、成就、同行方式、出行时段。按出现顺序去重，最多 8 个。 */
 export function journeyKeywords(trip: TripView, timeline: TimelineDay[], achievements: AchievementView[]) {

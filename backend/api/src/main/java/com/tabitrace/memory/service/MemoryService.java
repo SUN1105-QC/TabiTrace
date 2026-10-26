@@ -65,7 +65,7 @@ public class MemoryService {
         int year = today.getYear();
         int photoYear = mapper.countPhotosInYear(userId, year) > 0 ? year : 0;
         List<MemoryPhoto> photos = mapper.highlightPhotos(userId, year, HIGHLIGHT_PHOTOS).stream()
-                .map(p -> new MemoryPhoto(p.id, p.tripId, p.tripTitle, p.imageUrl, Boolean.TRUE.equals(p.featured), p.capturedAt != null ? p.capturedAt : p.createdAt)).toList();
+                .map(p -> new MemoryPhoto(p.id, p.tripId, p.tripTitle, p.imageUrl, p.thumbUrl, p.mediumUrl, p.originalUrl, p.width, p.height, Boolean.TRUE.equals(p.featured), p.capturedAt != null ? p.capturedAt : p.createdAt)).toList();
         // 同一成就可能在多段旅行里各获得一次，只保留最近的那一次
         Set<String> seen = new HashSet<>();
         List<MemoryAchievement> recent = mapper.recentAchievements(userId, RECENT_ACHIEVEMENTS * 5).stream()
@@ -90,7 +90,7 @@ public class MemoryService {
     private MemoryTrip trip(Long userId, TripEntity t, String cover, List<MemoryMapper.StoryRow> stories, List<MemoryMapper.ShareRow> shares) {
         TripSummary s = summaries.get(userId, t.id);
         List<PhotoRow> top = mapper.topPhotos(t.id, MOMENTS);
-        List<Moment> moments = top.stream().map(p -> new Moment(p.id, p.imageUrl)).toList();
+        List<Moment> moments = top.stream().map(p -> new Moment(p.id, p.imageUrl, p.thumbUrl, p.mediumUrl, p.originalUrl, p.width, p.height)).toList();
         MemoryMapper.NoteRow n = mapper.lastNote(t.id);
         List<MemoryMapper.StoryRow> tripStories = stories.stream().filter(v -> t.id.equals(v.tripId)).toList();
         int tripShares = (int) shares.stream().filter(x -> t.id.equals(x.tripId)).count();
@@ -128,7 +128,7 @@ public class MemoryService {
             }
             if (best != null) {
                 int photos = mapper.countPhotos(best.id);
-                List<Moment> moments = mapper.topPhotos(best.id, 4).stream().map(p -> new Moment(p.id, p.imageUrl)).toList();
+                List<Moment> moments = mapper.topPhotos(best.id, 4).stream().map(p -> new Moment(p.id, p.imageUrl, p.thumbUrl, p.mediumUrl, p.originalUrl, p.width, p.height)).toList();
                 return new Flashback(kind, bestYears, best.id, best.title, cityOf(best), best.startDate, best.endDate, covers.get(best.id), photos, moments);
             }
         }

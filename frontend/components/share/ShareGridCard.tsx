@@ -6,7 +6,7 @@
  */
 
 import type { PhotoView, TimelineDay, TripSummary, TripView } from '@/services/tabitrace-api'
-import { DEFAULT_GRID_OPTIONS, dayNumber, gridPhotos, memoPlaces, placeIndex, scopePhotos, scopeTimeline, type GridOptions } from '@/utils/share-grid'
+import { DEFAULT_GRID_OPTIONS, GRID_PHOTO_SLOTS, dayNumber, gridPhotos, memoPlaces, placeIndex, scopePhotos, scopeTimeline, type GridOptions } from '@/utils/share-grid'
 import { cityEn, dotDate, weekdayOf } from '@/utils/share-long'
 import { ShareGridTitleTile } from './ShareGridTitleTile'
 import { ShareGridImageTile } from './ShareGridImageTile'
@@ -14,17 +14,21 @@ import { ShareGridMemoTile, type GridFiller } from './ShareGridMemoTile'
 import { ShareGridDataTile } from './ShareGridDataTile'
 import { ShareGridFooterTile } from './ShareGridFooterTile'
 
-const IMAGE_SLOTS = 6
+const IMAGE_SLOTS = GRID_PHOTO_SLOTS
 
 /** 单日九宫格用到的当天数据 */
 export type GridDay = { date: string; no: number; places: number; photos: number }
 
-export function ShareGridCard({ trip, summary, timeline, photos, options = DEFAULT_GRID_OPTIONS }: {
+export function ShareGridCard({ trip, summary, timeline, photos, options = DEFAULT_GRID_OPTIONS, activeSlot = null, onSlot }: {
   trip: TripView
   summary: TripSummary
   timeline: TimelineDay[]
   photos: PhotoView[]
   options?: GridOptions
+  /** 编辑中选中的照片格（0 起）；导出时为 null */
+  activeSlot?: number | null
+  /** 点选照片格（只在编辑预览里传入；不传时方格不可点击） */
+  onSlot?: (slot: number) => void
 }) {
   const places = placeIndex(timeline)
   const picked = gridPhotos(photos, timeline, options, IMAGE_SLOTS)
@@ -46,12 +50,13 @@ export function ShareGridCard({ trip, summary, timeline, photos, options = DEFAU
     { kind: 'city' }
   ]
 
+  const edit = (i: number) => (onSlot ? { active: activeSlot === i, label: `第 ${i + 1} 张照片格`, onSelect: () => onSlot(i) } : undefined)
   const slots = Array.from({ length: IMAGE_SLOTS }, (_, i) => {
     const photo = picked[i]
-    if (photo) return <ShareGridImageTile key={`p${photo.id}`} photo={photo} place={photo.checkinId != null ? places.get(photo.checkinId) : undefined} />
+    if (photo) return <ShareGridImageTile key={`p${photo.id}`} photo={photo} places={places} trip={trip} edit={edit(i)} />
     const memo = memos[i - picked.length]
-    if (memo) return <ShareGridMemoTile key={`m${i}`} place={memo} trip={trip} />
-    return <ShareGridMemoTile key={`f${i}`} filler={fillers[(i - picked.length - memos.length) % fillers.length]} trip={trip} />
+    if (memo) return <ShareGridMemoTile key={`m${i}`} place={memo} trip={trip} edit={edit(i)} />
+    return <ShareGridMemoTile key={`f${i}`} filler={fillers[(i - picked.length - memos.length) % fillers.length]} trip={trip} edit={edit(i)} />
   })
 
   return (

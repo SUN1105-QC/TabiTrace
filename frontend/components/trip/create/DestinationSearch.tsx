@@ -28,7 +28,7 @@ export function DestinationSearch({ id, value, onChange, error }: { id: string; 
 
   const run = (q: string) => {
     window.clearTimeout(timer.current)
-    timer.current = window.setTimeout(async () => {
+    timer.current = window.setTimeout(() => { void (async () => {
       abort.current?.abort()
       const ctrl = new AbortController()
       abort.current = ctrl
@@ -41,7 +41,7 @@ export function DestinationSearch({ id, value, onChange, error }: { id: string; 
       } finally {
         if (!ctrl.signal.aborted) setLoading(false)
       }
-    }, 250)
+    })() }, 250)
   }
   useEffect(() => () => { window.clearTimeout(timer.current); abort.current?.abort() }, [])
 
@@ -89,7 +89,7 @@ export function DestinationSearch({ id, value, onChange, error }: { id: string; 
           aria-invalid={Boolean(error)}
           aria-describedby={error ? `${id}-error` : undefined}
           autoComplete="off"
-          placeholder="搜索城市，例如 东京、京都、巴黎"
+          placeholder="搜索城市，如东京、京都"
           value={query}
           onChange={e => { typed.current = true; setQuery(e.target.value); setOpen(true); run(e.target.value.trim()); if (value) onChange(null) }}
           onFocus={() => { setOpen(true); run(q) }}

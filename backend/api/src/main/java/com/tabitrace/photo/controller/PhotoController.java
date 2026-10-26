@@ -14,6 +14,8 @@ public class PhotoController {
     private final PhotoService service;public PhotoController(PhotoService service){this.service=service;}
     @PostMapping("/trips/{tripId}/photos/presign") public ApiResponse<PresignResponse> presign(@PathVariable Long tripId,@Valid @RequestBody PresignRequest r){return ApiResponse.ok(service.presign(SecurityUtils.currentUser().id(),tripId,r));}
     @PostMapping("/trips/{tripId}/photos") public ApiResponse<PhotoView> register(@PathVariable Long tripId,@Valid @RequestBody RegisterPhotoRequest r){return ApiResponse.ok(service.register(SecurityUtils.currentUser().id(),tripId,r));}
+    /** 照片墙分页：?filter=ALL|FEATURED|LINKED|UNLINKED&sort=NEWEST|OLDEST&cursor=&limit= */
+    @GetMapping("/trips/{tripId}/photos/page") public ApiResponse<PhotoPage> page(@PathVariable Long tripId,@RequestParam(required=false) String filter,@RequestParam(required=false) String sort,@RequestParam(required=false) String cursor,@RequestParam(required=false) Integer limit){return ApiResponse.ok(service.page(SecurityUtils.currentUser().id(),tripId,filter,sort,cursor,limit));}
     @GetMapping("/trips/{tripId}/photos") public ApiResponse<List<PhotoView>> list(@PathVariable Long tripId){return ApiResponse.ok(service.list(SecurityUtils.currentUser().id(),tripId));}
     @PutMapping("/photos/{id}") public ApiResponse<PhotoView> update(@PathVariable Long id,@RequestBody UpdatePhotoRequest r){return ApiResponse.ok(service.update(SecurityUtils.currentUser().id(),id,r));}
     @PostMapping("/photos/{id}/feature") public ApiResponse<PhotoView> feature(@PathVariable Long id){return ApiResponse.ok(service.feature(SecurityUtils.currentUser().id(),id,true));}

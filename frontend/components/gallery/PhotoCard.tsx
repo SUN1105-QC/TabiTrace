@@ -9,6 +9,11 @@
 import { useEffect, useRef } from 'react'
 import { Check, Image as ImageIcon, MoreHorizontal, Star, Trash2, Maximize2 } from 'lucide-react'
 import type { GalleryItem } from '@/utils/gallery'
+import { photoSrcSet, photoThumb } from '@/utils/photo-variants'
+
+/** 照片墙一格需要的图片宽度，供 srcset 选档（精选照片和普通照片格子一样大，只多一个星标） */
+// 格子是 4:5 竖长的：横图按 cover 铺满时，需要的宽度约为格子高度 × 1.33，所以比格子宽度报得大一些
+const GRID_SIZES = '(max-width: 767px) 67vw, (max-width: 1100px) 44vw, (max-width: 1600px) 33vw, 24vw'
 
 export function PhotoCard({ item, index, selecting, selected, isCover, readOnly, menuOpen, onOpen, onToggleSelect, onToggleFeatured, onMenu, onCover, onDelete }: {
   item: GalleryItem
@@ -41,7 +46,7 @@ export function PhotoCard({ item, index, selecting, selected, isCover, readOnly,
   return (
     <figure className={`gl-card${photo.featured ? ' is-featured' : ''}${selected ? ' is-selected' : ''}${selecting ? ' is-selecting' : ''}${menuOpen ? ' is-menu' : ''}`}>
       <button type="button" className="gl-card-hit" onClick={selecting ? onToggleSelect : onOpen} aria-label={selecting ? `${selected ? '取消选择' : '选择'}${label}` : `查看${label}`} aria-pressed={selecting ? selected : undefined}>
-        <img src={photo.imageUrl} alt="" loading="lazy" decoding="async" />
+        <img src={photoThumb(photo)} srcSet={photoSrcSet(photo)} sizes={GRID_SIZES} alt="" loading="lazy" decoding="async" />
       </button>
 
       {photo.featured && !selecting && <span className="gl-star-badge" aria-hidden="true"><Star size={11} /></span>}

@@ -12,7 +12,7 @@ export function useRequireSession(enabled = true) {
   useEffect(() => {
     if (!enabled) { setReady(true); return }
     if (hasSession()) { setReady(true); return }
-    const next = pathname || '/trips'
+    const next = pathname ? pathname + window.location.search : '/trips'
     router.replace(`/login?next=${encodeURIComponent(next)}`)
   }, [enabled, pathname, router])
 

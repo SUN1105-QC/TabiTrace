@@ -2,6 +2,7 @@
 
 import type { PhotoView } from '@/services/tabitrace-api'
 import { galleryPhotos } from '@/utils/share-long'
+import { photoMedium } from '@/utils/photo-variants'
 
 export function ShareResultGallery({ photos }: { photos: PhotoView[] }) {
   const picks = galleryPhotos(photos, 5)
@@ -15,7 +16,7 @@ export function ShareResultGallery({ photos }: { photos: PhotoView[] }) {
       <div className={`sl-gallery count-${picks.length}`}>
         {picks.map((p, i) => (
           <figure key={p.id} className={i === 0 ? 'is-main' : ''}>
-            <img src={p.imageUrl} crossOrigin="anonymous" alt="旅行照片" />
+            <img src={photoMedium(p)} crossOrigin="anonymous" alt="旅行照片" />
           </figure>
         ))}
       </div>

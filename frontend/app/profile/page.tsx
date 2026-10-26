@@ -7,6 +7,7 @@
  * Tab 用 ?tab= 记在地址栏里，刷新后停留在原来的 Tab。
  */
 
+import { PageContainer } from '@/components/common/PageContainer'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { RefreshCcw, TriangleAlert } from 'lucide-react'
@@ -21,6 +22,7 @@ import { SecuritySettings } from '@/components/settings/SecuritySettings'
 import { ProSettings } from '@/components/settings/ProSettings'
 import { UnsavedChangesBar } from '@/components/settings/UnsavedChangesBar'
 import { ApiError } from '@/services/api'
+import { useT } from '@/components/common/PreferencesProvider'
 import { userApi, type AccountOverview, type UserView } from '@/services/tabitrace-api'
 import {
   SETTINGS_TABS, buildPayload, changedFields, draftFromUser, fieldOfError, isSettingsTab, validateDraft,
@@ -31,6 +33,7 @@ type Pending = { kind: 'tab'; tab: SettingsTab } | { kind: 'href'; href: string 
 
 export default function PersonalSettingsPage() {
   const router = useRouter()
+  const t = useT()
   const [user, setUser] = useState<UserView | null>(null)
   const [overview, setOverview] = useState<AccountOverview | null>(null)
   const [loading, setLoading] = useState(true)
@@ -60,10 +63,11 @@ export default function PersonalSettingsPage() {
       const d = draftFromUser(u)
       setUser(u); setOverview(o); setInitial(d); setDraft(d); setErrors({})
     } catch (e) {
-      setLoadError(e instanceof Error && e.message ? e.message : '请稍后再试')
+      setLoadError(e instanceof Error && e.message ? e.message : t('common.tryLater'))
     } finally {
       setLoading(false)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
@@ -118,10 +122,10 @@ export default function PersonalSettingsPage() {
 
   const save = async (): Promise<boolean> => {
     if (!initial || !draft) return false
-    const invalid = validateDraft(draft)
+    const invalid = validateDraft(draft, t)
     if (Object.keys(invalid).length) {
       setErrors(invalid)
-      setSaveError('请先修改标出的字段')
+      setSaveError(t('settings.fixFields'))
       const first = invalid.nickname || invalid.bio ? 'profile' : 'preferences'
       if (first !== tab) goTab(first)
       return false
@@ -132,14 +136,14 @@ export default function PersonalSettingsPage() {
       const u = await userApi.update(buildPayload(initial, draft))
       const d = draftFromUser(u)
       setUser(u); setInitial(d); setDraft(d); setErrors({})
-      showToast('设置已保存')
+      showToast(t('settings.saved'))
       return true
     } catch (e) {
-      const msg = e instanceof Error && e.message ? e.message : '网络异常'
+      const msg = e instanceof Error && e.message ? e.message : t('common.networkError')
       const field = fieldOfError(e instanceof ApiError ? e.code : null)
       if (field) setErrors({ [field]: msg })
       setSaveError(msg)
-      showToast('设置保存失败，请重试')
+      showToast(t('settings.saveFailed'))
       return false
     } finally {
       setSaving(false)
@@ -183,34 +187,35 @@ export default function PersonalSettingsPage() {
     return (
       <main>
         <SiteHeader />
-        <div className="st-page">
+        <PageContainer variant="narrow" className="st-page">
           <div className="st-error" role="alert">
             <TriangleAlert size={22} />
-            <p>个人设置加载失败</p>
-            <small>{loadError || '请稍后再试'}</small>
-            <button type="button" className="st-btn is-primary" onClick={() => void load()}><RefreshCcw size={14} /> 重新加载</button>
+            <p>{t('settings.loadFailed')}</p>
+            <small>{loadError || t('common.tryLater')}</small>
+            <button type="button" className="st-btn is-primary" onClick={() => void load()}><RefreshCcw size={14} /> {t('common.reload')}</button>
           </div>
-        </div>
+        </PageContainer>
       </main>
     )
   }
 
-  const current = SETTINGS_TABS.find(t => t.key === tab)!
+  const current = SETTINGS_TABS.find(x => x.key === tab)!
+  const tt = t
 
   return (
     <main>
       <SiteHeader />
-      <div className={`st-page${dirty ? ' has-unsaved' : ''}`}>
+      <PageContainer variant="narrow" className={`st-page${dirty ? ' has-unsaved' : ''}`}>
         <div className="st-layout">
           <header className="st-header">
-            <p className="st-eyebrow">PERSONAL SETTINGS</p>
-            <h1>个人设置</h1>
-            <p>管理你的账户资料、旅行偏好、隐私和通知方式。</p>
+            <p className="st-eyebrow">{t('settings.eyebrow')}</p>
+            <h1>{t('settings.title')}</h1>
+            <p>{t('settings.subtitle')}</p>
           </header>
 
           <AccountSummaryCard user={user} overview={overview} onOpenProfile={() => selectTab('profile')} onOpenPro={() => selectTab('pro')} />
 
-          <nav className="st-tabs" role="tablist" aria-label="设置分类">
+          <nav className="st-tabs" role="tablist" aria-label={t('settings.tabsLabel')}>
             {SETTINGS_TABS.map((t, i) => (
               <button
                 key={t.key}
@@ -225,7 +230,7 @@ export default function PersonalSettingsPage() {
                 onClick={() => selectTab(t.key)}
                 onKeyDown={e => onTabKey(e, i)}
               >
-                {t.label}
+                {tt(t.label)}
               </button>
             ))}
           </nav>
@@ -245,28 +250,29 @@ export default function PersonalSettingsPage() {
 
         {pending && (
           <ConfirmDialog
-            title="有尚未保存的更改"
-            body={<p>离开前要保存这些更改吗？放弃后，修改将恢复为上次保存的内容。</p>}
+            title={t('settings.unsaved.leaveTitle')}
+            body={<p>{t('settings.unsaved.leaveBody')}</p>}
             onCancel={() => setPending(null)}
             actions={<>
-              <button type="button" className="st-btn is-quiet" onClick={() => setPending(null)}>取消</button>
-              <button type="button" className="st-btn" onClick={() => { discard(); proceed(pending) }}>放弃更改</button>
+              <button type="button" className="st-btn is-quiet" onClick={() => setPending(null)}>{t('common.cancel')}</button>
+              <button type="button" className="st-btn" onClick={() => { discard(); proceed(pending) }}>{t('settings.unsaved.leaveDiscard')}</button>
               <button type="button" className="st-btn is-primary" disabled={saving} onClick={async () => { const p = pending; if (await save()) proceed(p); else setPending(null) }}>
-                {saving ? '保存中…' : '保存更改'}
+                {saving ? t('common.saving') : t('common.saveChanges')}
               </button>
             </>}
           />
         )}
 
         {toast && <div className="ts-toast" role="status" aria-live="polite">{toast}</div>}
-      </div>
+      </PageContainer>
     </main>
   )
 }
 
 function SettingsSkeleton() {
+  const t = useT()
   return (
-    <div className="st-page" aria-busy="true" aria-label="正在加载个人设置">
+    <PageContainer variant="narrow" className="st-page" aria-busy="true" aria-label={t('settings.loading')}>
       <div className="st-layout">
         <header className="st-header">
           <div className="skeleton" style={{ width: 140, height: 12, borderRadius: 6 }} />
@@ -277,7 +283,7 @@ function SettingsSkeleton() {
         <div className="st-tabs">{[0, 1, 2, 3, 4, 5].map(i => <div key={i} className="skeleton" style={{ width: 84, height: 34, borderRadius: 999 }} />)}</div>
         <div className="st-panel"><SettingsSectionSkeleton /></div>
       </div>
-    </div>
+    </PageContainer>
   )
 }
 

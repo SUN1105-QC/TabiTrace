@@ -2,6 +2,7 @@
 
 import type { TimelineDay, TripView } from '@/services/tabitrace-api'
 import { cityOf, closingQuote, placeLabelEn } from '@/utils/share-long'
+import { BrandMark } from '@/components/common/Brand'
 
 export function ShareResultFooter({ trip, timeline, image }: { trip: TripView; timeline: TimelineDay[]; image?: string }) {
   const quote = closingQuote(timeline)
@@ -18,7 +19,7 @@ export function ShareResultFooter({ trip, timeline, image }: { trip: TripView; t
         {quote.place && <span className="sl-footer-note">—— 写于 {quote.place}</span>}
       </div>
       <div className="sl-brand">
-        <span className="sl-brand-mark">旅</span>
+        <BrandMark size={34} className="sl-brand-mark" />
         <span><b>旅迹 TabiTrace</b><small>Every Journey · A Better You</small></span>
       </div>
     </footer>

@@ -4,12 +4,23 @@
 
 import Link from 'next/link'
 import { ArrowRight, BookOpenText, Camera, Check, Film, MapPinned, Route, Share2 } from 'lucide-react'
-import { LANDING_IMAGES, PRODUCT_SHOTS } from './landingDemo'
+import { LANDING_IMAGES, PRODUCT_SHOTS, type ProductShot } from './landingDemo'
+import { hdSrcSet } from '@/utils/place-images'
 
-type Shot = { src: string; width: number; height: number; alt: string }
-const Img = ({ shot, className }: { shot: Shot; className?: string }) => (
-  <img src={shot.src} alt={shot.alt} width={shot.width} height={shot.height} loading="lazy" decoding="async" className={className} />
+const Img = ({ shot, sizes, className }: { shot: ProductShot; sizes: string; className?: string }) => (
+  <img src={shot.src} srcSet={shot.srcSet} sizes={sizes} alt={shot.alt} width={shot.width} height={shot.height} loading="lazy" decoding="async" className={className} />
 )
+
+/** 各位置截图的显示宽度（实测）：供 srcset 在 1 倍 / 2 倍图之间选择 */
+const SHOT_SIZES = {
+  cellMap: '(max-width: 1024px) 94vw, (max-width: 1599px) 54vw, (max-width: 2239px) 48vw, 41vw',
+  cellGrid: '(max-width: 767px) 82vw, (max-width: 1024px) 38vw, 18vw',
+  previewWide: '(max-width: 1024px) 94vw, (max-width: 1439px) 50vw, (max-width: 1919px) 44vw, 39vw',
+  previewNarrow: '(max-width: 1024px) 94vw, (max-width: 1439px) 38vw, (max-width: 1919px) 34vw, 30vw',
+  outcome: '(max-width: 767px) 61vw, (max-width: 1024px) 46vw, (max-width: 1919px) 20vw, 15vw',
+  storyCell: '96px',
+  storyOutcome: '(max-width: 767px) 54vw, (max-width: 1024px) 311px, 253px'
+}
 
 export function Capabilities() {
   return (
@@ -26,7 +37,7 @@ export function Capabilities() {
             <h3>旅行地图</h3>
             <p>去过的地方、计划中的地点和收藏的地点，都落在同一张地图上，一眼看出今天还剩哪几站。</p>
           </div>
-          <Img shot={PRODUCT_SHOTS.map} className="ld-cell-shot" />
+          <Img shot={PRODUCT_SHOTS.map} sizes={SHOT_SIZES.cellMap} className="ld-cell-shot" />
         </article>
         <article className="ld-cell">
           <span className="ld-icon"><Route size={19} /></span>
@@ -44,7 +55,7 @@ export function Capabilities() {
             <h3>分享成果</h3>
             <p>旅行海报、九宫格和每日长图，用你自己的照片和记录生成。</p>
           </div>
-          <Img shot={PRODUCT_SHOTS.grid} className="ld-cell-shot" />
+          <Img shot={PRODUCT_SHOTS.grid} sizes={SHOT_SIZES.cellGrid} className="ld-cell-shot" />
         </article>
         <article className="ld-cell is-story">
           <div className="ld-cell-text">
@@ -52,18 +63,18 @@ export function Capabilities() {
             <h3>Travel Story</h3>
             <p>把地图、照片和旅行文字组合成一支竖屏短片。</p>
           </div>
-          <img src={LANDING_IMAGES.storyFrame.src} alt={LANDING_IMAGES.storyFrame.alt} width={288} height={512} loading="lazy" className="ld-cell-story" />
+          <Img shot={LANDING_IMAGES.storyFrame} sizes={SHOT_SIZES.storyCell} className="ld-cell-story" />
         </article>
       </div>
     </section>
   )
 }
 
-const PREVIEWS: { key: string; eyebrow: string; title: string; copy: string; points: string[]; shot: Shot }[] = [
-  { key: 'map', eyebrow: 'MAP & CHECK-IN', title: '地图与打卡', copy: '地图是旅行工作台的主角。当天的计划地点按时间编号，打卡过的地点变成橙色，下一站在哪里一目了然。', points: ['按天筛选地图与行程', '到达后一键打卡，自动完成当天计划', '搜索官方地点或添加自定义地点'], shot: PRODUCT_SHOTS.map },
-  { key: 'timeline', eyebrow: 'TIMELINE', title: '旅行时间轴', copy: '计划和真实打卡放在同一条时间轴上：原计划几点、实际几点到达，照片和当时写下的一句话都在旁边。', points: ['“原计划 09:30 · 09:42 已打卡”', '照片、文字与地点放在一起', '按天回看整趟旅程'], shot: PRODUCT_SHOTS.timeline },
-  { key: 'gallery', eyebrow: 'GALLERY', title: '照片与精选', copy: '照片按旅行的每一天整理。把喜欢的设为精选，它们会优先出现在分享成果和 Travel Story 里。', points: ['批量上传，自动读取拍摄时间', '按天 / 精选 / 是否关联打卡整理', '设为旅行封面、批量精选'], shot: PRODUCT_SHOTS.gallery },
-  { key: 'story', eyebrow: 'TRAVEL STORY', title: 'Travel Story 工作台', copy: '选模板、挑照片、定风格，右侧实时预览；确认后生成可以下载的竖屏视频。', points: ['多种模板与背景音乐', '拖动调整镜头顺序', '生成 MP4，可以下载和分享'], shot: PRODUCT_SHOTS.story }
+const PREVIEWS: { key: string; eyebrow: string; title: string; copy: string; points: string[]; shot: ProductShot; sizes: string }[] = [
+  { key: 'map', eyebrow: 'MAP & CHECK-IN', title: '地图与打卡', copy: '地图是旅行工作台的主角。当天的计划地点按时间编号，打卡过的地点变成橙色，下一站在哪里一目了然。', points: ['按天筛选地图与行程', '到达后一键打卡，自动完成当天计划', '搜索官方地点或添加自定义地点'], shot: PRODUCT_SHOTS.map, sizes: SHOT_SIZES.previewWide },
+  { key: 'timeline', eyebrow: 'TIMELINE', title: '旅行时间轴', copy: '计划和真实打卡放在同一条时间轴上：原计划几点、实际几点到达，照片和当时写下的一句话都在旁边。', points: ['“原计划 09:30 · 09:42 已打卡”', '照片、文字与地点放在一起', '按天回看整趟旅程'], shot: PRODUCT_SHOTS.timeline, sizes: SHOT_SIZES.previewNarrow },
+  { key: 'gallery', eyebrow: 'GALLERY', title: '照片与精选', copy: '照片按旅行的每一天整理。把喜欢的设为精选，它们会优先出现在分享成果和 Travel Story 里。', points: ['批量上传，自动读取拍摄时间', '按天 / 精选 / 是否关联打卡整理', '设为旅行封面、批量精选'], shot: PRODUCT_SHOTS.gallery, sizes: SHOT_SIZES.previewWide },
+  { key: 'story', eyebrow: 'TRAVEL STORY', title: 'Travel Story 工作台', copy: '选模板、挑照片、定风格，右侧实时预览；确认后生成可以下载的竖屏视频。', points: ['多种模板与背景音乐', '拖动调整镜头顺序', '生成 MP4，可以下载和分享'], shot: PRODUCT_SHOTS.story, sizes: SHOT_SIZES.previewNarrow }
 ]
 
 export function ProductPreviews() {
@@ -76,7 +87,7 @@ export function ProductPreviews() {
       <div className="ld-previews">
         {PREVIEWS.map((p, i) => (
           <article key={p.key} className={`ld-preview${i % 2 ? ' is-reverse' : ''}`}>
-            <div className="ld-preview-shot"><Img shot={p.shot} /></div>
+            <div className="ld-preview-shot"><Img shot={p.shot} sizes={p.sizes} /></div>
             <div className="ld-preview-copy">
               <p className="ld-eyebrow">{p.eyebrow}</p>
               <h3>{p.title}</h3>
@@ -114,9 +125,9 @@ export function JourneyFlow() {
 
 export function Outcomes() {
   const items = [
-    { key: 'poster', title: '旅行海报', desc: '一张图讲完这趟旅行：封面照片、路线、数据和一句话。', shot: PRODUCT_SHOTS.poster },
-    { key: 'grid', title: '九宫格', desc: '默认用每天的精选照片，也可以整张导出或分别导出 9 张。', shot: PRODUCT_SHOTS.grid },
-    { key: 'long', title: '每日长图', desc: '按天展开的长图，适合完整回顾整段行程。', shot: PRODUCT_SHOTS.long }
+    { key: 'poster', title: '旅行海报', desc: '一张图讲完这趟旅行：封面照片、路线、数据和一句话。', shot: PRODUCT_SHOTS.poster, sizes: SHOT_SIZES.outcome },
+    { key: 'grid', title: '九宫格', desc: '默认用每天的精选照片，也可以整张导出或分别导出 9 张。', shot: PRODUCT_SHOTS.grid, sizes: SHOT_SIZES.outcome, contain: true },
+    { key: 'long', title: '每日长图', desc: '按天展开的长图，适合完整回顾整段行程。', shot: PRODUCT_SHOTS.long, sizes: SHOT_SIZES.outcome }
   ]
   return (
     <section className="ld-section" id="outcomes" aria-labelledby="ld-out-title">
@@ -128,13 +139,13 @@ export function Outcomes() {
       <div className="ld-outcomes">
         {items.map(it => (
           <article key={it.key} className="ld-outcome">
-            <div className="ld-outcome-shot"><Img shot={it.shot} /></div>
+            <div className="ld-outcome-shot"><Img shot={it.shot} sizes={it.sizes} className={it.contain ? 'is-contain' : undefined} /></div>
             <h3>{it.title}</h3>
             <p>{it.desc}</p>
           </article>
         ))}
         <article className="ld-outcome is-story">
-          <div className="ld-outcome-shot is-dark"><img src={LANDING_IMAGES.storyFrame.src} alt={LANDING_IMAGES.storyFrame.alt} width={288} height={512} loading="lazy" /></div>
+          <div className="ld-outcome-shot is-dark"><Img shot={LANDING_IMAGES.storyFrame} sizes={SHOT_SIZES.storyOutcome} /></div>
           <h3>Travel Story</h3>
           <p>竖屏旅行短片，可以下载 MP4 分享。</p>
         </article>
@@ -147,7 +158,7 @@ export function MemoriesBanner() {
   return (
     <section className="ld-memories" aria-labelledby="ld-mem-title">
       <div className="ld-memories-photos" aria-hidden="true">
-        {LANDING_IMAGES.memories.map(m => <img key={m.src} src={m.src} alt="" loading="lazy" />)}
+        {LANDING_IMAGES.memories.map(m => <img key={m.src} src={m.src} srcSet={hdSrcSet(m.src)} sizes="(max-width: 767px) 150vw, 40vw" alt="" loading="lazy" decoding="async" />)}
       </div>
       <div className="ld-memories-copy">
         <h2 id="ld-mem-title">旅行结束了，<br />回忆才刚刚开始。</h2>

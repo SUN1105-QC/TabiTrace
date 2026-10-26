@@ -10,7 +10,8 @@ public interface ShareLinkMapper {
     @Options(useGeneratedKeys=true,keyProperty="id") int insert(ShareLinkEntity link);
     @Select("SELECT * FROM share_links WHERE id=#{id}") ShareLinkEntity findById(Long id);
     @Select("SELECT * FROM share_links WHERE trip_id=#{tripId} ORDER BY id DESC") List<ShareLinkEntity> listByTrip(Long tripId);
-    @Select("SELECT * FROM share_links WHERE share_token=#{token} AND status='ACTIVE' AND (expires_at IS NULL OR expires_at>UTC_TIMESTAMP())") ShareLinkEntity findActiveByToken(String token);
+    /** 账号在注销冷静期时，分享链接暂停访问（撤销注销后恢复） */
+    @Select("SELECT s.* FROM share_links s JOIN trips t ON t.id=s.trip_id JOIN users u ON u.id=t.user_id WHERE s.share_token=#{token} AND s.status='ACTIVE' AND (s.expires_at IS NULL OR s.expires_at>UTC_TIMESTAMP()) AND u.status='ACTIVE'") ShareLinkEntity findActiveByToken(String token);
     @Update("UPDATE share_links SET view_count=view_count+1 WHERE id=#{id}") int incrementViews(Long id);
     @Update("UPDATE share_links SET status='REVOKED',revoked_at=UTC_TIMESTAMP() WHERE id=#{id} AND status='ACTIVE'") int revoke(Long id);
     @Select("SELECT COUNT(*) FROM share_links WHERE trip_id=#{tripId} AND status='ACTIVE' AND (expires_at IS NULL OR expires_at>UTC_TIMESTAMP())") int countActive(Long tripId);

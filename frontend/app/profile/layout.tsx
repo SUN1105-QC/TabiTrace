@@ -1,12 +1,10 @@
-'use client'
-
+import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
-import { useRequireSession } from '@/hooks/useRequireSession'
+import { SessionGate } from '@/components/common/SessionGate'
 
-export default function ProfileLayout({ children }: { children: ReactNode }) {
-  const ready = useRequireSession(true)
-  if (!ready) {
-    return <main className="grid min-h-[60vh] place-items-center px-5 text-sm text-black/45">正在确认登录状态…</main>
-  }
-  return <>{children}</>
+/** 个人页面：不进入搜索结果；确认登录后才渲染 */
+export const metadata: Metadata = { robots: { index: false, follow: false } }
+
+export default function PrivateLayout({ children }: { children: ReactNode }) {
+  return <SessionGate>{children}</SessionGate>
 }

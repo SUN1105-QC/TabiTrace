@@ -1,74 +1,72 @@
 'use client'
 
 /**
- * 首屏：左侧城市专题文案 + CTA + 快速标签，右侧大号城市专题卡（封面、当季推荐与真实统计）。
- * 数字全部来自官方内容库：地点数、专题路线数、区域数。
+ * 首屏：左侧标题、说明与两个操作，右侧一张东京氛围照片；下方是搜索、分类与一行真实统计。
+ * 不再放统计卡和快捷标签墙——用户在这里只需要决定「搜一下」还是「往下看推荐」。
  */
 
 import Link from 'next/link'
-import { ArrowRight, Compass, Map as MapIcon } from 'lucide-react'
-import type { OfficialRouteView } from '@/services/tabitrace-api'
+import { ArrowDown, Compass } from 'lucide-react'
+import type { TripView } from '@/services/tabitrace-api'
+import { PlaceImage } from '@/components/common/PlaceImage'
+import { hdImage } from '@/utils/place-images'
+import { ExploreSearch } from './ExploreSearch'
+import { ExploreCategoryFilter } from './ExploreCategoryFilter'
 
-const QUICK_TAGS: { label: string; filter?: string; route?: string }[] = [
-  { label: '城市漫步', filter: 'WALK' },
-  { label: '地标', filter: 'LANDMARK' },
-  { label: '夜景', filter: 'NIGHT' },
-  { label: '展馆', filter: 'MUSEUM' },
-  { label: '秋日', route: 'AUTUMN_TOKYO' },
-  { label: '美食', filter: 'FOOD' },
-  { label: '购物', filter: 'SHOP' }
-]
-
-export function ExploreHero({ stats, season, seasonRoute, trip, onStart, onMap, onFilter, onRoute }: {
-  stats: { places: number; routes: number; areas: number }
-  season: string
-  seasonRoute?: OfficialRouteView
-  trip: { id: number; title: string } | null
+export function ExploreHero({ query, category, stats, resultCount, signedIn, target, allJoined, onQuery, onCategory, onStart, onShowResults, onChangeTrip }: {
+  query: string
+  category: string
+  /** 只显示已经加载到的真实数字 */
+  stats: { places?: number; areas?: number; routes?: number }
+  resultCount: number
+  signedIn: boolean
+  target: TripView | null
+  /** 目标旅行加入了官方探索：全部官方地点已经在旅行里 */
+  allJoined: boolean
+  onQuery: (q: string) => void
+  onCategory: (key: string) => void
   onStart: () => void
-  onMap: () => void
-  onFilter: (key: string) => void
-  onRoute: (code: string) => void
+  onShowResults: () => void
+  onChangeTrip: () => void
 }) {
+  const statLine = [
+    stats.places ? `${stats.places} 个精选地点` : '',
+    stats.areas ? `${stats.areas} 个区域` : '',
+    stats.routes ? `${stats.routes} 条旅行灵感` : ''
+  ].filter(Boolean).join(' · ')
+
   return (
-    <section className="ex-hero">
-      <div className="ex-hero-text">
-        <p className="ex-eyebrow">TOKYO OFFICIAL EXPLORE</p>
-        <h1>从东京开始，<br />探索一座城市的另一种方式。</h1>
-        <p className="ex-hero-lead">将地标、街区、文化体验与散步灵感，整理成一份更值得出发的城市指南。</p>
-        <div className="ex-hero-cta">
-          <button type="button" className="ex-btn is-primary" onClick={onStart}><Compass size={15} /> 开始探索</button>
-          <button type="button" className="ex-btn" onClick={onMap}><MapIcon size={15} /> 查看地图</button>
+    <section className="xp-hero" aria-labelledby="xp-hero-title">
+      <div className="xp-hero-text">
+        <p className="xp-eyebrow">EXPLORE TOKYO</p>
+        <h1 id="xp-hero-title">从东京开始，<br />探索一座城市的另一种方式。</h1>
+        <p className="xp-hero-lead">发现值得去的地方，<br />把喜欢的地点加入下一段旅程。</p>
+        <div className="xp-hero-cta">
+          <button type="button" className="xp-btn is-primary" onClick={onStart}><Compass size={16} /> 开始探索</button>
+          <Link href="/trips" className="xp-btn">查看我的旅行</Link>
         </div>
-        <div className="ex-tags">
-          {QUICK_TAGS.map(t => (
-            <button key={t.label} type="button" onClick={() => (t.route ? onRoute(t.route) : onFilter(t.filter!))}>{t.label}</button>
-          ))}
-        </div>
-        <p className="ex-trip-line">
-          {trip ? <>地点会加入到当前旅行：<Link href={`/trips/${trip.id}`}>{trip.title}</Link></> : <>还没有打开的旅行，<Link href="/trips/new">先创建一段旅行</Link>，就可以把地点加进去。</>}
-        </p>
       </div>
 
-      <div className="ex-city">
-        <img src={seasonRoute?.coverImage ?? '/images/explore/rainbow-bridge.jpg'} alt="东京" />
-        <div className="ex-city-shade" />
-        <div className="ex-city-top">
-          <span>OFFICIAL CITY GUIDE</span>
-          <span>{season}季特别版</span>
-        </div>
-        <div className="ex-city-body">
-          <b>TOKYO</b>
-          <p>东京探索指南</p>
-          <dl>
-            <div><dt>{stats.places}</dt><dd>精选地点</dd></div>
-            <div><dt>{stats.routes}</dt><dd>推荐路线</dd></div>
-            <div><dt>{stats.areas}</dt><dd>探索区域</dd></div>
-          </dl>
-          {seasonRoute && (
-            <button type="button" className="ex-city-season" onClick={() => onRoute(seasonRoute.code)}>
-              当季推荐 · {seasonRoute.title} <ArrowRight size={13} />
-            </button>
-          )}
+      <figure className="xp-hero-media">
+        <PlaceImage src={hdImage('07-tokyo-station')} alt="东京站丸之内站舍" sizes="(max-width: 1023px) 100vw, 560px" eager />
+        <figcaption>TOKYO · 东京站丸之内站舍</figcaption>
+      </figure>
+
+      <div className="xp-hero-tools">
+        <ExploreSearch value={query} onChange={onQuery} onSubmit={onShowResults} />
+        <ExploreCategoryFilter value={category} onChange={onCategory} label="按分类浏览地点" />
+        <div className="xp-hero-foot">
+          {statLine && <p className="xp-hero-stats">{statLine}</p>}
+          {query ? (
+            <button type="button" className="xp-link" onClick={onShowResults}>找到 {resultCount} 个地点 · 查看结果 <ArrowDown size={13} /></button>
+          ) : signedIn ? (
+            <p className="xp-trip-line">
+              {target ? (allJoined
+                ? <>「<Link href={`/trips/${target.id}`}>{target.title}</Link>」已加入东京官方探索，全部地点都在这段旅行里</>
+                : <>地点会加入：<Link href={`/trips/${target.id}`}>{target.title}</Link></>) : '加入地点时可以选择旅行'}
+              <button type="button" className="xp-link" onClick={onChangeTrip}>{target ? '更换' : '选择旅行'}</button>
+            </p>
+          ) : null}
         </div>
       </div>
     </section>

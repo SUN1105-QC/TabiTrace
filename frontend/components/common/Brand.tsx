@@ -1,12 +1,15 @@
-import { MapPinned } from 'lucide-react'
+/** 品牌标志：原版 Logo（public/brand/），完整版为图标 + 「旅迹」字标，compact 只显示图标 */
+export const BRAND_LOGO = { src: '/brand/logo.webp', ratio: 447 / 200 }
+export const BRAND_MARK = '/brand/mark.webp'
+
+export function BrandLogo({ height, className }: { height: number; className?: string }) {
+  return <img src={BRAND_LOGO.src} alt="旅迹 TabiTrace" width={Math.round(height * BRAND_LOGO.ratio)} height={height} className={className} decoding="async" />
+}
+
+export function BrandMark({ size, className }: { size: number; className?: string }) {
+  return <img src={BRAND_MARK} alt="" aria-hidden="true" width={size} height={size} className={className} decoding="async" />
+}
 
 export function Brand({compact=false}:{compact?:boolean}) {
-  return (
-    <div className="flex items-center gap-2.5 font-semibold tracking-tight">
-      <span className="grid h-10 w-10 place-items-center rounded-[14px] bg-warm text-white shadow-card">
-        <MapPinned size={19} strokeWidth={2.2} />
-      </span>
-      {!compact && <span className="leading-tight"><b className="block text-[18px]">旅迹</b><small className="block text-[10px] font-medium tracking-[.08em] text-black/45">TabiTrace</small></span>}
-    </div>
-  )
+  return compact ? <BrandMark size={40} className="block" /> : <BrandLogo height={50} className="block h-[50px] w-auto" />
 }

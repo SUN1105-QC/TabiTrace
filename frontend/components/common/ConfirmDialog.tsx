@@ -7,8 +7,10 @@
 
 import { useEffect, useId, useRef, type ReactNode } from 'react'
 import { X } from 'lucide-react'
+import { useT } from '@/components/common/PreferencesProvider'
 
 export function ConfirmDialog({ title, body, actions, onCancel }: { title: string; body: ReactNode; actions: ReactNode; onCancel: () => void }) {
+  const t = useT()
   const titleId = useId()
   const panel = useRef<HTMLDivElement | null>(null)
   useEffect(() => {
@@ -22,7 +24,7 @@ export function ConfirmDialog({ title, body, actions, onCancel }: { title: strin
       <div className="modal-panel st-dialog" role="dialog" aria-modal="true" aria-labelledby={titleId} ref={panel}>
         <div className="modal-head">
           <h2 id={titleId}>{title}</h2>
-          <button type="button" className="icon-button" onClick={onCancel} aria-label="关闭"><X size={16} /></button>
+          <button type="button" className="icon-button" onClick={onCancel} aria-label={t('common.close')}><X size={16} /></button>
         </div>
         <div className="modal-body">
           <div className="st-dialog-body">{body}</div>

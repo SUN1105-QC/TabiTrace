@@ -1,21 +1,26 @@
 'use client'
 
 /**
- * 登录 / 注册共用的 Auth 组件与行为：
- * - AuthPage：页面外壳（公共页头 + 内容区），两种布局各自传入栅格样式
- * - AuthCardHeader / AuthField / PasswordField / FormAlert / AuthSubmit / AuthSwitch：表单卡片里的统一元素
- * - useSignedInRedirect：已登录用户打开登录 / 注册页时，确认会话有效后直接跳走
- * - useKeyboardSafe：软键盘弹起时，让当前输入框和提交按钮留在可见区域
+ * 旅迹 Auth Design System：登录、注册、忘记密码（以及以后的重置密码、修改邮箱）共用。
+ *
+ * 布局（样式见 globals.css 的 au- 前缀，一份响应式规则）：
+ * - AuthShell：公共页头 + 统一栅格。<1024px 为紧凑布局（Hero 图 + 上叠卡片）；≥1024px 为左右双栏
+ *   · variant="memories"：左侧为暖色面板 + 旅行照片拼贴（登录、找回密码：“回到自己的旅程”）
+ *   · variant="product"：左侧为产品预览（注册：“从这里开始一段新的旅迹”）
+ * - AuthCard / AuthCardHeader / AuthFooter
+ * 表单元素：AuthField / PasswordField / PasswordRuleHint / FormAlert / AuthSubmit / AuthSwitch
+ * 行为：useSignedInRedirect（已登录直接跳走）、useKeyboardSafe（软键盘不遮挡）、useNextParam / withNext（保留 ?next=）
  */
 
 import Link from 'next/link'
-import { forwardRef, useEffect, useLayoutEffect, useState, type InputHTMLAttributes, type ReactNode, type RefObject } from 'react'
+import { forwardRef, useEffect, useLayoutEffect, useState, type CSSProperties, type FormHTMLAttributes, type InputHTMLAttributes, type ReactNode, type RefObject } from 'react'
 import { useRouter } from 'next/navigation'
-import { AlertCircle, ArrowRight, Eye, EyeOff, Loader2, type LucideIcon } from 'lucide-react'
+import { AlertCircle, ArrowRight, Check, Eye, EyeOff, Loader2, type LucideIcon } from 'lucide-react'
 import { SiteHeader } from '@/components/common/SiteHeader'
+import { LEGAL_LINKS } from '@/constants/app'
 import { userApi } from '@/services/tabitrace-api'
 import { hasSession } from '@/services/api'
-import { safeNextPath } from '@/utils/auth'
+import { passwordStrength, REGISTER_RULES, safeNextPath } from '@/utils/auth'
 
 export type AuthPhase = 'form' | 'checking' | 'redirecting'
 
@@ -28,7 +33,7 @@ export function useNextParam() {
   return next
 }
 
-/** 把当前的 ?next= 带到另一页（登录 ↔ 注册），只带站内路径 */
+/** 把当前的 ?next= 带到另一页（登录 ↔ 注册 ↔ 找回密码），只带站内路径 */
 export function withNext(path: string, next: string | null) {
   const safe = next ? safeNextPath(next, '') : ''
   return safe ? `${path}?next=${encodeURIComponent(safe)}` : path
@@ -66,24 +71,67 @@ export function useKeyboardSafe(formRef: RefObject<HTMLFormElement | null>, subm
   }, [formRef, submitRef])
 }
 
-export function AuthPage({ className, children }: { className: string; children: ReactNode }) {
+// ---------------------------------------------------------------- 布局
+
+export type AuthHero = {
+  eyebrow: string
+  title: ReactNode
+  /** 桌面端的完整说明 */
+  sub: ReactNode
+  /** 手机紧凑 Hero 里的一句话（最多一行） */
+  subShort: ReactNode
+  /** 紧凑 Hero 的背景图（只在 <1024px 时加载） */
+  image: string
+}
+
+export function AuthShell({ variant, hero, visual, children }: { variant: 'memories' | 'product'; hero: AuthHero; visual?: ReactNode; children: ReactNode }) {
   return (
-    <main>
+    <main className="au-page">
       <SiteHeader />
-      <section className={className}>{children}</section>
+      <section className={`au-shell is-${variant}`}>
+        <div className="au-side" style={{ '--au-hero-image': `url(${hero.image})` } as CSSProperties}>
+          <div className="au-intro">
+            <p className="au-eyebrow">{hero.eyebrow}</p>
+            <h1>{hero.title}</h1>
+            <p className="au-sub"><span className="au-sub-short">{hero.subShort}</span><span className="au-sub-long">{hero.sub}</span></p>
+          </div>
+          {/* 桌面端视觉：手机端 display:none，里面的懒加载图片不会被下载 */}
+          {visual && <div className="au-visual">{visual}</div>}
+        </div>
+        <div className="au-main">{children}</div>
+      </section>
+      <AuthFooter />
     </main>
   )
 }
 
+/** 表单卡片：统一圆角、内边距、上叠效果 */
+export const AuthCard = forwardRef<HTMLFormElement, FormHTMLAttributes<HTMLFormElement>>(function AuthCard({ className, ...props }, ref) {
+  return <form ref={ref} noValidate aria-labelledby="auth-card-title" className={`au-card${className ? ` ${className}` : ''}`} {...props} />
+})
+
 export function AuthCardHeader({ eyebrow, title, sub }: { eyebrow: string; title: ReactNode; sub?: ReactNode }) {
   return (
     <>
-      <p className="text-xs font-bold tracking-[.18em] text-warm">{eyebrow}</p>
-      <h2 id="auth-card-title" className="mt-2 font-serif text-[28px] leading-tight md:text-4xl">{title}</h2>
-      {sub}
+      <p className="au-card-eyebrow">{eyebrow}</p>
+      <h2 id="auth-card-title" className="au-card-title">{title}</h2>
+      {sub && <p className="au-card-sub">{sub}</p>}
     </>
   )
 }
+
+/** 隐私政策 / 使用条款：只有真实页面存在时才显示（constants/app.ts 的 LEGAL_LINKS） */
+export function AuthFooter() {
+  if (!LEGAL_LINKS.privacy && !LEGAL_LINKS.terms) return null
+  return (
+    <footer className="au-footer">
+      {LEGAL_LINKS.privacy && <Link href={LEGAL_LINKS.privacy}>隐私政策</Link>}
+      {LEGAL_LINKS.terms && <Link href={LEGAL_LINKS.terms}>使用条款</Link>}
+    </footer>
+  )
+}
+
+// ---------------------------------------------------------------- 表单元素
 
 export function FormAlert({ id, children }: { id: string; children: ReactNode }) {
   return (
@@ -104,14 +152,19 @@ type FieldProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'id'> & {
   /** 表单级错误的 id，一并关联到输入框 */
   formErrorId?: string
   trailing?: ReactNode
+  /** label 右侧的操作（例如“忘记密码？”） */
+  labelAside?: ReactNode
 }
 
-export const AuthField = forwardRef<HTMLInputElement, FieldProps>(function AuthField({ id, label, icon: Icon, error, hint, formErrorId, trailing, className, ...input }, ref) {
+export const AuthField = forwardRef<HTMLInputElement, FieldProps>(function AuthField({ id, label, icon: Icon, error, hint, formErrorId, trailing, labelAside, className, ...input }, ref) {
   const describedBy = [error && `${id}-error`, hint && `${id}-hint`, formErrorId].filter(Boolean).join(' ') || undefined
   return (
     <div>
-      <label htmlFor={id} className="text-sm font-medium text-ink/80">{label}</label>
-      <div className="relative mt-2">
+      <div className="au-label-row">
+        <label htmlFor={id} className="au-label">{label}</label>
+        {labelAside}
+      </div>
+      <div className="au-input-wrap">
         <Icon size={17} aria-hidden="true" className="au-icon" />
         <input ref={ref} id={id} aria-invalid={Boolean(error)} aria-describedby={describedBy} className={`au-input${trailing ? ' has-toggle' : ''}${className ? ` ${className}` : ''}`} {...input} />
         {trailing}
@@ -140,6 +193,22 @@ export const PasswordField = forwardRef<HTMLInputElement, Omit<FieldProps, 'type
   )
 })
 
+/** 设置新密码时的规则提示：只展示后端真实规则（至少 8 位），强度仅供参考 */
+export function PasswordRuleHint({ value }: { value: string }) {
+  const strength = passwordStrength(value)
+  const lengthMet = value.length >= REGISTER_RULES.passwordMin && value.length <= REGISTER_RULES.passwordMax
+  return (
+    <div className="au-pw-meta">
+      <span className={lengthMet ? 'is-met' : undefined}><Check size={13} aria-hidden="true" />至少 {REGISTER_RULES.passwordMin} 位</span>
+      {strength.level > 0 && (
+        <span className="au-strength" data-level={strength.level}>
+          <i aria-hidden="true" /><i aria-hidden="true" /><i aria-hidden="true" />强度 {strength.label}<small>（仅供参考）</small>
+        </span>
+      )}
+    </div>
+  )
+}
+
 export const AuthSubmit = forwardRef<HTMLButtonElement, { locked: boolean; label: string; lockedLabel: string; status: string }>(function AuthSubmit({ locked, label, lockedLabel, status }, ref) {
   return (
     <>
@@ -156,8 +225,8 @@ export const AuthSubmit = forwardRef<HTMLButtonElement, { locked: boolean; label
 
 export function AuthSwitch({ prompt, href, label }: { prompt: string; href: string; label: string }) {
   return (
-    <p className="mt-4 text-center text-[13px] text-black/45 md:mt-5 md:text-xs">
-      {prompt}<Link href={href} className="inline-flex min-h-11 items-center px-1 font-bold text-warm">{label}</Link>
+    <p className="au-switch">
+      {prompt}<Link href={href}>{label}</Link>
     </p>
   )
 }

@@ -12,6 +12,8 @@ public interface PlaceMapper {
       ORDER BY name LIMIT 30
       """) List<PlaceEntity> search(String q);
     @Select("SELECT * FROM places WHERE source_type='OFFICIAL' AND city=#{city} ORDER BY id") List<PlaceEntity> findOfficialByCity(String city);
+    /** 坐标附近约 200 米方框内的官方地点（快速打卡的「附近地点」提示，精确距离由调用方再算） */
+    @Select("SELECT * FROM places WHERE source_type='OFFICIAL' AND latitude BETWEEN #{lat}-0.002 AND #{lat}+0.002 AND longitude BETWEEN #{lng}-0.0025 AND #{lng}+0.0025") List<PlaceEntity> findOfficialNear(@Param("lat") double lat,@Param("lng") double lng);
     @Select("SELECT COUNT(*) FROM places WHERE source_type='OFFICIAL' AND city=#{city}") int countOfficialByCity(String city);
     @Select("SELECT p.* FROM trip_places tp JOIN places p ON p.id=tp.place_id WHERE tp.trip_id=#{tripId} ORDER BY tp.sort_order,tp.id") List<PlaceEntity> findByTrip(Long tripId);
     /** 每个地点被多少段旅行加入过（探索页的「热度」），键为 placeId / trips */

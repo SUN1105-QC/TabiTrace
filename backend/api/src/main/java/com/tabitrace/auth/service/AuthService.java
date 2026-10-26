@@ -29,9 +29,15 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwt;
     private final EmailVerificationService verifications;
+    private final LoginThrottleService throttle;
+    /** 邮箱不存在时也跑一次 BCrypt，避免通过响应时间判断邮箱是否注册 */
+    private final String timingDummyHash;
 
-    public AuthService(UserMapper users, RefreshTokenMapper refreshTokens, PasswordEncoder passwordEncoder, JwtService jwt, EmailVerificationService verifications) {
-        this.users=users; this.refreshTokens=refreshTokens; this.passwordEncoder=passwordEncoder; this.jwt=jwt; this.verifications=verifications;
+    public AuthService(UserMapper users, RefreshTokenMapper refreshTokens, PasswordEncoder passwordEncoder, JwtService jwt,
+                       EmailVerificationService verifications, LoginThrottleService throttle) {
+        this.users=users; this.refreshTokens=refreshTokens; this.passwordEncoder=passwordEncoder; this.jwt=jwt;
+        this.verifications=verifications; this.throttle=throttle;
+        this.timingDummyHash=passwordEncoder.encode("tabitrace-login-timing-equalizer");
     }
 
     @Transactional
@@ -46,13 +52,24 @@ public class AuthService {
         UserEntity u=new UserEntity();
         u.email=email; u.passwordHash=passwordEncoder.encode(request.password());
         u.nickname=registerNickname(request.nickname(), email);
-        u.locale="zh-CN"; u.timezone="Asia/Tokyo"; u.defaultVisibility="PRIVATE"; u.emailNotifications=true;
+        // 注册时沿用用户在注册页正在使用的界面语言与设备时区，避免注册完成后界面被切回默认语言；无效值回退到默认
+        u.locale=registerLocale(request.locale()); u.timezone=registerTimezone(request.timezone()); u.defaultVisibility="PRIVATE"; u.emailNotifications=false;
         // 并发注册同一邮箱时，以数据库 users.email 唯一约束为准
         try { users.insert(u); }
         catch(DuplicateKeyException ex) { throw emailExists(); }
         u=users.findById(u.id);
         return issue(u, userAgent, null);
     }
+
+    static String registerLocale(String v) {
+        try { return v == null ? DEFAULT_LOCALE : UserService.requireLocale(v); } catch (BusinessException ex) { return DEFAULT_LOCALE; }
+    }
+
+    static String registerTimezone(String v) {
+        try { return v == null ? DEFAULT_TIMEZONE : UserService.requireTimezone(v); } catch (BusinessException ex) { return DEFAULT_TIMEZONE; }
+    }
+
+    private static final String DEFAULT_LOCALE = "zh-CN", DEFAULT_TIMEZONE = "Asia/Tokyo";
 
     private static BusinessException emailExists() { return new BusinessException("EMAIL_EXISTS","该邮箱已经注册", HttpStatus.CONFLICT); }
 
@@ -63,16 +80,56 @@ public class AuthService {
         return prefix.codePointCount(0, prefix.length()) <= UserService.NICKNAME_MAX ? prefix : prefix.substring(0, prefix.offsetByCodePoints(0, UserService.NICKNAME_MAX));
     }
 
-    @Transactional
-    public TokenResponse login(LoginRequest request) { return login(request, null); }
+    public TokenResponse login(LoginRequest request) { return login(request, null, null); }
 
-    @Transactional
-    public TokenResponse login(LoginRequest request, String userAgent) {
-        UserEntity u=users.findByEmail(request.email().trim().toLowerCase());
-        if(u==null||!passwordEncoder.matches(request.password(),u.passwordHash))
+    /**
+     * 登录：先做频率限制，再校验密码。邮箱不存在与密码错误返回同一个错误，并且都会计入失败次数。
+     * 失败记录必须保留，所以业务异常不回滚。
+     */
+    @Transactional(noRollbackFor = BusinessException.class)
+    public TokenResponse login(LoginRequest request, String userAgent, String clientIp) {
+        String email=request.email().trim().toLowerCase();
+        throttle.check(email, clientIp);
+        UserEntity u=users.findByEmail(email);
+        boolean ok = u!=null ? passwordEncoder.matches(request.password(),u.passwordHash) : dummyMatch(request.password());
+        if(!ok) {
+            throttle.recordFailure(email, clientIp);
             throw new BusinessException("INVALID_CREDENTIALS","邮箱或密码不正确", HttpStatus.UNAUTHORIZED);
+        }
+        // 注销冷静期：密码正确才告诉用户账号在冷静期，确认撤销后恢复账号并登录
+        if(UserService.STATUS_DELETION_PENDING.equals(u.status)) {
+            if(!Boolean.TRUE.equals(request.cancelDeletion()))
+                throw new BusinessException("ACCOUNT_DELETION_PENDING","这个账号已申请注销",HttpStatus.FORBIDDEN,
+                        java.util.Map.of("scheduledAt",String.valueOf(u.deletionScheduledAt)));
+            users.cancelDeletion(u.id);
+            u=users.findById(u.id);
+        }
         if(!"ACTIVE".equals(u.status)) throw new BusinessException("USER_DISABLED","账号当前不可用",HttpStatus.FORBIDDEN);
+        throttle.clear(email);
         return issue(u, userAgent, null);
+    }
+
+    private boolean dummyMatch(String password) {
+        if(timingDummyHash!=null) passwordEncoder.matches(password, timingDummyHash);
+        return false;
+    }
+
+    /**
+     * 忘记密码：用 purpose=RESET_PASSWORD 的邮箱验证令牌设置新密码。
+     * 成功后撤销该账号所有已登录设备，再为当前设备签发新会话（等同重新登录）。
+     * 令牌不存在 / 账号不可用时统一返回“验证已失效”，不暴露账号状态。
+     */
+    @Transactional
+    public TokenResponse resetPassword(PasswordResetRequest request, String userAgent) {
+        String email=EmailVerificationService.normalizeEmail(request.email());
+        verifications.consume(request.emailVerificationToken(), email, VerificationPurpose.RESET_PASSWORD);
+        UserEntity u=users.findByEmail(email);
+        if(u==null || !"ACTIVE".equals(u.status))
+            throw new BusinessException("EMAIL_TOKEN_INVALID","邮箱验证已失效，请重新获取验证码");
+        users.updatePassword(u.id, passwordEncoder.encode(request.newPassword()));
+        refreshTokens.revokeAll(u.id);
+        throttle.clear(email);
+        return issue(users.findById(u.id), userAgent, null);
     }
 
     @Transactional
@@ -88,17 +145,23 @@ public class AuthService {
         if(stored==null) throw new BusinessException("REFRESH_TOKEN_REVOKED","Refresh Token 已失效",HttpStatus.UNAUTHORIZED);
         UserEntity u=users.findById(Long.valueOf(claims.getSubject()));
         if(u==null) throw new BusinessException("USER_NOT_FOUND","用户不存在",HttpStatus.UNAUTHORIZED);
+        if(!"ACTIVE".equals(u.status)) throw new BusinessException("REFRESH_TOKEN_REVOKED","Refresh Token 已失效",HttpStatus.UNAUTHORIZED);
         refreshTokens.revoke(claims.getId());
-        // 刷新是同一台设备的延续：沿用首次登录时间，设备信息以本次请求为准
+        // 刷新是同一台设备的延续：沿用首次登录时间与会话编号，设备信息以本次请求为准
         LocalDateTime started=stored.sessionStartedAt!=null?stored.sessionStartedAt:stored.createdAt;
-        return issue(u, userAgent!=null?userAgent:stored.userAgent, started);
+        return issue(u, userAgent!=null?userAgent:stored.userAgent, started, stored.sessionId!=null?stored.sessionId:stored.jti);
     }
 
     @Transactional
-    public void logout(Long userId, LogoutRequest request) {
+    public void logout(Long userId, LogoutRequest request) { logout(userId, null, request); }
+
+    /** 只退出当前设备：优先用 refresh token（Cookie）识别，其次用访问令牌里的 sid；都没有时才退出该用户全部设备（旧令牌兼容） */
+    @Transactional
+    public void logout(Long userId, String sid, LogoutRequest request) {
         if(request!=null && request.refreshToken()!=null && !request.refreshToken().isBlank()) {
             try { refreshTokens.revoke(jwt.parse(request.refreshToken()).getId()); return; } catch(Exception ignored) {}
         }
+        if(sid!=null && !sid.isBlank()) { refreshTokens.revoke(sid); return; }
         // Logout is intentionally idempotent. Public /auth/logout may be called after
         // the access token has expired, so only revoke-all when an authenticated user exists.
         if(userId!=null) refreshTokens.revokeAll(userId);
@@ -138,10 +201,14 @@ public class AuthService {
         return refreshTokens.revokeOthers(userId,currentJti);
     }
 
-    private TokenResponse issue(UserEntity u, String userAgent, LocalDateTime sessionStartedAt) {
+    private TokenResponse issue(UserEntity u, String userAgent, LocalDateTime sessionStartedAt) { return issue(u, userAgent, sessionStartedAt, null); }
+
+    /** sessionId 为空时开始一个新的登录会话 */
+    private TokenResponse issue(UserEntity u, String userAgent, LocalDateTime sessionStartedAt, String sessionId) {
         JwtService.TokenWithJti refresh=jwt.createRefreshToken(u.id,u.email);
-        String access=jwt.createAccessToken(u.id,u.email,refresh.jti());
-        RefreshTokenEntity e=new RefreshTokenEntity(); e.userId=u.id; e.jti=refresh.jti();
+        String session=sessionId!=null?sessionId:java.util.UUID.randomUUID().toString();
+        String access=jwt.createAccessToken(u.id,u.email,refresh.jti(),session);
+        RefreshTokenEntity e=new RefreshTokenEntity(); e.userId=u.id; e.jti=refresh.jti(); e.sessionId=session;
         e.userAgent=userAgent==null?null:userAgent.substring(0,Math.min(255,userAgent.length()));
         e.sessionStartedAt=sessionStartedAt!=null?sessionStartedAt:LocalDateTime.now(ZoneOffset.UTC);
         e.expiresAt=LocalDateTime.ofInstant(refresh.expiresAt(), ZoneOffset.UTC); refreshTokens.insert(e);
@@ -149,9 +216,10 @@ public class AuthService {
     }
 
     public static UserView view(UserEntity u){
-        return new UserView(u.id,u.email,u.nickname,u.avatarUrl,u.bio,u.locale,u.timezone,u.distanceUnit==null?"KM":u.distanceUnit,
+        return new UserView(u.id,u.email,u.nickname,u.avatarUrl,u.avatarSmallUrl,u.bio,u.locale,u.timezone,u.distanceUnit==null?"KM":u.distanceUnit,
                 u.defaultVisibility,Boolean.TRUE.equals(u.shareExactLocation),u.shareLinkExpiryDays==null?0:u.shareLinkExpiryDays,
                 Boolean.TRUE.equals(u.emailNotifications),!Boolean.FALSE.equals(u.notifyTripReminder),!Boolean.FALSE.equals(u.notifyStory),
-                !Boolean.FALSE.equals(u.notifyAchievement),!Boolean.FALSE.equals(u.notifyShare),u.createdAt);
+                !Boolean.FALSE.equals(u.notifyAchievement),!Boolean.FALSE.equals(u.notifyShare),u.createdAt,
+                u.lifetimeProAt!=null,u.lifetimeProAt);
     }
 }

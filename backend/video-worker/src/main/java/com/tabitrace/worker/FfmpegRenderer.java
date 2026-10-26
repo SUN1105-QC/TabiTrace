@@ -28,25 +28,38 @@ import java.util.stream.Stream;
 
 /**
  * 按 API 冻结的分镜渲染 Travel Story：
- *   PREPARING 下载解码照片 → MAP 地图路线帧 → STORY 开场 / 地点 / 成就 / 结尾帧 → MUSIC 校验音乐 → EXPORTING xfade 转场 + 混音导出 MP4。
- * 每个阶段失败都抛带错误码的 RenderFailure，前端据此显示「素材下载失败 / 地图生成失败 / 视频合成失败」等。
+ *   PREPARING 下载解码照片 → STORY 开场 / 地点 / 成就 / 结尾帧 → MUSIC 校验音乐 → EXPORTING xfade 转场 + 混音导出 MP4。
+ * 每个阶段失败都抛带错误码的 RenderFailure，前端据此显示「素材下载失败 / 画面生成失败 / 视频合成失败」等。
+ * 音乐例外：音乐文件不存在、下载失败或混音失败时不让整个视频失败，改用无音乐继续生成，并上报 MUSIC_FALLBACK 告警。
  */
 @Component
 public class FfmpegRenderer {
-    /** 渲染进度回调：阶段名 + 百分比 */
-    public interface Progress { void report(String stage, int progress); }
+    /** 渲染进度回调：阶段名 + 百分比；warn 上报「生成成功但有降级」（例如 MUSIC_FALLBACK） */
+    public interface Progress {
+        void report(String stage, int progress);
+        default void warn(String code) {}
+    }
+
+    public static final String MUSIC_FALLBACK = "MUSIC_FALLBACK";
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FfmpegRenderer.class);
 
     private static final Set<String> TRANSITIONS = Set.of("fade", "fadeblack", "fadewhite", "dissolve", "slideleft",
             "slideright", "slideup", "slidedown", "wipeleft", "wiperight", "smoothleft", "smoothright", "circleopen");
-    private static final int MAX_MAP_FRAMES = 12;
     private static final int FPS = 30;
 
-    private record Shot(Path file, double seconds) {}
+    private record Shot(Path file, double seconds) {
+        Shot withSeconds(double s) { return new Shot(file, s); }
+    }
+    /** 冻结在分镜里的音乐片段：从原曲第 start 秒开始，统一响度增益 + 用户音量，淡入淡出 */
+    /** loudnorm：没有预先测过响度（「我的音乐」）时，用 FFmpeg loudnorm 实时统一到 -16 LUFS，代替固定增益 */
+    private record MusicPlan(Path file, double start, double gainDb, double volume, double fadeIn, double fadeOut, String credit, boolean loudnorm) {}
 
     private final JdbcTemplate jdbc;
     private final String ffmpeg;
     private final Path workDir;
     private final Path musicDir;
+    private final Path musicCacheDir;
+    private final WorkerStorage storage;
     private final long ffmpegTimeoutSeconds;
     private final HttpClient http = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build();
     private final ObjectMapper json = JsonMapper.builder().build();
@@ -56,7 +69,11 @@ public class FfmpegRenderer {
             @Value("${worker.ffmpeg-binary:ffmpeg}") String ffmpeg,
             @Value("${worker.work-dir:./video-output}") String workDir,
             @Value("${worker.music-dir:./video-music}") String musicDir,
-            @Value("${worker.ffmpeg-timeout-seconds:600}") long ffmpegTimeoutSeconds) {
+            @Value("${worker.ffmpeg-timeout-seconds:600}") long ffmpegTimeoutSeconds,
+            @Value("${worker.music-cache-dir:${java.io.tmpdir}/tabitrace-music}") String musicCacheDir,
+            WorkerStorage storage) {
+        this.musicCacheDir = Path.of(musicCacheDir);
+        this.storage = storage;
         this.jdbc = jdbc;
         this.ffmpeg = ffmpeg;
         this.workDir = Path.of(workDir);
@@ -70,10 +87,20 @@ public class FfmpegRenderer {
         try {
             return renderIn(dir, job, progress);
         } catch (Exception ex) {
-            // 工作目录可能在 public 下：失败时下载的原始照片同样不能留在可公开访问的位置
+            // 工作目录可能在 public 下：失败时下载的原始照片同样不能留在可公开访问的位置。
+            // 停机中断时线程带着中断标记，先清掉再删（否则删除重试会立刻放弃），删完再恢复
+            boolean interrupted = Thread.interrupted();
             deleteContents(dir, null);
+            if (interrupted) Thread.currentThread().interrupt();
             throw ex;
         }
+    }
+
+    /** 成片已上传到对象存储：删除本地工作目录（容器磁盘不会随渲染次数增长） */
+    public void discard(long jobId) {
+        Path dir = workDir.resolve("project-" + jobId);
+        deleteContents(dir, null);
+        try { Files.deleteIfExists(dir); } catch (IOException ignored) { /* 目录非空或被占用：启动清扫会再处理 */ }
     }
 
     private Path renderIn(Path dir, VideoJob job, Progress progress) throws Exception {
@@ -90,32 +117,15 @@ public class FfmpegRenderer {
         progress.report("PREPARING", 10);
         Map<Long, BufferedImage> images = loadPhotos(dir, scenes);
 
-        // ── MAP：地图路线帧 ──
-        Map<String, List<Shot>> byScene = new HashMap<>();
-        int frameNo = 0;
-        if (scenes.stream().anyMatch(sc -> "MAP".equals(sc.path("type").asText()))) {
-            progress.report("MAP", 30);
-            try {
-                for (JsonNode sc : scenes) {
-                    if (!"MAP".equals(sc.path("type").asText())) continue;
-                    List<Shot> shots = renderMap(dir, painter, sc, frameNo);
-                    frameNo += shots.size();
-                    byScene.put(sc.path("key").asText(), shots);
-                }
-            } catch (Exception ex) {
-                throw new RenderFailure("MAP_FAILED", "地图路线生成失败", ex);
-            }
-        }
-
         // ── STORY：开场 / 地点照片 / 成就 / 结尾 ──
         progress.report("STORY", 50);
+        Map<String, List<Shot>> byScene = new HashMap<>();
         int photoTotal = (int) scenes.stream().filter(sc -> "PLACE".equals(sc.path("type").asText()))
                 .mapToLong(sc -> sc.path("photoIds").size()).sum();
-        int photoIndex = 0;
+        int photoIndex = 0, frameNo = 0;
         try {
             for (JsonNode sc : scenes) {
                 String type = sc.path("type").asText();
-                if ("MAP".equals(type)) continue;
                 List<Shot> shots = new ArrayList<>();
                 double seconds = sc.path("duration").asDouble();
                 String title = text(sc, "title"), subtitle = text(sc, "subtitle");
@@ -126,9 +136,11 @@ public class FfmpegRenderer {
                     case "PLACE" -> {
                         List<Long> ids = ids(sc.path("photoIds"));
                         JsonNode shotSeconds = meta.path("shots");
+                        // 旧版本分镜在地点开头留给路线动画的时长（meta.leg.seconds）并入第一张照片，总时长不变
+                        double extra = meta.path("leg").path("seconds").asDouble(0);
                         for (int i = 0; i < ids.size(); i++) {
                             photoIndex++;
-                            double s = shotSeconds.has(i) ? shotSeconds.get(i).asDouble() : seconds / ids.size();
+                            double s = (shotSeconds.has(i) ? shotSeconds.get(i).asDouble() : (seconds - extra) / ids.size()) + (i == 0 ? extra : 0);
                             BufferedImage img = images.get(ids.get(i));
                             // 照片在排队期间被删：跳过这一张，时长并入相邻镜头
                             if (img == null) { shots.add(new Shot(null, s)); continue; }
@@ -143,7 +155,8 @@ public class FfmpegRenderer {
                     }
                     case "ENDING" -> shots.add(write(dir, ++frameNo, painter.ending(firstImage(sc, images), title, subtitle,
                             text(meta, "stats"), text(meta, "endingText"), text(meta, "tagline")), seconds));
-                    default -> { }
+                    // 旧版本分镜里的地图 / 路线总览段落：不再渲染，时长并入相邻镜头（总时长不变）
+                    default -> shots.add(new Shot(null, seconds));
                 }
                 byScene.put(sc.path("key").asText(), shots);
             }
@@ -158,13 +171,26 @@ public class FfmpegRenderer {
 
         // ── MUSIC ──
         progress.report("MUSIC", 70);
-        Path music = resolveMusic(job.musicCode());
+        MusicPlan music = music(job, sb, progress);
+        // 需要署名的音乐（CC BY）：在最后一个画面的副本底部写上作者与授权（原图保留，混音失败回退无音乐时不带署名）
+        List<Shot> withCredit = music != null && music.credit() != null ? creditLastShot(timeline, music.credit()) : timeline;
 
         // ── EXPORTING ──
         progress.report("EXPORTING", 80);
         String transition = sb.path("transition").asText("fade");
-        Path output = encode(dir, timeline, TRANSITIONS.contains(transition) ? transition : "fade",
-                sb.path("transitionSeconds").asDouble(0.5), music, job.duration(), size, sb.path("grade").asText("NATURAL"));
+        String tr = TRANSITIONS.contains(transition) ? transition : "fade";
+        double trSeconds = sb.path("transitionSeconds").asDouble(0.5);
+        String grade = sb.path("grade").asText("NATURAL");
+        Path output;
+        try {
+            output = encode(dir, withCredit, tr, trSeconds, music, job.duration(), size, grade);
+        } catch (RenderFailure ex) {
+            if (music == null || Thread.currentThread().isInterrupted()) throw ex;
+            // 音频损坏等导致混音失败：去掉音乐再合成一次，视频仍然生成
+            log.warn("视频项目 {} 混音失败，改用无音乐生成：{}", job.id(), ex.getMessage());
+            progress.warn(MUSIC_FALLBACK);
+            output = encode(dir, timeline, tr, trSeconds, null, job.duration(), size, grade);
+        }
 
         cleanupIntermediate(dir, output);
         return output;
@@ -215,29 +241,6 @@ public class FfmpegRenderer {
         return out;
     }
 
-    private List<Shot> renderMap(Path dir, ScenePainter painter, JsonNode sc, int frameNo) throws IOException {
-        List<ScenePainter.MapPoint> points = new ArrayList<>();
-        for (JsonNode p : sc.path("meta").path("points")) {
-            points.add(new ScenePainter.MapPoint(p.path("name").asText(""), p.path("time").asText(""),
-                    p.path("lat").asDouble(), p.path("lng").asDouble()));
-        }
-        double seconds = sc.path("duration").asDouble();
-        String title = text(sc, "title"), subtitle = text(sc, "subtitle");
-        List<Shot> shots = new ArrayList<>();
-        if (points.size() < 2) return shots;
-        if ("FULL".equals(sc.path("meta").path("mode").asText())) {
-            // 完整路线：一站一帧，路线逐段延伸；点太多时均匀抽样，控制帧数
-            List<Integer> steps = new ArrayList<>();
-            int frames = Math.min(points.size(), MAX_MAP_FRAMES);
-            for (int i = 0; i < frames; i++) steps.add((int) Math.round(i * (points.size() - 1) / (double) (frames - 1)));
-            double each = seconds / steps.size();
-            for (int step : steps) shots.add(write(dir, ++frameNo, painter.map(points, step, title, subtitle), each));
-        } else {
-            shots.add(write(dir, ++frameNo, painter.map(points, -1, title, subtitle), seconds));
-        }
-        return shots;
-    }
-
     /** 缺图的镜头时长并入前一个（没有前一个就并入后一个），保证总时长不变。 */
     private static List<Shot> mergeMissing(List<Shot> shots) {
         List<Shot> out = new ArrayList<>();
@@ -245,10 +248,10 @@ public class FfmpegRenderer {
         for (Shot s : shots) {
             if (s.file() == null) {
                 if (out.isEmpty()) carry += s.seconds();
-                else out.set(out.size() - 1, new Shot(out.get(out.size() - 1).file(), out.get(out.size() - 1).seconds() + s.seconds()));
+                else out.set(out.size() - 1, out.get(out.size() - 1).withSeconds(out.get(out.size() - 1).seconds() + s.seconds()));
                 continue;
             }
-            out.add(new Shot(s.file(), s.seconds() + carry));
+            out.add(s.withSeconds(s.seconds() + carry));
             carry = 0;
         }
         return out;
@@ -277,7 +280,7 @@ public class FfmpegRenderer {
         };
     }
 
-    private Path encode(Path dir, List<Shot> shots, String transition, double transitionSeconds, Path music,
+    private Path encode(Path dir, List<Shot> shots, String transition, double transitionSeconds, MusicPlan music,
                         int duration, int[] size, String grade) throws RenderFailure {
         double minShot = shots.stream().mapToDouble(Shot::seconds).min().orElse(1);
         double t = shots.size() < 2 ? 0 : round3(Math.max(0.1, Math.min(transitionSeconds, minShot * 0.45)));
@@ -288,7 +291,7 @@ public class FfmpegRenderer {
             cmd.addAll(List.of("-loop", "1", "-framerate", String.valueOf(FPS), "-t", fmt(len),
                     "-i", shots.get(i).file().getFileName().toString()));
         }
-        if (music != null) cmd.addAll(List.of("-stream_loop", "-1", "-i", music.toAbsolutePath().toString()));
+        if (music != null) cmd.addAll(List.of("-stream_loop", "-1", "-ss", fmt(music.start()), "-i", music.file().toAbsolutePath().toString()));
 
         StringBuilder f = new StringBuilder();
         for (int i = 0; i < shots.size(); i++) {
@@ -307,8 +310,11 @@ public class FfmpegRenderer {
         }
         f.append('[').append(last).append(']').append(gradeFilter(grade)).append("format=yuv420p[vout]");
         if (music != null) {
-            f.append(";[").append(shots.size()).append(":a]afade=t=in:st=0:d=0.6,afade=t=out:st=")
-                    .append(fmt(Math.max(0, duration - 1.8))).append(":d=1.8,volume=1.2[aout]");
+            f.append(";[").append(shots.size()).append(":a]")
+                    .append(music.loudnorm() ? "loudnorm=I=-16:TP=-1.5:LRA=11" : "volume=" + fmt(music.gainDb()) + "dB")
+                    .append(",volume=").append(fmt(music.volume()))
+                    .append(",alimiter=limit=0.95:level=disabled,afade=t=in:st=0:d=").append(fmt(music.fadeIn()))
+                    .append(",afade=t=out:st=").append(fmt(Math.max(0, duration - music.fadeOut()))).append(":d=").append(fmt(music.fadeOut())).append("[aout]");
         }
 
         Path output = dir.resolve("output.mp4");
@@ -329,13 +335,89 @@ public class FfmpegRenderer {
         return output;
     }
 
-    private Path resolveMusic(String musicCode) throws RenderFailure {
-        if (musicCode == null || "NONE".equalsIgnoreCase(musicCode)) return null;
+    /**
+     * 解析冻结在分镜里的音乐。音乐不可用（存储下载失败、文件不存在或为空）时返回 null 并上报 MUSIC_FALLBACK：
+     * 视频照常生成（无音乐），而不是整条任务失败。
+     */
+    private MusicPlan music(VideoJob job, JsonNode sb, Progress progress) {
+        JsonNode m = sb.path("music");
+        if (m.isObject() && !m.path("objectKey").asText("").isBlank()) {
+            if (m.path("volume").asDouble(0.5) <= 0) return null;
+            String title = m.path("title").asText(job.musicCode());
+            boolean user = "USER".equals(m.path("source").asText(""));
+            Path file;
+            try {
+                if (user) {
+                    // 「我的音乐」：不只相信分镜里的路径，按 id 重新核对音乐属于这个视频的主人、文件还没被清理
+                    String reason = verifyUserMusic(job, m.path("userMusicId").asLong(0), m.path("objectKey").asText());
+                    if (reason != null) return fallback(job, progress, "自定义音乐「" + title + "」" + reason);
+                    file = storage.userMusic(m.path("objectKey").asText(), job.userId(), musicDir, musicCacheDir);
+                } else {
+                    file = storage.music(m.path("objectKey").asText(), musicDir, musicCacheDir);
+                }
+            } catch (Exception ex) {
+                return fallback(job, progress, "背景音乐「" + title + "」读取失败：" + ex.getMessage());
+            }
+            if (!usableAudio(file)) return fallback(job, progress, "背景音乐「" + title + "」的音频文件不存在或为空");
+            String credit = m.path("creditShort").isTextual() ? m.path("creditShort").asText() : null;
+            return new MusicPlan(file, m.path("startSeconds").asDouble(0), m.path("gainDb").asDouble(0), m.path("volume").asDouble(0.5),
+                    m.path("fadeInSeconds").asDouble(1.0), m.path("fadeOutSeconds").asDouble(1.8), credit, m.path("loudnorm").asBoolean(false));
+        }
+        // 旧分镜（没有冻结音乐片段）：按音乐代码在本地目录查找，从头播放
+        if (job.musicCode() == null || job.musicCode().isBlank() || "NONE".equalsIgnoreCase(job.musicCode())) return null;
+        Path legacy = resolveMusic(job.musicCode());
+        return legacy == null ? fallback(job, progress, "音乐「" + job.musicCode() + "」的音频文件不存在") : new MusicPlan(legacy, 0, 0, 0.5, 1.0, 1.8, null, false);
+    }
+
+    /** 核对「我的音乐」：属于这个视频的主人、存储路径一致、文件还没被清理。通过返回 null，否则返回原因 */
+    private String verifyUserMusic(VideoJob job, long musicId, String key) {
+        List<java.util.Map<String, Object>> rows = jdbc.queryForList("SELECT user_id, storage_key, purged_at FROM user_music WHERE id=?", musicId);
+        if (rows.isEmpty()) return "不存在";
+        java.util.Map<String, Object> r = rows.get(0);
+        if (job.userId() == null || ((Number) r.get("user_id")).longValue() != job.userId()) return "不属于这个视频的主人";
+        if (!key.equals(r.get("storage_key"))) return "存储路径不一致";
+        if (r.get("purged_at") != null) return "的文件已被清理";
+        return null;
+    }
+
+    private static MusicPlan fallback(VideoJob job, Progress progress, String reason) {
+        log.warn("视频项目 {} 改用无音乐生成（MUSIC_FALLBACK）：{}", job.id(), reason);
+        progress.warn(MUSIC_FALLBACK);
+        return null;
+    }
+
+    private static boolean usableAudio(Path file) {
+        try { return file != null && Files.isRegularFile(file) && Files.size(file) > 1024; } catch (IOException ex) { return false; }
+    }
+
+    /** 在最后一个画面的副本上写署名，返回替换了最后一个画面的新时间线（原图不改） */
+    private static List<Shot> creditLastShot(List<Shot> timeline, String credit) throws RenderFailure {
+        Shot last = timeline.get(timeline.size() - 1);
+        Path file = last.file().resolveSibling("credit-" + last.file().getFileName());
+        try {
+            BufferedImage img = ImageIO.read(last.file().toFile());
+            if (img == null) return timeline;
+            BufferedImage rgb = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_RGB);
+            java.awt.Graphics2D g = rgb.createGraphics();
+            g.drawImage(img, 0, 0, null);
+            g.dispose();
+            ScenePainter.creditOverlay(rgb, credit);
+            ImageIO.write(rgb, "jpg", file.toFile());
+        } catch (IOException ex) {
+            throw new RenderFailure("STORY_FAILED", "片尾音乐署名生成失败", ex);
+        }
+        List<Shot> out = new ArrayList<>(timeline);
+        out.set(out.size() - 1, new Shot(file, last.seconds()));
+        return out;
+    }
+
+    /** 旧分镜：按音乐代码在本地目录查找音频；找不到时返回 null（由调用方回退无音乐） */
+    private Path resolveMusic(String musicCode) {
         for (String extension : List.of(".mp3", ".wav", ".m4a", ".aac")) {
             Path candidate = musicDir.resolve(musicCode.toUpperCase(Locale.ROOT) + extension);
             if (Files.isRegularFile(candidate)) return candidate;
         }
-        throw new RenderFailure("MUSIC_UNAVAILABLE", "音乐「" + musicCode + "」的音频文件不存在，请换一首音乐或补上音频文件");
+        return null;
     }
 
     // ───────────── 文件与进程 ─────────────
@@ -375,7 +457,17 @@ public class FfmpegRenderer {
         Process process = new ProcessBuilder(cmd).directory(dir.toFile()).redirectErrorStream(true)
                 .redirectOutput(logFile.toFile()).start();
         try {
-            if (!process.waitFor(ffmpegTimeoutSeconds, TimeUnit.SECONDS)) {
+            boolean finished;
+            try {
+                finished = process.waitFor(ffmpegTimeoutSeconds, TimeUnit.SECONDS);
+            } catch (InterruptedException ex) {
+                // Worker 停机中断了渲染：FFmpeg 子进程不能留下来继续占用 CPU / 磁盘
+                process.destroyForcibly();
+                process.waitFor(10, TimeUnit.SECONDS);
+                Thread.currentThread().interrupt();
+                throw ex;
+            }
+            if (!finished) {
                 process.destroyForcibly();
                 process.waitFor(10, TimeUnit.SECONDS);
                 throw new IOException("ffmpeg 超过 " + ffmpegTimeoutSeconds + " 秒没有完成，已强制结束");
@@ -396,14 +488,17 @@ public class FfmpegRenderer {
      * 启动时没有任何任务在渲染：中间文件全部删除；output.mp4 只保留「已完成」项目的，
      * 强杀时写了一半的残缺视频同样删掉。返回删除的文件数。
      */
-    public int sweepLeftovers() throws IOException {
+    public int sweepLeftovers() throws IOException { return sweepLeftovers(true); }
+
+    /** keepCompletedOutputs=false：成片已在对象存储（r2 模式），本地 output.mp4 也一并删除 */
+    public int sweepLeftovers(boolean keepCompletedOutputs) throws IOException {
         if (!Files.isDirectory(workDir)) return 0;
         Set<String> completed = new HashSet<>(jdbc.queryForList(
                 "SELECT CONCAT('project-',id) FROM video_projects WHERE status='COMPLETED'", String.class));
         int removed = 0;
         try (Stream<Path> dirs = Files.list(workDir)) {
             for (Path d : dirs.filter(Files::isDirectory).filter(p -> p.getFileName().toString().startsWith("project-")).toList()) {
-                boolean keepOutput = completed.contains(d.getFileName().toString());
+                boolean keepOutput = keepCompletedOutputs && completed.contains(d.getFileName().toString());
                 try (Stream<Path> files = Files.list(d)) {
                     for (Path f : files.toList()) {
                         boolean isOutput = f.getFileName().toString().equals("output.mp4");

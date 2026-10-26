@@ -40,7 +40,7 @@ public class RecentRecordService {
         for (CheckinEntity c : checkins.recentByTrip(tripId, n)) {
             List<PhotoEntity> ps = photos.listByCheckin(c.id);
             out.add(new RecentRecord("CHECKIN", c.id, c.placeNameSnapshot, c.areaSnapshot, c.checkinType, at(c.checkinTime, zone), ps.size(),
-                    ps.isEmpty() ? null : ps.get(0).imageUrl, c.note));
+                    ps.isEmpty() ? null : thumb(ps.get(0)), c.note));
         }
         out.addAll(groupUnattached(photos.recentUnattached(tripId, UNATTACHED_SCAN), zone));
         return merge(out, n);
@@ -57,7 +57,7 @@ public class RecentRecordService {
         List<RecentRecord> out = new ArrayList<>();
         byDay.forEach((day, ps) -> {
             PhotoEntity latest = ps.get(0);
-            out.add(new RecentRecord("PHOTOS", null, null, null, null, at(latest.capturedAt != null ? latest.capturedAt : latest.createdAt, zone), ps.size(), latest.imageUrl, null));
+            out.add(new RecentRecord("PHOTOS", null, null, null, null, at(latest.capturedAt != null ? latest.capturedAt : latest.createdAt, zone), ps.size(), thumb(latest), null));
         });
         return out;
     }
@@ -77,4 +77,7 @@ public class RecentRecordService {
         var u = users.findById(userId);
         try { return ZoneId.of(u == null || u.timezone == null ? "UTC" : u.timezone); } catch (Exception e) { return ZoneId.of("UTC"); }
     }
+
+    /** 列表缩略图：优先上传时生成的缩略图，旧照片回退原图 */
+    private static String thumb(com.tabitrace.photo.entity.PhotoEntity p) { return p.thumbUrl != null ? p.thumbUrl : p.mediumUrl != null ? p.mediumUrl : p.imageUrl; }
 }

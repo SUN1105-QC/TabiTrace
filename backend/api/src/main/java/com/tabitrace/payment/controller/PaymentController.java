@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 public class PaymentController {
     private final PaymentService service;public PaymentController(PaymentService service){this.service=service;}
     @PostMapping("/trips/{tripId}/payments/checkout") public ApiResponse<CheckoutResponse> checkout(@PathVariable Long tripId){return ApiResponse.ok(service.checkout(SecurityUtils.currentUser().id(),tripId));}
+    /** 买断 · 终身 Pro */
+    @PostMapping("/payments/lifetime/checkout") public ApiResponse<CheckoutResponse> lifetime(){return ApiResponse.ok(service.checkoutLifetime(SecurityUtils.currentUser().id()));}
+    @GetMapping("/payments/lifetime/latest") public ApiResponse<PaymentView> lifetimeLatest(){return ApiResponse.ok(service.latestLifetime(SecurityUtils.currentUser().id()));}
     @GetMapping("/trips/{tripId}/payments/latest") public ApiResponse<PaymentView> latest(@PathVariable Long tripId){return ApiResponse.ok(service.latest(SecurityUtils.currentUser().id(),tripId));}
     @PostMapping(value="/payments/stripe/webhook",consumes=MediaType.APPLICATION_JSON_VALUE) public ApiResponse<Void> webhook(@RequestBody String body,@RequestHeader("Stripe-Signature") String signature){service.webhook(body,signature);return ApiResponse.ok();}
 }

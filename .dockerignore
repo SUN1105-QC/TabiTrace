@@ -1,0 +1,24 @@
+# 只把构建需要的源码送进 Docker：依赖、构建产物、日志、本地上传、密钥和文档都不复制
+.git
+**/node_modules
+**/.next
+**/target
+**/*.log
+**/.env
+**/.env.*
+!**/.env.example
+backend/.tabitrace
+.tabitrace
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+frontend/public/generated-videos
+frontend/public/vendor
+video-output
+.tools
+.claude
+AI开发执行指令
+docs
+static
+**/*.png.tmp

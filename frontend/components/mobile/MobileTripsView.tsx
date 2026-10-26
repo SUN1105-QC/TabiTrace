@@ -10,6 +10,7 @@ import { ChevronRight, Plus } from 'lucide-react'
 import { CurrentTripCard } from '@/components/home/CurrentTripCard'
 import type { ItineraryView, TripSummary, TripView } from '@/services/tabitrace-api'
 import { daysBetween } from '@/lib/time'
+import { TripCoverImage } from '@/components/trip/TripCoverImage'
 
 const STATUS_TEXT: Record<string, string> = { PLANNING: '准备中', ONGOING: '进行中', COMPLETED: '已完成', ARCHIVED: '已归档' }
 
@@ -70,7 +71,7 @@ export function MobileTripsView({
               return (
                 <li key={t.id}>
                   <Link href={`/trips/${t.id}`}>
-                    <span className="m-trip-thumb"><img src={t.coverImage || '/images/cover.jpg'} alt={t.title} loading="lazy" /></span>
+                    <span className="m-trip-thumb"><TripCoverImage trip={t} alt={t.title} compact sizes="96px" /></span>
                     <span className="m-trip-body">
                       <b>{t.title}</b>
                       <small>{t.destinationName} · {t.startDate.replace(/-/g, '.')} - {t.endDate.replace(/-/g, '.')}</small>

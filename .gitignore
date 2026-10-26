@@ -11,16 +11,24 @@ target/
 # ── 运行时产物：日志、上传的照片、渲染出的视频 ──
 *.log
 backend/.tabitrace/
+.tabitrace/
 frontend/public/generated-videos/
+# 由 frontend/scripts/copy-maplibre-worker.mjs 在 predev / prebuild 时生成
+frontend/public/vendor/maplibre-gl/
 video-output/
 
 # ── 环境变量（只提交示例文件）──
 .env
 .env.*
 !.env.example
+!.env.*.example
 
 # ── 本机 Claude / IDE / 系统文件 ──
-.claude/settings.local.json
+.claude/
+*.pem
+*.key
+*.p12
+*.pfx
 .idea/
 .vscode/
 *.iml
