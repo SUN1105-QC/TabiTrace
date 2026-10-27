@@ -1,5 +1,15 @@
 # 2026-10-26 · Lightsail 发布记录
 
+## 2026-10-27 · R2 与背景音乐已完成配置
+
+- R2_BUCKET=tabi-media，R2_MUSIC_BUCKET=tabi-music-private，R2_PUBLIC_BASE_URL=https://media.sunows.com。凭证仅保存在服务器受限 .env 中。
+- 两个桶上传、读取、删除验证通过，验证对象已清除；媒体匿名 HTTPS 读取与 https://tabi.sunows.com 的 GET / HEAD / PUT 跨域预检通过。未调整音乐桶的公开设置。
+- 按生产数据库中 enabled=1、status=APPROVED 的清单发布 19 首背景音乐：19 个原曲进入音乐桶，19 个试听进入媒体桶，共 38 个对象、170238721 字节。原曲 SHA256 与数据库和本地分析记录一致，远端大小与 MD5 校验通过，试听匿名读取和 CORS 校验通过；没有覆盖内容不一致的已有对象。
+- Java HttpClient 从服务器容器读取媒体返回 200，下载 721022 字节。最初 Python-urllib 客户端被 Cloudflare 返回 403，使用明确的验证客户端标识及实际 Java 客户端均成功；没有关闭 Cloudflare 安全设置。
+- 2026-10-27 21:33 JST 复查：Nginx 配置有效，MySQL 健康，服务器域名解析正确；生产启动检查仅剩 MAIL_FROM_ADDRESS 与 RESEND_API_KEY 缺失。用户尚未开通邮件服务，已提供 Resend 开通步骤。网站仍未正式上线。
+
+以下保留 2026-10-26 初始发布记录，R2 / 音乐未配置的旧状态以上述更新为准。
+
 状态：源码整理、GitHub 上传、服务器部署准备与构建验证已完成；**完整网站尚未正式上线**。缺少 R2 与真实邮件配置，不能把 DNS 或证书成功记为应用上线。
 
 ## 项目分析与整理
