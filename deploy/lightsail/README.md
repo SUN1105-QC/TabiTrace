@@ -51,6 +51,10 @@ sudo docker compose --env-file /srv/sunows/apps/tabi/shared/.env -f compose.prod
 
 ## Nginx 与 HTTPS
 
+2026-10-27 已发布到 https://tabi.sunows.com，四个生产容器已启动，SMTP 认证、R2、公开 HTTPS、浏览器与证书续期演练通过。实际启用的是 nginx-tls.conf，证书续期钩子为 /etc/letsencrypt/renewal-hooks/deploy/tabi-nginx-reload.sh（内容见 renew-nginx.sh）。业务镜像标签 b7a2e45；后续提交主要是部署模板与验收文档。
+
+证书已存在时，使用 nginx-tls.conf；首次创建且证书尚未申请时才使用下面的 HTTP 模板与 Certbot 流程。已发布实例维护时不要将 HTTPS 站点替换回 HTTP 模板。Lightsail 的 IPv4 防火墙须允许 TCP 443；API、数据库端口不需要向公网开放。
+
 只有应用健康、域名已解析到本服务器后执行：
 
 ```bash

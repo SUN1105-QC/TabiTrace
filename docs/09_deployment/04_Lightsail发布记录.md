@@ -1,5 +1,19 @@
 # 2026-10-26 · Lightsail 发布记录
 
+## 2026-10-27 · 已正式发布
+
+网站地址：https://tabi.sunows.com 。公网 HTTP 自动 301 跳转 HTTPS，首页、登录、注册、找回密码、价格、署名与东京探索页面均返回 200；公网 /health 返回 ok。未登录 API 返回 401，跨站会话请求被拒绝，refresh Cookie 的 Secure、HttpOnly、SameSite=Strict 属性通过检查。
+
+- 用户提供的 SMTP 文件带编辑器行号与制表符，已在导入时规范化；APP_AUTH_EMAIL_CODE_FROM 映射 MAIL_FROM_ADDRESS，MAIL_SMTP_STARTTLS_ENABLE 映射 MAIL_SMTP_STARTTLS，MAIL_PROVIDER 设为 smtp。原文件未改，凭证仅保存在服务器受限 .env，未提交 Git。
+- Gmail SMTP 587 / STARTTLS 验证：TLSv1.3、认证返回 235、发件地址被接受。只执行连接 / 登录 / 发件信封检查后重置，没有发送邮件。
+- 四个容器已运行，web / API / MySQL 健康检查通过；Worker 无专用 Docker 健康检查，以运行状态和存储工具链验证。使用已构建的 b7a2e45 镜像，启动前确认 frontend、backend 与 Compose 相对该版本无差异。
+- 主机 Nginx 已启用项目 TLS 模板与 ACME 验证目录；证书续期计时器正常，certbot dry-run 成功，续期后 Nginx 校验 / 重载钩子已安装。
+- 最初公网 443 超时，主机监听与 INPUT 策略正常。用户按指引在 Lightsail 添加 HTTPS 入站规则后，公网 HTTPS 和浏览器验证通过。SSH、主机防火墙、数据库公开端口未更改。
+- 桌面 1440 与手机 390 宽度浏览器通过：首页、登录 / 注册表单、无横向溢出、未登录访问旅行页跳转登录、无运行时错误。实际公网访问完成验证；早期私有 SSH 通道已撤销。
+- 在现有 API 容器内使用其实际依赖与现有环境变量验证 Java S3 SDK：预签名 PUT 200、读取内容一致、私有音乐对象访问成功，临时对象已清除。未向其他镜像传递服务器 .env。
+
+边界：验收未发送真实邮件、未创建测试账号，也未跑注册后旅行 / 照片 / 视频全链路；SMTP 已认证不等于邮件收件箱送达已验证。Stripe 未配置，支付不可用。真实业务验收可由用户在正式页面完成，用户数据不会被自动清理。下方为历史准备记录，已解决的阻塞以上述发布结果为准。
+
 ## 2026-10-27 · R2 与背景音乐已完成配置
 
 - R2_BUCKET=tabi-media，R2_MUSIC_BUCKET=tabi-music-private，R2_PUBLIC_BASE_URL=https://media.sunows.com。凭证仅保存在服务器受限 .env 中。
