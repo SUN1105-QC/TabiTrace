@@ -1,5 +1,20 @@
 # 2026-10-26 · Lightsail 发布记录
 
+## 2026-10-30 · 成就下线与费用功能合并发布完成
+
+正式地址：https://tabi.sunows.com 。业务提交 f32c4aad053ed5e10b637bade3ef5bf1bd8e88f7，三个业务镜像标签均为 f32c4aad053e，发布前线上源码为 0a0d9d3、业务镜像为 b7a2e45。
+
+- 移除全部产品成就入口、相关统计/总结/回忆/分享图/通知/视频展示、API 与解锁计算，开发模式同步移除。旧成就地址由 Next 路由层 308 跳到对应旅行；历史成就表与兼容字段保留，不清空历史数据。
+- 同步发布支付订单、退款/争议同步与对账、账号用量与限额、V22 成片清理。受限服务器环境仅补充已确认的 COST_ENFORCE=true、每日 20 次 / 6000 秒、全站同时 3 个任务，其他秘密配置保留。
+- 数据库迁移前快照：`/srv/sunows/apps/tabi/shared/backups/20261029T223026Z-before-f32c4aad053e.sql.gz`，24260 字节，0600，gzip 校验通过；环境配置也在该受限目录备份。Flyway V20、V21、V22 均成功，现有账号数量保持 1，验收时视频清理队列为空。
+- API / Web / MySQL 健康检查通过，Worker 运行，四个容器重启计数均为 0；数据库与业务目录卷未清理，Nginx、TLS 与防火墙未更改。
+- 公网 HTTPS：首页、探索、价格、登录、health 均 200；`/trips/1/achievements` 为 308 → `/trips/1`；未登录访问账号、用量、支付记录接口均 401。
+- 公共方案接口与 API 容器运行时均确认限额已启用：20 / 6000 / 全站同时 3，Free 与 Pro 共用账号每日额度。原有每账号同时最多 2 个任务继续执行。
+- 本地 API 215 项（含 MySQL 专项 16 项）、Worker 19 项、前端 67 项全部通过，生产构建完成，Lint 0 errors / 109 warnings。[GitHub Linux CI](https://github.com/SUN1105-QC/TabiTrace/actions/runs/40965625471) 前后端均通过。
+- Stripe Secret / Webhook 尚未配置，方案接口明确 paymentsAvailable=false；没有启用生产 mock，没有执行扣款、退款或发送邮件。未创建测试账号或修改现有旅行、照片；真实登录后的完整业务链路仍由用户验收，旧版孤儿成片仍需存储清单核对。
+
+本次用户明确授权使用的 Lightsail 私钥只用于 SSH，没有进入 Git；临时受限副本在验收后清理。下面为历史部署记录。
+
 ## 2026-10-27 · 已正式发布
 
 网站地址：https://tabi.sunows.com 。公网 HTTP 自动 301 跳转 HTTPS，首页、登录、注册、找回密码、价格、署名与东京探索页面均返回 200；公网 /health 返回 ok。未登录 API 返回 401，跨站会话请求被拒绝，refresh Cookie 的 Secure、HttpOnly、SameSite=Strict 属性通过检查。
