@@ -32,6 +32,8 @@ public class VideoProjectEntity {
     public String renderer;
     public String outputKey;
     public String outputUrl;
+    /** Actual encoded file length, recorded by the worker; null means an unmeasured historical output. */
+    public Long outputBytes;
     public String errorCode;
     public String errorMessage;
     /** 生成成功但有降级（MUSIC_FALLBACK：音乐不可用，已用无音乐生成） */

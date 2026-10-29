@@ -13,9 +13,4 @@ public interface VideoCatalogMapper {
     @Select("SELECT * FROM video_music ORDER BY sort_order,code") List<VideoMusicEntity> music();
     @Select("SELECT * FROM video_music WHERE code=#{code}") VideoMusicEntity musicByCode(String code);
 
-    @Select("""
-      SELECT a.name FROM user_achievements ua JOIN achievements a ON a.id=ua.achievement_id
-      WHERE ua.user_id=#{userId} AND ua.trip_id=#{tripId} ORDER BY ua.earned_at,a.id
-      """)
-    List<String> earnedAchievementNames(@Param("userId") Long userId, @Param("tripId") Long tripId);
 }

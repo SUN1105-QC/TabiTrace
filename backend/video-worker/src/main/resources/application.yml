@@ -8,6 +8,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
 worker:
   poll-ms: ${VIDEO_WORKER_POLL_MS:5000}
+  cleanup-interval-ms: ${VIDEO_OUTPUT_CLEANUP_INTERVAL_MS:60000}
   # 停机（SIGTERM）时等待当前视频完成的秒数，超时则中断并放回队列；Railway drainingSeconds 需大于它 + 10
   shutdown-grace-seconds: ${WORKER_SHUTDOWN_GRACE_SECONDS:20}
   ffmpeg-binary: ${FFMPEG_BINARY:ffmpeg}

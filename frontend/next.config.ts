@@ -43,6 +43,9 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   reactStrictMode: true,
   poweredByHeader: false,
+  async redirects() {
+    return [{ source: '/trips/:id/achievements', destination: '/trips/:id', permanent: true }]
+  },
   async rewrites() {
     return apiInternalUrl ? [{ source: '/api/v1/:path*', destination: `${apiInternalUrl}/api/v1/:path*` }] : []
   },

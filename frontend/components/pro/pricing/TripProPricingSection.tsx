@@ -14,10 +14,12 @@ import { PricingCardFree } from './PricingCardFree'
 import { PricingCardLifetimePro } from './PricingCardLifetimePro'
 import { PricingCardTripPro } from './PricingCardTripPro'
 import { WhyBuyPerTrip } from './WhyBuyPerTrip'
+import { videoUsageTerms } from '@/utils/plan'
 
 export function TripProPricingSection({ s }: { s: TripProState }) {
   const { plan, loggedIn, trip, loadingTrip, pay, checkout, lifetime, lifePay, lifeMessage, lifeMock, checkoutLifetime } = s
   if (!plan) return null
+  const budgetNote=videoUsageTerms(plan)
 
   const tripCta = !loggedIn
     ? <Link href="/login?next=%2Fpricing" className="pr-cta">登录后升级 <ArrowRight size={16} aria-hidden="true" /></Link>
@@ -34,7 +36,7 @@ export function TripProPricingSection({ s }: { s: TripProState }) {
     : (
       <>
         <LifetimeButton plan={plan} owned={lifetime} state={lifePay} onClick={() => void checkoutLifetime()} />
-        <PayNotice state={lifePay} message={lifeMessage} trip={null} mock={lifeMock} lifetime />
+        <PayNotice state={lifePay} message={lifeMessage} trip={null} mock={lifeMock} lifetime onRetry={() => void s.recheckLifetime()} />
         {!lifetime && <PayNotes plan={plan} lifetime />}
       </>
     )
@@ -45,6 +47,7 @@ export function TripProPricingSection({ s }: { s: TripProState }) {
         <p className="pr-eyebrow">PRICING</p>
         <h2 id="pr-price-title">基础记录永久免费，需要时再升级</h2>
       </header>
+      {budgetNote&&<p className="pr-notice is-info">{budgetNote}</p>}
       <div className={`pr-pricing${plan.lifetime ? ' has-lifetime' : ''}`}>
         <PricingCardFree plan={plan} />
         <PricingCardTripPro plan={plan} cta={tripCta} />

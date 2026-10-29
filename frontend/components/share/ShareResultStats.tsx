@@ -1,14 +1,13 @@
 /** 旅行基础信息：2 × 3 小模块，图标 + 数字 + 标签，数字突出。 */
 
-import { CalendarDays, Images, MapPin, Navigation, Trophy, Users } from 'lucide-react'
-import type { AchievementView, PhotoView, TripSummary, TripView } from '@/services/tabitrace-api'
+import { CalendarDays, Images, MapPin, Navigation, Compass, Users } from 'lucide-react'
+import type { PhotoView, TripSummary, TripView } from '@/services/tabitrace-api'
 import { cityOf, daysNights } from '@/utils/share-long'
 
-export function ShareResultStats({ trip, summary, photos, achievements }: {
+export function ShareResultStats({ trip, summary, photos }: {
   trip: TripView
   summary: TripSummary
   photos: PhotoView[]
-  achievements: AchievementView[]
 }) {
   const featured = photos.filter(p => p.featured).length
   const items = [
@@ -19,7 +18,7 @@ export function ShareResultStats({ trip, summary, photos, achievements }: {
     featured > 0
       ? { icon: Images, value: `${featured}`, unit: '张', label: '精选照片' }
       : { icon: Images, value: `${summary.photos}`, unit: '张', label: '旅行照片' },
-    { icon: Trophy, value: `${achievements.filter(a => a.earned).length}`, unit: '个', label: '旅行成就' }
+    { icon: Compass, value: `${summary.areas}`, unit: '个', label: '走过区域' }
   ]
 
   return (

@@ -44,13 +44,12 @@ export function groupTimeline(entries: TimelineEntry[]): TimelineYear[] {
   return years
 }
 
-/** 6 天 · 12 个地点 · 11 张照片 · 7 个成就（为 0 的项不显示） */
-export function statLine(t: { days: number; places: number; photos: number; achievements: number }) {
+/** 6 天 · 12 个地点 · 11 张照片（为 0 的项不显示） */
+export function statLine(t: { days: number; places: number; photos: number }) {
   return [
     t.days ? `${t.days} 天` : '',
     t.places ? `${t.places} 个地点` : '',
     t.photos ? `${t.photos} 张照片` : '',
-    t.achievements ? `${t.achievements} 个成就` : ''
   ].filter(Boolean).join(' · ')
 }
 

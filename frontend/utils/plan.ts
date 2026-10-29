@@ -31,6 +31,17 @@ export type TripProPlan = {
   sharePro?: ShareTier
   storyTemplates: CatalogItem[]
   storyMusic: CatalogItem[]
+  videoUsageLimits?: { enforced:boolean;dailyRenders:number;dailyOutputSeconds:number }
+}
+
+/** The same enforced limits are disclosed before purchase, including for anonymous visitors. */
+export function videoUsageTerms(plan:TripProPlan) {
+  const limits=plan.videoUsageLimits
+  if(!limits?.enforced)return null
+  const parts=[]
+  if(limits.dailyRenders>0)parts.push(`每日最多提交 ${limits.dailyRenders} 次视频生成请求`)
+  if(limits.dailyOutputSeconds>0)parts.push(`累计成片时长最多 ${limits.dailyOutputSeconds} 秒`)
+  return parts.length?`${parts.join('，')}。Free 与 Pro 共用账号当日额度，按 UTC 统计日重置；失败后重新提交也计入次数。`:null
 }
 
 export const planPrice = (p: TripProPlan) => formatCurrency(p.price.amount, p.price.currency)

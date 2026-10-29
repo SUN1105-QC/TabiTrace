@@ -1,11 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowRight, CalendarDays, Camera, ChevronRight, Film, Images, MapPin, Trophy } from 'lucide-react'
+import { ArrowRight, CalendarDays, Camera, ChevronRight, Film, Images, MapPin } from 'lucide-react'
 import type { Activity } from '@/hooks/useHomeData'
 import { relativeTime } from '@/lib/time'
 
-const ICONS = { checkin: MapPin, photo: Images, itinerary: CalendarDays, video: Film, achievement: Trophy, trip: Camera }
+const ICONS = { checkin: MapPin, photo: Images, itinerary: CalendarDays, video: Film, trip: Camera }
 
 export function RecentActivities({ activities, tripId }: { activities: Activity[]; tripId: number | null }) {
   return (

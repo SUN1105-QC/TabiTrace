@@ -11,6 +11,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1")
 public class PaymentController {
     private final PaymentService service;public PaymentController(PaymentService service){this.service=service;}
+    @GetMapping("/payments") public ApiResponse<java.util.List<PaymentView>> history(){return ApiResponse.ok(service.history(SecurityUtils.currentUser().id()));}
+    @GetMapping("/payments/{id}") public ApiResponse<PaymentView> get(@PathVariable Long id){return ApiResponse.ok(service.get(SecurityUtils.currentUser().id(),id));}
+    @PostMapping("/payments/{id}/refresh") public ApiResponse<PaymentView> refresh(@PathVariable Long id){return ApiResponse.ok(service.refresh(SecurityUtils.currentUser().id(),id));}
+    @PostMapping("/payments/{id}/resume") public ApiResponse<CheckoutResponse> resume(@PathVariable Long id){return ApiResponse.ok(service.resume(SecurityUtils.currentUser().id(),id));}
+    @PostMapping("/payments/{id}/cancel") public ApiResponse<PaymentView> cancel(@PathVariable Long id){return ApiResponse.ok(service.cancel(SecurityUtils.currentUser().id(),id));}
     @PostMapping("/trips/{tripId}/payments/checkout") public ApiResponse<CheckoutResponse> checkout(@PathVariable Long tripId){return ApiResponse.ok(service.checkout(SecurityUtils.currentUser().id(),tripId));}
     /** 买断 · 终身 Pro */
     @PostMapping("/payments/lifetime/checkout") public ApiResponse<CheckoutResponse> lifetime(){return ApiResponse.ok(service.checkoutLifetime(SecurityUtils.currentUser().id()));}

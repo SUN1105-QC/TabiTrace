@@ -33,7 +33,7 @@ import { exportPosterPng } from '@/utils/export-poster'
 import { deliverFiles, exportGridTiles, upgradeImagesForExport, waitForImages } from '@/utils/share-export'
 import { shareTierOf, watermarkDataUrl } from '@/utils/share-tier'
 import type { TripProPlan } from '@/utils/plan'
-import { planApi, tripApi, type AchievementView, type ItineraryView, type PhotoView, type ShareLinkView, type TimelineDay, type TripSummary, type TripView } from '@/services/tabitrace-api'
+import { planApi, tripApi, type ItineraryView, type PhotoView, type ShareLinkView, type TimelineDay, type TripSummary, type TripView } from '@/services/tabitrace-api'
 
 const NO_EDIT: GridEditState = { activeSlot: null, pending: null }
 const nextFrame = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))
@@ -46,7 +46,6 @@ export default function SharePage() {
   const [summary, setSummary] = useState<TripSummary | null>(null)
   const [photos, setPhotos] = useState<PhotoView[]>([])
   const [timeline, setTimeline] = useState<TimelineDay[]>([])
-  const [achievements, setAchievements] = useState<AchievementView[]>([])
   const [links, setLinks] = useState<ShareLinkView[]>([])
   const [itinerary, setItinerary] = useState<ItineraryView[]>([])
   const [loading, setLoading] = useState(true)
@@ -66,8 +65,8 @@ export default function SharePage() {
   const reload = useCallback(async () => {
     try {
       // 行程只用于海报的「探索进度」（非官方城市时按计划地点算），读不到时不影响其余内容
-      const [t, s, p, tl, a, l, it] = await Promise.all([tripApi.get(tripId), tripApi.summary(tripId), tripApi.photos(tripId), tripApi.timeline(tripId), tripApi.achievements(tripId), tripApi.shares(tripId), tripApi.itinerary(tripId).catch(() => [] as ItineraryView[])])
-      setTrip(t); setSummary(s); setPhotos(p); setTimeline(tl); setAchievements(a); setLinks(l); setItinerary(it)
+      const [t, s, p, tl, l, it] = await Promise.all([tripApi.get(tripId), tripApi.summary(tripId), tripApi.photos(tripId), tripApi.timeline(tripId), tripApi.shares(tripId), tripApi.itinerary(tripId).catch(() => [] as ItineraryView[])])
+      setTrip(t); setSummary(s); setPhotos(p); setTimeline(tl); setLinks(l); setItinerary(it)
       // 从 Trip Pro 页等处带 ?mode=nine / long 进来时，第一次加载完成后打开对应的成果
       if (!modeFromUrl.current) {
         modeFromUrl.current = true
@@ -118,7 +117,7 @@ export default function SharePage() {
     }
     if (scrapbook) return <TravelScrapbookTemplate trip={t} summary={s} timeline={timeline} photos={photos} options={gridOpts} {...slot} />
     if (mode === 'nine') return <ShareGridCard trip={t} summary={s} timeline={timeline} photos={photos} options={gridOpts} {...slot} />
-    return <ShareResultLong trip={t} summary={s} timeline={timeline} photos={photos} achievements={achievements} />
+    return <ShareResultLong trip={t} summary={s} timeline={timeline} photos={photos} />
   }
 
   // ---------- 导出 ----------

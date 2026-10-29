@@ -8,7 +8,7 @@ export type VisualStyle = 'NATURAL' | 'FRESH' | 'FILM' | 'URBAN'
 export type VideoStatus = 'DRAFT' | 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED'
 export type RenderStage = 'PREPARING' | 'STORY' | 'MUSIC' | 'EXPORTING' | 'UPLOADING'
 /** 分镜段落类型（旅行路线动画已移除；旧版本冻结的分镜里若还有地图段落，前端会跳过） */
-export type SceneType = 'OPENING' | 'PLACE' | 'ACHIEVEMENTS' | 'ENDING'
+export type SceneType = 'OPENING' | 'PLACE' | 'ENDING'
 
 export type VideoTemplate = {
   code: string

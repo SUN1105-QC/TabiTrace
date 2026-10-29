@@ -10,7 +10,7 @@ import type { StorySettings, VisualStyle } from '@/types/video'
 import { VISUAL_STYLES } from '@/utils/video-studio'
 
 export type ContentSection = 'all' | 'text' | 'display' | 'style'
-type BoolKey = 'showDate' | 'showPlaceNames' | 'showWeather' | 'showCheckinText' | 'showStats' | 'showAchievements' | 'showEnding'
+type BoolKey = 'showDate' | 'showPlaceNames' | 'showWeather' | 'showCheckinText' | 'showStats' | 'showEnding'
 
 const TOGGLES: { key: BoolKey; label: string; desc: string; real: boolean }[] = [
   { key: 'showDate', label: '旅行日期', desc: '开场日期与每个地点的时间', real: true },
@@ -18,7 +18,6 @@ const TOGGLES: { key: BoolKey; label: string; desc: string; real: boolean }[] = 
   { key: 'showWeather', label: '天气', desc: '打卡时记录的天气（有记录才显示）', real: true },
   { key: 'showCheckinText', label: '旅行文字', desc: '打卡时写下的文字', real: true },
   { key: 'showStats', label: '旅行数据', desc: '片尾的地点数与照片数', real: true },
-  { key: 'showAchievements', label: '旅行成就', desc: '成就画面', real: true },
   { key: 'showEnding', label: '片尾', desc: '结尾画面与结束语', real: true }
 ]
 

@@ -1,6 +1,5 @@
 package com.tabitrace.photo;
 
-import com.tabitrace.achievement.service.AchievementService;
 import com.tabitrace.checkin.mapper.CheckinMapper;
 import com.tabitrace.common.BusinessException;
 import com.tabitrace.photo.dto.PhotoDtos.BatchPhotoRequest;
@@ -23,13 +22,13 @@ import static org.mockito.Mockito.*;
 
 /** 照片工作台：删除时清理引用、设为封面、批量操作的归属校验 */
 class PhotoGalleryServiceTest {
-    PhotoMapper photos; TripMapper tripMapper; TripService trips; AchievementService achievements; PhotoService service; StorageService storage;
+    PhotoMapper photos; TripMapper tripMapper; TripService trips; PhotoService service; StorageService storage;
 
     @BeforeEach
     void setUp() {
-        photos = mock(PhotoMapper.class); tripMapper = mock(TripMapper.class); trips = mock(TripService.class); achievements = mock(AchievementService.class);
+        photos = mock(PhotoMapper.class); tripMapper = mock(TripMapper.class); trips = mock(TripService.class);
         storage = mock(StorageService.class);
-        service = new PhotoService(photos, trips, mock(CheckinMapper.class), storage, achievements, tripMapper);
+        service = new PhotoService(photos, trips, mock(CheckinMapper.class), storage, tripMapper);
         TripEntity t = new TripEntity(); t.id = 5L; t.userId = 1L; t.title = "t"; t.destinationName = "d"; t.startDate = LocalDate.of(2026, 10, 1); t.endDate = LocalDate.of(2026, 10, 3); t.planType = "FREE"; t.status = "ONGOING"; t.visibility = "PRIVATE";
         when(trips.requireWritable(1L, 5L)).thenReturn(t);
         when(tripMapper.findById(5L)).thenReturn(t);
@@ -69,7 +68,7 @@ class PhotoGalleryServiceTest {
         verify(photos).delete(10L);
         verify(photos).clearVideoCover(10L);
         verify(tripMapper).clearCoverIf(5L, "u10");
-        verify(achievements).evaluate(1L, 5L, "PHOTO_DELETED");
+        verify(storage).deleteAll(anyCollection());
     }
 
     @Test

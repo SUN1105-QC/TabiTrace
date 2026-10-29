@@ -46,7 +46,7 @@ export default function TokyoExplorePage() {
   const [toast, setToast] = useState('')
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // 载入后处理链接参数：#place-12 打开地点详情；?filter=NIGHT（成就页）/ ?area=浅草 直接筛选
+  // 载入后处理链接参数：#place-12 打开地点详情；?filter=NIGHT/ ?area=浅草 直接筛选
   const data = useExploreData('TOKYO', loaded => {
     const m = /^#place-(\d+)$/.exec(window.location.hash)
     if (m && loaded.some(p => p.id === Number(m[1]))) { setDetailId(Number(m[1])); return }

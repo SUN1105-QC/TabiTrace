@@ -3,12 +3,12 @@
 /**
  * 旅行总结页的数据（手机与桌面共用，只请求一次）。
  * - 核心：行程 + 总结统计（失败时整页显示错误）
- * - 补充：时间轴（每天的地点）、照片（每天的缩略图）、成就、Travel Story 项目、分享链接、用户时区
+ * - 补充：时间轴（每天的地点）、照片（每天的缩略图）、Travel Story 项目、分享链接、用户时区
  *   任何一项失败只让对应模块隐藏，不影响页面其余部分
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { tripApi, userApi, type AchievementView, type PhotoView, type ShareLinkView, type TimelineDay, type TripSummary, type TripView } from '@/services/tabitrace-api'
+import { tripApi, userApi, type PhotoView, type ShareLinkView, type TimelineDay, type TripSummary, type TripView } from '@/services/tabitrace-api'
 import { videoApi } from '@/services/video'
 import type { VideoProject } from '@/types/video'
 import { buildItems, groupByDay, type GalleryItem } from '@/utils/gallery'
@@ -18,7 +18,6 @@ export type SummaryData = {
   summary: TripSummary
   timeline: TimelineDay[]
   photos: PhotoView[]
-  achievements: AchievementView[]
   videos: VideoProject[]
   shares: ShareLinkView[]
   timeZone: string
@@ -37,13 +36,13 @@ export function useTripSummaryData(tripId: number) {
   const load = useCallback(async () => {
     setLoading(true); setError('')
     try {
-      const [trip, summary, timeline, photos, achievements, videos, shares, me] = await Promise.all([
+      const [trip, summary, timeline, photos, videos, shares, me] = await Promise.all([
         tripApi.get(tripId), tripApi.summary(tripId),
         settled(tripApi.timeline(tripId), [] as TimelineDay[]), settled(tripApi.photos(tripId), [] as PhotoView[]),
-        settled(tripApi.achievements(tripId), [] as AchievementView[]), settled(videoApi.list(tripId), [] as VideoProject[]),
+        settled(videoApi.list(tripId), [] as VideoProject[]),
         settled(tripApi.shares(tripId), [] as ShareLinkView[]), settled(userApi.me(), null)
       ])
-      setData({ trip, summary, timeline, photos, achievements, videos, shares, timeZone: me?.timezone || 'Asia/Tokyo' })
+      setData({ trip, summary, timeline, photos, videos, shares, timeZone: me?.timezone || 'Asia/Tokyo' })
     } catch (e) {
       setError(e instanceof Error ? e.message : '旅行总结暂时无法加载')
     } finally {
@@ -65,12 +64,11 @@ export function useTripSummaryData(tripId: number) {
     return { places, photos }
   }, [data])
 
-  const earned = useMemo(() => (data?.achievements ?? []).filter(a => a.earned).sort((a, b) => (b.earnedAt ?? '').localeCompare(a.earnedAt ?? '')), [data])
   /** 最近一个已完成的 Travel Story（有成片才算“已生成”） */
   const story = useMemo(() => (data?.videos ?? []).filter(v => v.status === 'COMPLETED' && v.outputUrl).sort((a, b) => (b.completedAt ?? b.createdAt).localeCompare(a.completedAt ?? a.createdAt))[0] ?? null, [data])
   /** 仍然有效的公开分享链接（分享成果已经发布过） */
   const activeShare = useMemo(() => (data?.shares ?? []).find(s => s.status === 'ACTIVE' && (!s.expiresAt || utcTime(s.expiresAt) > Date.now())) ?? null, [data])
   const storyCover = useMemo(() => (story?.coverPhotoId ? data?.photos.find(p => p.id === story.coverPhotoId) ?? null : null), [story, data])
 
-  return { data, error, loading, reload: load, byDay, earned, story, storyCover, activeShare }
+  return { data, error, loading, reload: load, byDay, story, storyCover, activeShare }
 }

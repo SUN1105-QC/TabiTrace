@@ -10,13 +10,14 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ApiError, hasSession } from '@/services/api'
-import { planApi, tripApi, userApi, type TripSummary, type TripView } from '@/services/tabitrace-api'
+import { paymentApi, planApi, tripApi, userApi, type TripSummary, type TripView } from '@/services/tabitrace-api'
 import { membershipApi } from '@/services/user-music'
 import type { TripProPlan } from '@/utils/plan'
+import { PAYMENT_STATUS, paymentSucceeded, pollPayment } from '@/utils/payment'
 
-export type PayState = 'idle' | 'loading' | 'confirming' | 'success' | 'cancelled' | 'failed' | 'already'
+export type PayState = 'idle' | 'loading' | 'confirming' | 'pending' | 'success' | 'cancelled' | 'failed' | 'already'
 
-const wait = (ms: number) => new Promise(r => setTimeout(r, ms))
+const wait = (ms: number) => new Promise<void>(r => setTimeout(r, ms))
 
 export function useTripPro() {
   const [plan, setPlan] = useState<TripProPlan | null>(null)
@@ -50,7 +51,7 @@ export function useTripPro() {
   }, [])
 
   const replaceTrip = useCallback((t: TripView) => {
-    setTrip(t)
+    setTrip(current => current?.id === t.id ? t : current)
     setTrips(ts => ts.map(x => (x.id === t.id ? t : x)))
   }, [])
 
@@ -58,41 +59,68 @@ export function useTripPro() {
     membershipApi.current().then(m => setMember(m.status === 'ACTIVE')).catch(() => setMember(false))
   }, [])
 
-  // 付款返回后确认结果：以旅行的真实方案为准，最多等 30 秒
-  const confirmPaid = useCallback(async (tripId: number) => {
-    setPay('confirming')
-    for (let i = 0; i < 15; i++) {
-      try {
-        const t = await tripApi.get(tripId)
-        if (t.planType === 'PRO') { replaceTrip(t); setPay('success'); return }
-      } catch { /* 继续等待 */ }
-      await wait(2000)
-    }
-    setPayMessage('支付结果还在确认中，稍后刷新本页即可看到最新状态；如已扣款，旅行会自动解锁。')
-  }, [replaceTrip])
+  const mounted = useRef(true)
+  const tripRun = useRef(0)
+  const lifeRun = useRef(0)
+  const tripOrder = useRef<number | undefined>(undefined)
+  const lifetimeOrder = useRef<number | undefined>(undefined)
+  useEffect(() => {
+    mounted.current = true
+    return () => { mounted.current = false; tripRun.current++; lifeRun.current++ }
+  }, [])
 
-  // 买断付款返回后确认：以 lifetimePro 为准，确认后刷新旅行列表（所有旅行都会变成 PRO）
-  const confirmLifetime = useCallback(async () => {
-    setLifePay('confirming')
-    for (let i = 0; i < 15; i++) {
-      try {
-        const me = await userApi.refresh()
-        if (me.lifetimePro) {
-          setLifetime(true); setLifePay('success'); refreshMembership()
-          const rows = await tripApi.list(); setTrips(rows); setTrip(t => rows.find(x => x.id === t?.id) ?? t)
-          return
-        }
-      } catch { /* 继续等待 */ }
-      await wait(2000)
+  const reloadEntitlements = useCallback(async () => {
+    const [me, rows, membership] = await Promise.all([userApi.refresh(), tripApi.list(), membershipApi.current()])
+    setLifetime(Boolean(me.lifetimePro)); setMember(membership.status === 'ACTIVE')
+    setTrips(rows); setTrip(current => rows.find(t => t.id === current?.id) ?? current)
+  }, [])
+
+  // Confirm the specific order, never an unrelated Pro flag or the success URL alone.
+  const confirmPaid = useCallback(async (tripId: number, orderId?: number) => {
+    const run = ++tripRun.current
+    const active = () => mounted.current && run === tripRun.current
+    setPay('confirming'); setPayMessage('')
+    try {
+      const id = orderId ?? (await tripApi.latestPayment(tripId))?.id
+      if (!id) throw new Error('未找到这次付款的订单，请在付款记录中查询')
+      tripOrder.current = id
+      const p = await pollPayment(id, { ...paymentApi, wait, cancelled: () => !active() })
+      if (!active()) return
+      if (!p) { setPay('pending'); setPayMessage('暂未确认付款结果，请重新查询或在付款记录中继续原订单，请勿重复付款。'); return }
+      if (p.tripId !== tripId || p.product !== 'TRIP_PRO') throw new Error('付款订单与当前旅行不一致')
+      if (paymentSucceeded(p)) { await reloadEntitlements(); if (active()) setPay('success') }
+      else { setPay('failed'); setPayMessage(PAYMENT_STATUS[p.status] ?? '请在付款记录中核实结果') }
+    } catch (e) {
+      if (active()) { setPay('pending'); setPayMessage(e instanceof Error ? e.message : '请在付款记录中查询结果') }
     }
-    setLifeMessage('支付结果还在确认中，稍后刷新本页即可看到最新状态；如已扣款，终身 Pro 会自动生效。')
-  }, [refreshMembership])
+  }, [reloadEntitlements])
+
+  const confirmLifetime = useCallback(async (orderId?: number) => {
+    const run = ++lifeRun.current
+    const active = () => mounted.current && run === lifeRun.current
+    setLifePay('confirming'); setLifeMessage('')
+    try {
+      const id = orderId ?? (await tripApi.latestLifetimePayment())?.id
+      if (!id) throw new Error('未找到这次付款的订单，请在付款记录中查询')
+      lifetimeOrder.current = id
+      const p = await pollPayment(id, { ...paymentApi, wait, cancelled: () => !active() })
+      if (!active()) return
+      if (!p) { setLifePay('pending'); setLifeMessage('暂未确认付款结果，请重新查询或在付款记录中继续原订单，请勿重复付款。'); return }
+      if (p.product !== 'LIFETIME') throw new Error('付款订单与终身方案不一致')
+      if (paymentSucceeded(p)) { await reloadEntitlements(); if (active()) setLifePay('success') }
+      else { setLifePay('failed'); setLifeMessage(PAYMENT_STATUS[p.status] ?? '请在付款记录中核实结果') }
+    } catch (e) {
+      if (active()) { setLifePay('pending'); setLifeMessage(e instanceof Error ? e.message : '请在付款记录中查询结果') }
+    }
+  }, [reloadEntitlements])
 
   useEffect(() => {
     loadPlan()
     const q = new URLSearchParams(window.location.search)
     const wanted = Number(q.get('trip') || 0)
     const payment = q.get('payment')
+    const parsedOrder = Number(q.get('order'))
+    const orderId = Number.isSafeInteger(parsedOrder) && parsedOrder > 0 ? parsedOrder : undefined
     const forLifetime = q.get('plan') === 'lifetime'
     const session = hasSession()
     setLoggedIn(session)
@@ -100,7 +128,7 @@ export function useTripPro() {
     userApi.me().then(me => setLifetime(Boolean(me.lifetimePro))).catch(() => {})
     refreshMembership()
     if (forLifetime && payment === 'cancelled') setLifePay('cancelled')
-    if (forLifetime && payment === 'success') void confirmLifetime()
+    if (forLifetime && payment === 'success') void confirmLifetime(orderId)
     void (async () => {
       try {
         const rows = await tripApi.list()
@@ -111,13 +139,13 @@ export function useTripPro() {
         if (picked) {
           loadSummary(picked)
           if (!forLifetime && payment === 'cancelled') setPay('cancelled')
-          if (!forLifetime && payment === 'success') void confirmPaid(picked.id)
+          if (!forLifetime && payment === 'success') void confirmPaid(picked.id, orderId)
         }
       } catch {
         setTrip(null)
       } finally {
         setLoadingTrip(false)
-        if (payment) { q.delete('payment'); q.delete('plan'); window.history.replaceState(null, '', `${window.location.pathname}${q.toString() ? `?${q}` : ''}${window.location.hash}`) }
+        if (payment) { q.delete('payment'); q.delete('plan'); q.delete('order'); window.history.replaceState(null, '', `${window.location.pathname}${q.toString() ? `?${q}` : ''}${window.location.hash}`) }
       }
     })()
   }, [loadPlan, loadSummary, confirmPaid, confirmLifetime, refreshMembership])
@@ -134,6 +162,7 @@ export function useTripPro() {
   const selectTrip = (id: number) => {
     const t = trips.find(x => x.id === id)
     if (!t) return
+    tripRun.current++; tripOrder.current = undefined
     setTrip(t); setPay('idle'); setPayMessage(''); loadSummary(t)
     const q = new URLSearchParams(window.location.search); q.set('trip', String(id))
     window.history.replaceState(null, '', `${window.location.pathname}?${q}`)
@@ -199,6 +228,9 @@ export function useTripPro() {
   }
 
   return {
+    reloadEntitlements,
+    recheckTrip: () => trip && confirmPaid(trip.id, tripOrder.current),
+    recheckLifetime: () => confirmLifetime(lifetimeOrder.current),
     plan, planError, loadPlan, loggedIn,
     trips, trip, summary, loadingTrip, selectTrip,
     pay, payMessage, mockPaid, checkout,

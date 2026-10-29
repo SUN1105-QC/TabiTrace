@@ -15,7 +15,7 @@ export const zhCN = {
   },
   nav: {
     home: '首页', myTrips: '我的旅行', createTrip: '创建旅行', mapCheckin: '地图与打卡', photos: '照片与精选', travelStory: 'Travel Story',
-    explore: '推荐探索', memories: '旅行回忆', achievements: '我的成就', settings: '个人设置', upgradePro: '升级 Trip Pro',
+    explore: '推荐探索', memories: '旅行回忆', settings: '个人设置', upgradePro: '升级 Trip Pro',
     upgradeProSub: '解锁更多精彩功能', taglineTop: '旅行，', taglineBottom: '让每一次出发都有意义。', mainNav: '主导航', secondaryNav: '次级导航',
     newContent: '有新内容', closeNav: '关闭导航', openNav: '打开导航', artwork: '旅行插画', brandHome: '旅迹 TabiTrace 首页'
   },
@@ -25,12 +25,12 @@ export const zhCN = {
   },
   mobileNav: { label: '移动端导航', home: '首页', trips: '旅程', checkin: '打卡', checkinLabel: '快速打卡', share: '分享', me: '我的' },
   titles: {
-    home: '首页', trips: '我的旅行', newTrip: '创建旅行', map: '旅行地图与打卡', photos: '照片与精选', achievements: '旅行成就', summary: '旅行总结',
+    home: '首页', trips: '我的旅行', newTrip: '创建旅行', map: '旅行地图与打卡', photos: '照片与精选', summary: '旅行总结',
     share: '分享成果', story: 'Travel Story', exploreTokyo: '东京官方探索', explore: '官方城市探索', memories: '旅行回忆', pricing: 'Trip Pro',
     settings: '个人设置', fallback: '旅迹 TabiTrace'
   },
   tripNav: {
-    label: '旅行页面', overview: '总览', map: '地图与打卡', mapShort: '地图', photos: '照片', achievements: '成就', summary: '总结',
+    label: '旅行页面', overview: '总览', map: '地图与打卡', mapShort: '地图', photos: '照片', summary: '总结',
     share: '分享成果', shareShort: '分享', video: '旅行视频', videoShort: '视频'
   },
   publicNav: {
@@ -45,7 +45,6 @@ export const zhCN = {
   notify: {
     button: '通知', buttonUnread: '通知，{count} 条未读', list: '通知列表', title: '通知', count: '{count} 条',
     empty: '还没有新的旅行动态。完成一次打卡后，这里会出现提醒。',
-    achievementTitle: '解锁成就「{name}」', achievementBody: '继续记录可以解锁更多成就',
     storyDoneTitle: 'Travel Story 生成完成', storyDoneBody: '{template} 模板 · {photos} 张照片',
     storyFailTitle: 'Travel Story 生成失败', storyFailBody: '可以在旅行视频页重新生成',
     shareTitle: '分享链接被访问 {count} 次', shareBody: '有人看过你的旅行故事',
@@ -103,7 +102,6 @@ export const zhCN = {
       inApp: '站内通知', inAppDesc: '显示在顶部铃铛通知中心里的内容，切换后立即保存。', updated: '通知设置已更新',
       trip: '旅行提醒', tripDesc: '旅行即将开始、或已经结束但还没整理时提醒你。',
       story: 'Travel Story', storyDesc: '旅行视频生成完成或生成失败时通知你。',
-      achievement: '旅行成就', achievementDesc: '解锁新的旅行成就时通知你。',
       share: '分享动态', shareDesc: '你的分享链接被别人打开时通知你。',
       quotaNote: '免费额度快用完的提醒会一直显示，避免你在旅途中突然无法打卡或上传照片。',
       email: '邮件通知', emailRow: '邮件提醒', emailDesc: '旅迹目前还没有开通通知邮件，不会向你的邮箱发送任何旅行通知（注册验证码等账户安全邮件除外）。开通后会在这里提供开关。',

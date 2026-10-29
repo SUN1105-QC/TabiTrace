@@ -13,6 +13,15 @@ public interface VideoProjectMapper {
         #{showText},#{showAchievements},#{settingsJson},#{status},#{progress},UTC_TIMESTAMP(),UTC_TIMESTAMP())
       """) @Options(useGeneratedKeys=true,keyProperty="id") int insert(VideoProjectEntity p);
     @Select("SELECT * FROM video_projects WHERE id=#{id}") VideoProjectEntity findById(Long id);
+    @Select("SELECT * FROM video_projects WHERE id=#{id} FOR UPDATE") VideoProjectEntity lockById(Long id);
+    @Select("SELECT * FROM video_projects WHERE trip_id=#{tripId} ORDER BY id FOR UPDATE") List<VideoProjectEntity> lockByTrip(Long tripId);
+    @Select("SELECT * FROM video_projects WHERE user_id=#{userId} ORDER BY id FOR UPDATE") List<VideoProjectEntity> lockByUser(Long userId);
+    /** Same transaction as record deletion; do not cascade this durable cleanup request. */
+    @Insert("""
+      INSERT INTO video_output_deletions(project_id,user_id,trip_id,next_attempt_at,created_at)
+      VALUES(#{id},#{userId},#{tripId},UTC_TIMESTAMP(),UTC_TIMESTAMP())
+      ON DUPLICATE KEY UPDATE project_id=project_id
+      """) int enqueueOutputDeletion(VideoProjectEntity p);
     @Select("SELECT * FROM video_projects WHERE trip_id=#{tripId} ORDER BY id DESC") List<VideoProjectEntity> listByTrip(Long tripId);
     @Update("""
       UPDATE video_projects SET name=#{name},template_code=#{templateCode},aspect_ratio=#{aspectRatio},duration=#{duration},quality=#{quality},
@@ -22,7 +31,7 @@ public interface VideoProjectMapper {
       """) int updateDraft(VideoProjectEntity p);
     @Update("""
       UPDATE video_projects SET status=#{status},progress=#{progress},render_stage=#{renderStage},renderer=#{renderer},
-        output_key=#{outputKey},output_url=#{outputUrl},error_code=#{errorCode},error_message=#{errorMessage},
+        output_key=#{outputKey},output_url=#{outputUrl},output_bytes=#{outputBytes},error_code=#{errorCode},error_message=#{errorMessage},
         completed_at=#{completedAt},updated_at=UTC_TIMESTAMP()
       WHERE id=#{id}
       """) int updateStatus(VideoProjectEntity p);

@@ -114,6 +114,29 @@ app:
     stripe:
       secret-key: ${STRIPE_SECRET_KEY:}
       webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+      # 本地阈值，不替代 Stripe 按商户结算币种执行的最低金额检查
+      min-amount: ${STRIPE_MIN_AMOUNT:400}
+    reconcile:
+      enabled: ${PAYMENTS_RECONCILE_ENABLED:true}
+      interval-ms: ${PAYMENTS_RECONCILE_INTERVAL_MS:60000}
+      min-age-seconds: ${PAYMENTS_RECONCILE_MIN_AGE_SECONDS:300}
+      settled-age-seconds: ${PAYMENTS_RECONCILE_SETTLED_AGE_SECONDS:86400}
+      batch-size: ${PAYMENTS_RECONCILE_BATCH_SIZE:10}
+  # 用户于 2026-10-29 确定的限额：每日 20 次 / 6000 秒，全站同时 3 个任务；0 表示该项不限制。
+  cost:
+    enforce: ${COST_ENFORCE:true}
+    account-daily-renders: ${COST_ACCOUNT_DAILY_RENDERS:20}
+    account-daily-seconds: ${COST_ACCOUNT_DAILY_SECONDS:6000}
+    global-daily-renders: ${COST_GLOBAL_DAILY_RENDERS:0}
+    global-daily-seconds: ${COST_GLOBAL_DAILY_SECONDS:0}
+    global-active-renders: ${COST_GLOBAL_ACTIVE_RENDERS:3}
+    warn-daily-renders: ${COST_WARN_DAILY_RENDERS:20}
+    warn-daily-seconds: ${COST_WARN_DAILY_SECONDS:1200}
+    warn-global-daily-renders: ${COST_WARN_GLOBAL_DAILY_RENDERS:200}
+    warn-global-daily-seconds: ${COST_WARN_GLOBAL_DAILY_SECONDS:12000}
+    warn-storage-bytes: ${COST_WARN_STORAGE_BYTES:10737418240}
+    scan-interval-ms: ${COST_SCAN_INTERVAL_MS:900000}
+    scan-batch-size: ${COST_SCAN_BATCH_SIZE:100}
   # 「我的音乐」（会员上传自定义音乐）的全部限制；前端从 GET /api/v1/user/music 读取同一份数值
   user-music:
     max-file-bytes: ${USER_MUSIC_MAX_FILE_BYTES:31457280}

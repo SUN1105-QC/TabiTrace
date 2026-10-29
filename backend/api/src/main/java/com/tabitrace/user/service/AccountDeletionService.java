@@ -8,6 +8,9 @@ import com.tabitrace.user.dto.UserDtos.DeleteAccountRequest;
 import com.tabitrace.user.entity.UserEntity;
 import com.tabitrace.user.mapper.UserMapper;
 import com.tabitrace.usermusic.service.UserMusicService;
+import com.tabitrace.video.mapper.VideoProjectMapper;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -25,7 +28,7 @@ import java.util.List;
  * 1. 申请：校验密码 → 账号进入 DELETION_PENDING → 撤销全部登录会话（所有设备立即退出，旧访问令牌同时失效）
  * 2. 冷静期内重新登录：密码正确后提示「已申请注销」，用户确认撤销即恢复账号（见 AuthService.login）
  * 3. 到期：定时任务先删除存储里属于该账号的全部文件（照片、头像、视频、音乐），成功后再删除账号；
- *    旅行、打卡、照片记录、分享链接、视频项目、付款与会员记录等随外键级联删除。文件删除失败时保留账号，下次重试。
+ *    视频清理任务与账号删除同事务提交；付款与渠道事件保留归属快照，其他业务记录随外键级联删除。
  */
 @Service
 public class AccountDeletionService {
@@ -35,9 +38,13 @@ public class AccountDeletionService {
     private final RefreshTokenMapper refreshTokens;
     private final PasswordEncoder passwordEncoder;
     private final StorageService storage;
+    private final VideoProjectMapper videos;
+    private final TransactionTemplate transactions;
 
-    public AccountDeletionService(UserMapper users, RefreshTokenMapper refreshTokens, PasswordEncoder passwordEncoder, StorageService storage) {
+    public AccountDeletionService(UserMapper users, RefreshTokenMapper refreshTokens, PasswordEncoder passwordEncoder, StorageService storage,
+                                  VideoProjectMapper videos, PlatformTransactionManager transactionManager) {
         this.users = users; this.refreshTokens = refreshTokens; this.passwordEncoder = passwordEncoder; this.storage = storage;
+        this.videos = videos; this.transactions = new TransactionTemplate(transactionManager);
     }
 
     @Transactional
@@ -66,9 +73,18 @@ public class AccountDeletionService {
 
     /** 先删文件再删账号：文件删除失败会抛异常，账号保留到下次重试 */
     boolean purge(Long userId) {
-        storage.deletePrefix("users/" + userId + "/");
-        storage.deletePrefix(UserMusicService.KEY_PREFIX + userId + "/");
-        boolean deleted = users.deleteIfDue(userId) > 0;
+        // Explicit template: purgeDue invokes this method on the same instance, bypassing @Transactional proxies.
+        boolean deleted = Boolean.TRUE.equals(transactions.execute(status -> {
+            if (users.lockDueForDeletion(userId) == null) return false;
+            for (var video : videos.lockByUser(userId)) videos.enqueueOutputDeletion(video);
+            storage.deletePrefix("users/" + userId + "/");
+            storage.deletePrefix(UserMusicService.KEY_PREFIX + userId + "/");
+            if (users.deleteIfDue(userId) == 0) {
+                status.setRollbackOnly();
+                return false;
+            }
+            return true;
+        }));
         if (deleted) log.info("ACCOUNT: 已删除账号 userId={}", userId);
         return deleted;
     }

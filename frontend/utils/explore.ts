@@ -16,7 +16,7 @@ const inCategory = (...cats: string[]) => (p: PlaceView) => cats.includes(p.cate
 
 /**
  * 分类胶囊（Hero 与「全部地点」共用这一份）。后端的类别是自由文本、标签是固定枚举，这里统一映射。
- * hidden 的分类不显示胶囊，只用于旧链接（如成就页的 ?filter=NIGHT），选中时以可清除的胶囊出现。
+ * hidden 的分类不显示胶囊，只用于旧筛选链接（如 ?filter=NIGHT），选中时以可清除的胶囊出现。
  */
 export const CATEGORIES: CategoryDef[] = [
   { key: 'ALL', label: '全部', match: () => true },

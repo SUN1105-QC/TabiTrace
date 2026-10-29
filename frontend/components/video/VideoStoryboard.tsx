@@ -7,13 +7,13 @@
  */
 
 import { useState } from 'react'
-import { ArrowDown, ArrowUp, Eye, EyeOff, GripVertical, MapPin, PencilLine, Sparkles, Trophy, Flag, Info } from 'lucide-react'
+import { ArrowDown, ArrowUp, Eye, EyeOff, GripVertical, MapPin, PencilLine, Sparkles, Flag, Info } from 'lucide-react'
 import type { SegmentOverride, Scene, Storyboard } from '@/types/video'
 import type { PhotoView } from '@/services/tabitrace-api'
 import { SCENE_LABEL, timecode } from '@/utils/video-status'
 import { photoThumb } from '@/utils/photo-variants'
 
-const ICON: Record<string, typeof MapPin> = { OPENING: Sparkles, PLACE: MapPin, ACHIEVEMENTS: Trophy, ENDING: Flag }
+const ICON: Record<string, typeof MapPin> = { OPENING: Sparkles, PLACE: MapPin, ENDING: Flag }
 
 /** 把本地的段落覆盖先套到分镜上，编辑后立刻看到顺序和开关变化（时长在重新预览后更新）。 */
 export function applySegments(scenes: Scene[], segments: SegmentOverride[]): Scene[] {
@@ -55,7 +55,7 @@ export function VideoStoryboard({
     )
   }
 
-  const scenes = applySegments(storyboard.scenes, segments)
+  const scenes = applySegments(storyboard.scenes.filter(s => ['OPENING', 'PLACE', 'ENDING'].includes(s.type)), segments)
   const middleKeys = scenes.filter(s => !s.pinned).map(s => s.key)
 
   /** 以当前显示的顺序重建覆盖列表；标题只记录用户真正改过的。 */
@@ -133,7 +133,6 @@ export function VideoStoryboard({
                   </button>
                 )}
                 {s.subtitle && <small>{s.subtitle}</small>}
-                {s.type === 'ACHIEVEMENTS' && s.meta.items && <small>{s.meta.items.join(' · ')}</small>}
               </span>
               {s.photoIds.length > 0 && (
                 <span className="ts-scene-thumbs">

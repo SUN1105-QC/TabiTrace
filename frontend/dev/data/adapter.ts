@@ -132,7 +132,6 @@ const MOCK_ROUTES: Route[] = [
   ['DELETE', /^\/photos\/(\d+)$/, ({ m }) => mock().deletePhoto(id(m[1]))],
 
   // 成果
-  ['GET', /^\/trips\/(\d+)\/achievements$/, ({ m }) => mock().achievements(id(m[1]))],
   ['GET', /^\/trips\/(\d+)\/summary$/, ({ m }) => mock().summary(id(m[1]))],
   ['GET', /^\/trips\/(\d+)\/share-links$/, ({ m }) => mock().sharesOf(id(m[1]))],
   ['POST', /^\/trips\/(\d+)\/share-links$/, ({ m, body }) => mock().createShare(id(m[1]), body?.expiresAt, window.location.origin)],
@@ -155,7 +154,7 @@ const MOCK_ROUTES: Route[] = [
   ['GET', /^\/video-projects\/(\d+)\/storyboard$/, ({ m }) => { const v = mock().video(id(m[1])); return mock().storyboard(v.tripId, v, mock().trip(v.tripId).planType === 'PRO') }]
 ]
 
-const EMPTY_MEMORIES = { overview: { archivedTrips: 0, cities: 0, photos: 0, creations: 0 }, trips: [], hasMore: false, timeline: [], creations: [], photos: [], photoYear: 0, achievements: [], achievementCount: 0, flashback: null }
+const EMPTY_MEMORIES = { overview: { archivedTrips: 0, cities: 0, photos: 0, creations: 0 }, trips: [], hasMore: false, timeline: [], creations: [], photos: [], photoYear: 0, flashback: null }
 const EMPTY_OVERVIEW = { trips: 0, places: 0, photos: 0, proTrips: 0, activeFreeTrips: 0, freeTripLimit: 1, tripProAmount: 400, lifetimeAmount: 100000, tripProCurrency: 'CNY', lifetimePro: false, plans: [] }
 const notFound = (code: string, message: string) => () => { throw new ApiError(message, 404, code) }
 

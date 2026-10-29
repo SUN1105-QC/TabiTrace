@@ -79,7 +79,6 @@ export const CATEGORY_LABEL: Record<string, string> = {
 export const SCENE_LABEL: Record<string, string> = {
   OPENING: '开场',
   PLACE: '地点',
-  ACHIEVEMENTS: '旅行成就',
   ENDING: '结尾'
 }
 

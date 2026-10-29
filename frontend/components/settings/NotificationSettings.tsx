@@ -12,12 +12,11 @@ import { useT } from '@/components/common/PreferencesProvider'
 import type { MessageKey } from '@/i18n'
 import { SettingsRow, SettingsSection, Switch } from './SettingsParts'
 
-type NotifyKey = 'notifyTripReminder' | 'notifyStory' | 'notifyAchievement' | 'notifyShare'
+type NotifyKey = 'notifyTripReminder' | 'notifyStory' | 'notifyShare'
 
 const ITEMS: { key: NotifyKey; label: MessageKey; description: MessageKey }[] = [
   { key: 'notifyTripReminder', label: 'settings.notifications.trip', description: 'settings.notifications.tripDesc' },
   { key: 'notifyStory', label: 'settings.notifications.story', description: 'settings.notifications.storyDesc' },
-  { key: 'notifyAchievement', label: 'settings.notifications.achievement', description: 'settings.notifications.achievementDesc' },
   { key: 'notifyShare', label: 'settings.notifications.share', description: 'settings.notifications.shareDesc' }
 ]
 

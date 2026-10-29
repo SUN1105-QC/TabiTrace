@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 
 /**
  * 按 API 冻结的分镜渲染 Travel Story：
- *   PREPARING 下载解码照片 → STORY 开场 / 地点 / 成就 / 结尾帧 → MUSIC 校验音乐 → EXPORTING xfade 转场 + 混音导出 MP4。
+ *   PREPARING 下载解码照片 → STORY 开场 / 地点 / 结尾帧 → MUSIC 校验音乐 → EXPORTING xfade 转场 + 混音导出 MP4。
  * 每个阶段失败都抛带错误码的 RenderFailure，前端据此显示「素材下载失败 / 画面生成失败 / 视频合成失败」等。
  * 音乐例外：音乐文件不存在、下载失败或混音失败时不让整个视频失败，改用无音乐继续生成，并上报 MUSIC_FALLBACK 告警。
  */
@@ -117,7 +117,7 @@ public class FfmpegRenderer {
         progress.report("PREPARING", 10);
         Map<Long, BufferedImage> images = loadPhotos(dir, scenes);
 
-        // ── STORY：开场 / 地点照片 / 成就 / 结尾 ──
+        // ── STORY：开场 / 地点照片 / 结尾 ──
         progress.report("STORY", 50);
         Map<String, List<Shot>> byScene = new HashMap<>();
         int photoTotal = (int) scenes.stream().filter(sc -> "PLACE".equals(sc.path("type").asText()))
@@ -148,14 +148,9 @@ public class FfmpegRenderer {
                                     i == 0, photoIndex, photoTotal), s));
                         }
                     }
-                    case "ACHIEVEMENTS" -> {
-                        List<String> items = new ArrayList<>();
-                        meta.path("items").forEach(n -> items.add(n.asText()));
-                        shots.add(write(dir, ++frameNo, painter.achievements(title, subtitle, items), seconds));
-                    }
                     case "ENDING" -> shots.add(write(dir, ++frameNo, painter.ending(firstImage(sc, images), title, subtitle,
                             text(meta, "stats"), text(meta, "endingText"), text(meta, "tagline")), seconds));
-                    // 旧版本分镜里的地图 / 路线总览段落：不再渲染，时长并入相邻镜头（总时长不变）
+                    // 旧版本分镜里的已下线段落：不再渲染，时长并入相邻镜头（总时长不变）
                     default -> shots.add(new Shot(null, seconds));
                 }
                 byScene.put(sc.path("key").asText(), shots);

@@ -171,35 +171,6 @@ final class ScenePainter {
         return img;
     }
 
-    // ───────────── 成就 ─────────────
-
-    BufferedImage achievements(String title, String subtitle, List<String> items) {
-        BufferedImage img = canvas();
-        Graphics2D g = graphics(img);
-        paper(g);
-        int top = landscape ? s(150) : feed ? s(230) : s(420);
-        text(g, "ACHIEVEMENTS", sans(Font.BOLD, 28), BRAND, s(90), top, w - s(180), 1, 0.35f);
-        text(g, title, serif(Font.BOLD, 84), INK, s(90), top + s(120), w - s(180), 1, 0);
-        text(g, subtitle, sans(Font.PLAIN, 32), MUTED, s(90), top + s(200), w - s(180), 1, 0);
-        // 成就卡：竖屏一列；放不下时（4:5、横屏）排成两列，仍放不下的只显示前面的
-        int start = top + s(320), row = s(180), gap = s(40);
-        int perCol = Math.max(1, (h - start - s(110)) / row);
-        int cols = Math.min(landscape ? 3 : 2, (items.size() + perCol - 1) / perCol);
-        int colW = (w - s(180) - (cols - 1) * gap) / cols;
-        List<String> shown = items.subList(0, Math.min(items.size(), perCol * cols));
-        for (int i = 0; i < shown.size(); i++) {
-            int x = s(90) + (i / perCol) * (colW + gap), y = start + (i % perCol) * row;
-            g.setColor(Color.WHITE);
-            g.fill(new RoundRectangle2D.Double(x, y, colW, s(150), s(36), s(36)));
-            g.setColor(BRAND);
-            g.fillOval(x + s(40), y + s(35), s(80), s(80));
-            text(g, "★", sans(Font.BOLD, 40), Color.WHITE, x + s(60), y + s(92), s(60), 1, 0);
-            text(g, shown.get(i), sans(Font.BOLD, 40), INK, x + s(160), y + s(92), colW - s(200), 1, 0);
-        }
-        finish(g, img);
-        return img;
-    }
-
     // ───────────── 结尾 ─────────────
 
     BufferedImage ending(BufferedImage background, String title, String subtitle, String stats, String endingText, String tagline) {

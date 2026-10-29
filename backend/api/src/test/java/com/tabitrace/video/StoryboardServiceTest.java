@@ -26,6 +26,19 @@ import static org.mockito.Mockito.*;
 class StoryboardServiceTest {
 
     @Test
+    void retiredAchievementsCannotBeEnabledByLegacySettingsOrRequests() {
+        assertFalse(StoryboardService.normalize(null, true, true).showAchievements());
+        StorySettings old = new StorySettings(null, null, true, true, true, true, true, true, true, true,
+                List.of(new SegmentOverride("achievements", true, "旧成就")), null);
+        var normalized = StoryboardService.normalize(old, true, true);
+        assertFalse(normalized.showAchievements());
+        StoryboardView sb = service(checkins(true, true, true)).build(1L, trip("PRO"), journal(), 30, "1080p", "9:16",
+                null, normalized, List.of(101L, 201L, 301L));
+        assertTrue(sb.scenes().stream().noneMatch(s -> "ACHIEVEMENTS".equals(s.type())));
+        assertEquals(30, sb.scenes().stream().filter(SceneView::enabled).mapToDouble(SceneView::duration).sum(), 0.02);
+    }
+
+    @Test
     void scenesAlwaysAddUpToTheChosenDuration() {
         for (int duration : List.of(15, 30, 60)) {
             StoryboardView sb = service(checkins(true, true, true)).build(1L, trip("FREE"), journal(), duration, "720p", "9:16",
@@ -51,13 +64,13 @@ class StoryboardServiceTest {
 
     @Test
     void storyHasNoRouteSceneEvenWithCoordinatesOrAnOldMapOverride() {
-        // 旅行路线动画已移除：打卡有坐标、旧草稿里还留着 "map" 段落覆盖时，也只有开场 / 地点 / 成就 / 结尾
+        // 旅行路线动画已移除：打卡有坐标、旧草稿里还留着 "map" 段落覆盖时，也只有开场 / 地点 / 结尾
         StorySettings old = new StorySettings(null, null, true, true, true, true, true, true, true, true,
                 List.of(new SegmentOverride("map", true, "东京路线")), null);
         for (StorySettings s : java.util.Arrays.asList(null, old)) {
             StoryboardView sb = service(checkins(true, true, true)).build(1L, trip("PRO"), journal(), 30, "1080p", "9:16",
                     null, StoryboardService.normalize(s, true, true), List.of(101L, 201L, 301L));
-            assertTrue(sb.scenes().stream().allMatch(x -> List.of("OPENING", "PLACE", "ACHIEVEMENTS", "ENDING").contains(x.type())),
+            assertTrue(sb.scenes().stream().allMatch(x -> List.of("OPENING", "PLACE", "ENDING").contains(x.type())),
                     sb.scenes().stream().map(SceneView::type).toList().toString());
             assertTrue(sb.scenes().stream().noneMatch(x -> x.meta().containsKey("leg") || x.meta().containsKey("route")));
         }
@@ -100,7 +113,6 @@ class StoryboardServiceTest {
         PhotoMapper pm = mock(PhotoMapper.class);
         for (long id : List.of(101L, 102L, 201L, 301L)) when(pm.findById(id)).thenReturn(photo(id, id / 100));
         VideoCatalogMapper catalog = mock(VideoCatalogMapper.class);
-        when(catalog.earnedAchievementNames(anyLong(), anyLong())).thenReturn(List.of("初次打卡"));
         SummaryService summaries = mock(SummaryService.class);
         when(summaries.get(anyLong(), anyLong())).thenReturn(new TripSummary(10L, "东京旅行", "ONGOING", "FREE", 6, 3, 4, 1, 3, 0, 0, 0, 1, List.of(), null));
         return new StoryboardService(cm, pm, catalog, summaries, mock(UserMapper.class));

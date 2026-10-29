@@ -13,7 +13,7 @@ export const jaJP: Messages = {
   },
   nav: {
     home: 'ホーム', myTrips: 'マイ旅行', createTrip: '旅行を作成', mapCheckin: 'マップとチェックイン', photos: '写真とお気に入り', travelStory: 'Travel Story',
-    explore: 'おすすめ探索', memories: '旅の思い出', achievements: '実績', settings: '個人設定', upgradePro: 'Trip Pro にアップグレード',
+    explore: 'おすすめ探索', memories: '旅の思い出', settings: '個人設定', upgradePro: 'Trip Pro にアップグレード',
     upgradeProSub: 'もっと多くの機能を', taglineTop: '旅は、', taglineBottom: 'いつの出発にも意味をくれる。', mainNav: 'メインナビゲーション', secondaryNav: 'サブナビゲーション',
     newContent: '新着あり', closeNav: 'ナビゲーションを閉じる', openNav: 'ナビゲーションを開く', artwork: '旅のイラスト', brandHome: '旅迹 TabiTrace ホーム'
   },
@@ -23,12 +23,12 @@ export const jaJP: Messages = {
   },
   mobileNav: { label: 'モバイルナビゲーション', home: 'ホーム', trips: '旅程', checkin: 'チェックイン', checkinLabel: 'クイックチェックイン', share: '共有', me: 'マイページ' },
   titles: {
-    home: 'ホーム', trips: 'マイ旅行', newTrip: '旅行を作成', map: '旅行マップとチェックイン', photos: '写真とお気に入り', achievements: '旅の実績', summary: '旅のまとめ',
+    home: 'ホーム', trips: 'マイ旅行', newTrip: '旅行を作成', map: '旅行マップとチェックイン', photos: '写真とお気に入り', summary: '旅のまとめ',
     share: '共有する', story: 'Travel Story', exploreTokyo: '東京公式ガイド', explore: '公式都市ガイド', memories: '旅の思い出', pricing: 'Trip Pro',
     settings: '個人設定', fallback: '旅迹 TabiTrace'
   },
   tripNav: {
-    label: '旅行ページ', overview: '概要', map: 'マップとチェックイン', mapShort: 'マップ', photos: '写真', achievements: '実績', summary: 'まとめ',
+    label: '旅行ページ', overview: '概要', map: 'マップとチェックイン', mapShort: 'マップ', photos: '写真', summary: 'まとめ',
     share: '共有する', shareShort: '共有', video: 'Travel Story', videoShort: '動画'
   },
   publicNav: {
@@ -43,7 +43,6 @@ export const jaJP: Messages = {
   notify: {
     button: '通知', buttonUnread: '通知、未読 {count} 件', list: '通知一覧', title: '通知', count: '{count} 件',
     empty: 'まだ旅の更新はありません。チェックインするとここにお知らせが表示されます。',
-    achievementTitle: '実績「{name}」を獲得しました', achievementBody: '記録を続けてさらに実績を獲得しましょう',
     storyDoneTitle: 'Travel Story が完成しました', storyDoneBody: '{template} テンプレート · 写真 {photos} 枚',
     storyFailTitle: 'Travel Story の生成に失敗しました', storyFailBody: 'Travel Story ページで再生成できます',
     shareTitle: '共有リンクが {count} 回閲覧されました', shareBody: 'あなたの旅の物語が見られています',
@@ -101,7 +100,6 @@ export const jaJP: Messages = {
       inApp: 'アプリ内通知', inAppDesc: '上部のベルの通知センターに表示する内容です。切り替えるとすぐに保存されます。', updated: '通知設定を更新しました',
       trip: '旅行のリマインダー', tripDesc: '旅行が始まる前や、終わったのにまだ整理していないときにお知らせします。',
       story: 'Travel Story', storyDesc: '旅の動画の生成が完了したとき、または失敗したときにお知らせします。',
-      achievement: '旅の実績', achievementDesc: '新しい実績を獲得したときにお知らせします。',
       share: '共有の動き', shareDesc: '共有リンクが開かれたときにお知らせします。',
       quotaNote: '無料枠が残りわずかになったお知らせは常に表示され、旅の途中で突然チェックインや写真のアップロードができなくなることを防ぎます。',
       email: 'メール通知', emailRow: 'メールでのお知らせ', emailDesc: '旅迹はまだ旅に関するお知らせメールを送っていません（登録用の確認コードなどアカウントのセキュリティに関するメールは除く）。提供を開始したらここにスイッチを表示します。',

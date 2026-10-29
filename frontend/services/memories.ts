@@ -19,7 +19,6 @@ export type MemoryTrip = {
   days: number
   places: number
   photos: number
-  achievements: number
   /** trip.coverImage → 第一张精选照片 → 第一张照片；都没有时为空，显示文字封面 */
   cover?: string | null
   moments: Moment[]
@@ -47,7 +46,6 @@ export type Creation = {
 }
 
 export type MemoryPhoto = { id: number; tripId: number; tripTitle: string; imageUrl: string; thumbUrl?: string | null; mediumUrl?: string | null; originalUrl?: string | null; width?: number | null; height?: number | null; featured: boolean; takenAt?: string | null }
-export type MemoryAchievement = { code: string; name: string; description?: string | null; tripId?: number | null; tripTitle?: string | null; earnedAt?: string | null }
 
 export type Flashback = {
   kind: 'DAY' | 'MONTH' | 'SEASON'
@@ -71,8 +69,6 @@ export type MemoriesView = {
   photos: MemoryPhoto[]
   /** 照片区是否来自今年的旅行（0 表示今年还没有，照片取自往年） */
   photoYear: number
-  achievements: MemoryAchievement[]
-  achievementCount: number
   flashback?: Flashback | null
 }
 

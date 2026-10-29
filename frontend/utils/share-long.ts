@@ -3,7 +3,7 @@
  * 没有数据的项（如天气）直接不显示，而不是填占位文字。
  */
 
-import type { AchievementView, CheckinView, PhotoView, TimelineDay, TripSummary, TripView } from '@/services/tabitrace-api'
+import type { CheckinView, PhotoView, TimelineDay, TripSummary, TripView } from '@/services/tabitrace-api'
 import { toDate, zonedParts } from '@/lib/time'
 import { photoMedium } from '@/utils/photo-variants'
 
@@ -64,8 +64,8 @@ export function galleryPhotos(photos: PhotoView[], count: number) {
 /** 打卡时刻在用户时区里的小时 */
 const localHour = (c: CheckinView) => { const d = toDate(c.checkinTime); return d ? zonedParts(d).hour : undefined }
 
-/** 旅途关键词：去过的街区、代表地点、成就、同行方式、出行时段。按出现顺序去重，最多 8 个。 */
-export function journeyKeywords(trip: TripView, timeline: TimelineDay[], achievements: AchievementView[]) {
+/** 旅途关键词：去过的街区、代表地点、同行方式、出行时段。按出现顺序去重，最多 8 个。 */
+export function journeyKeywords(trip: TripView, timeline: TimelineDay[]) {
   const checkins = timeline.flatMap(d => d.items.map(i => i.checkin))
   const words: string[] = []
   const add = (w?: string | null) => { const v = w?.trim(); if (v && !words.includes(v)) words.push(v) }
@@ -75,7 +75,6 @@ export function journeyKeywords(trip: TripView, timeline: TimelineDay[], achieve
   add(trip.peopleCount <= 1 ? '一个人旅行' : `${trip.peopleCount} 人同行`)
   if (checkins.some(c => (localHour(c) ?? 12) >= 19)) add('夜晚漫步')
   if (checkins.some(c => (localHour(c) ?? 12) < 9)) add('清晨出发')
-  achievements.filter(a => a.earned).forEach(a => { if (words.length < 8) add(a.name) })
   return words.slice(0, 8)
 }
 

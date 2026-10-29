@@ -1,6 +1,6 @@
 /**
  * 格子 5：数据摘要，九宫格的视觉中心。浅米底、橙色大数字、四项核心数据。
- * 单日九宫格的前三项换成当天的数据（第几天 / 当天地点 / 当天照片），成就仍是整趟旅行的。
+ * 单日九宫格的前三项换成当天的数据（第几天 / 当天地点 / 当天照片），区域数仍是整趟旅行的。
  */
 
 import type { TripSummary, TripView } from '@/services/tabitrace-api'
@@ -13,12 +13,12 @@ export function ShareGridDataTile({ trip, summary, day }: { trip: TripView; summ
     [String(day.no).padStart(2, '0'), 'DAY', `第 ${day.no} 天`],
     [day.places, 'PLACES', '个地点'],
     [day.photos, 'PHOTOS', '张照片'],
-    [summary.achievements, 'BADGES', '枚成就']
+    [summary.areas, 'AREAS', '个区域']
   ] : [
     [summary.days, 'DAYS', '天'],
     [summary.places, 'PLACES', '个地点'],
     [summary.photos, 'PHOTOS', '张照片'],
-    [summary.achievements, 'BADGES', '枚成就']
+    [summary.areas, 'AREAS', '个区域']
   ]
   return (
     <ShareGridTile variant="data">

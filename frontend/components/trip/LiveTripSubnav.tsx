@@ -13,7 +13,7 @@ import { useT } from '@/components/common/PreferencesProvider'
 import type { MessageKey } from '@/i18n'
 
 const items: [suffix: string, label: MessageKey, short: MessageKey][] = [
-  ['', 'tripNav.overview', 'tripNav.overview'], ['/map', 'tripNav.map', 'tripNav.mapShort'], ['/gallery', 'tripNav.photos', 'tripNav.photos'], ['/achievements', 'tripNav.achievements', 'tripNav.achievements'],
+  ['', 'tripNav.overview', 'tripNav.overview'], ['/map', 'tripNav.map', 'tripNav.mapShort'], ['/gallery', 'tripNav.photos', 'tripNav.photos'],
   ['/summary', 'tripNav.summary', 'tripNav.summary'], ['/share', 'tripNav.share', 'tripNav.shareShort'], ['/video', 'tripNav.video', 'tripNav.videoShort']
 ]
 

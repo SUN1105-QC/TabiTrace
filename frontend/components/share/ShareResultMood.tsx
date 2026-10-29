@@ -1,15 +1,14 @@
 /** 这趟旅程：一句概述 + 关键词标签，让长图从「流水账」变成「故事总结」。 */
 
-import type { AchievementView, TimelineDay, TripSummary, TripView } from '@/services/tabitrace-api'
+import type { TimelineDay, TripSummary, TripView } from '@/services/tabitrace-api'
 import { journeyKeywords, journeySummary } from '@/utils/share-long'
 
-export function ShareResultMood({ trip, summary, timeline, achievements }: {
+export function ShareResultMood({ trip, summary, timeline }: {
   trip: TripView
   summary: TripSummary
   timeline: TimelineDay[]
-  achievements: AchievementView[]
 }) {
-  const words = journeyKeywords(trip, timeline, achievements)
+  const words = journeyKeywords(trip, timeline)
   return (
     <section className="sl-section sl-mood">
       <div className="sl-heading">

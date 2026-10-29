@@ -90,7 +90,6 @@ export default function MemoriesPage() {
     ...(data.creations.some(c => c.type === 'STORY') ? [{ label: 'Travel Story', target: 'mm-creations' }] : []),
     ...(data.flashback ? [{ label: '往年今日', target: 'mm-flashback' }] : [])
   ]
-  const achievementsHref = `/trips/${data.achievements[0]?.tripId ?? featured?.id ?? ''}/achievements`
 
   return (
     <main>
@@ -130,7 +129,7 @@ export default function MemoriesPage() {
           </div>
         )}
 
-        <MemoryClosing achievements={data.achievements} total={data.achievementCount} achievementsHref={empty ? '/trips' : achievementsHref} />
+        <MemoryClosing />
       </PageContainer>
     </main>
   )

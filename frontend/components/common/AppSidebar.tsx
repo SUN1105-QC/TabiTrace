@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import {
-  Compass, Crown, Film, Home, Images, MapPinned, Plus, Settings, Sparkles, Trophy, X
+  Compass, Crown, Film, Home, Images, MapPinned, Plus, Settings, Sparkles, X
 } from 'lucide-react'
 import { useT } from '@/components/common/PreferencesProvider'
 import { BrandLogo } from '@/components/common/Brand'
@@ -28,7 +28,6 @@ export function sidebarItems(activeTripId: number | null): { main: Item[]; secon
     ],
     secondary: [
       { href: '/memories', label: 'nav.memories', icon: Images, badge: 'memories' },
-      { href: trip('/achievements'), label: 'nav.achievements', icon: Trophy },
       { href: '/profile', label: 'nav.settings', icon: Settings }
     ]
   }
@@ -68,7 +67,7 @@ export function AppSidebar({ activeTripId, badges, open, onClose }: { activeTrip
 
   const isActive = ({ href, label }: Item) => {
     if (href === '/') return pathname === '/'
-    // 没有当前旅行时，地图 / 照片 / Travel Story / 成就会回落到旅行列表；这时只高亮“我的旅行”本身
+    // 没有当前旅行时，地图 / 照片 / Travel Story 会回落到旅行列表；这时只高亮“我的旅行”本身
     if (href === '/trips') return label === 'nav.myTrips' && pathname === '/trips'
     return pathname.startsWith(href.split('?')[0])
   }

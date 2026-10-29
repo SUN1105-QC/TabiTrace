@@ -22,6 +22,8 @@ import { TripProComparisonTable } from '@/components/pro/TripProComparisonTable'
 import { TripProFaq } from '@/components/pro/TripProFaq'
 import { UpgradeButton } from '@/components/pro/TripProButtons'
 import { useTripPro } from '@/components/pro/useTripPro'
+import { PaymentHistory } from '@/components/pro/PaymentHistory'
+import { AccountUsage } from '@/components/pro/AccountUsage'
 import { isOneTimePerTrip, planPrice } from '@/utils/plan'
 
 export default function PricingPage() {
@@ -71,6 +73,8 @@ export default function PricingPage() {
             <TripProPricingSection s={s} />
             <TripProComparisonTable plan={plan} trip={trip} />
             <TripProFaq plan={plan} />
+            {s.loggedIn && <PaymentHistory refreshKey={`${s.pay}:${s.lifePay}`} onUpdated={s.reloadEntitlements} />}
+            {s.loggedIn && <AccountUsage />}
           </>
         )}
 

@@ -5,14 +5,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   tripApi, userApi,
-  type AchievementView, type CheckinView, type ItineraryView, type PhotoView,
+  type CheckinView, type ItineraryView, type PhotoView,
   type PlaceView, type ShareLinkView, type TripSummary, type TripView, type VideoProjectView
 } from '@/services/tabitrace-api'
 import { useQuickCheckIn } from '@/components/checkin/QuickCheckInProvider'
 import { dateKeyOf, toDate } from '@/lib/time'
 import { photoMedium, photoThumb } from '@/utils/photo-variants'
 
-export type ActivityKind = 'checkin' | 'photo' | 'itinerary' | 'video' | 'trip' | 'achievement'
+export type ActivityKind = 'checkin' | 'photo' | 'itinerary' | 'video' | 'trip'
 export type Activity = { id: string; kind: ActivityKind; title: string; detail: string; at: string | null; href: string; thumbnail?: string }
 
 export type HomeData = {
@@ -25,18 +25,17 @@ export type HomeData = {
   checkins: CheckinView[]
   itinerary: ItineraryView[]
   photos: PhotoView[]
-  achievements: AchievementView[]
   videos: VideoProjectView[]
   shares: ShareLinkView[]
-  stats: { places: number; placesTotal: number; photos: number; achievements: number; trips: number }
+  stats: { places: number; placesTotal: number; photos: number; trips: number }
   activities: Activity[]
   recommended: PlaceView[]
 }
 
 const EMPTY: HomeData = {
   user: null, trips: [], activeTrip: null, summaries: {}, activeSummary: null,
-  places: [], checkins: [], itinerary: [], photos: [], achievements: [], videos: [], shares: [],
-  stats: { places: 0, placesTotal: 0, photos: 0, achievements: 0, trips: 0 }, activities: [], recommended: []
+  places: [], checkins: [], itinerary: [], photos: [], videos: [], shares: [],
+  stats: { places: 0, placesTotal: 0, photos: 0, trips: 0 }, activities: [], recommended: []
 }
 
 export function useHomeData(enabled: boolean) {
@@ -69,28 +68,26 @@ export function useHomeData(enabled: boolean) {
         summaryPairs.forEach(([id, s]) => { if (s) summaries[id] = s })
 
         let places: PlaceView[] = [], checkins: CheckinView[] = [], itinerary: ItineraryView[] = []
-        let photos: PhotoView[] = [], achievements: AchievementView[] = [], videos: VideoProjectView[] = [], shares: ShareLinkView[] = []
+        let photos: PhotoView[] = [], videos: VideoProjectView[] = [], shares: ShareLinkView[] = []
         if (activeTrip) {
-          ;[places, checkins, itinerary, photos, achievements, videos, shares] = await Promise.all([
+          ;[places, checkins, itinerary, photos, videos, shares] = await Promise.all([
             tripApi.places(activeTrip.id).catch(() => []),
             tripApi.checkins(activeTrip.id).catch(() => []),
             tripApi.itinerary(activeTrip.id).catch(() => []),
             tripApi.photos(activeTrip.id).catch(() => []),
-            tripApi.achievements(activeTrip.id).catch(() => []),
             tripApi.videos(activeTrip.id).catch(() => []),
             tripApi.shares(activeTrip.id).catch(() => [])
           ])
         }
 
         const totals = Object.values(summaries).reduce((acc, s) => ({
-          photos: acc.photos + s.photos,
-          achievements: acc.achievements + s.achievements
-        }), { photos: 0, achievements: 0 })
+          photos: acc.photos + s.photos
+        }), { photos: 0 })
 
         const activeSummary = activeTrip ? summaries[activeTrip.id] ?? null : null
         const visitedPlaceIds = new Set(checkins.map(c => c.placeId).filter(Boolean) as number[])
 
-        const activities = buildActivities({ activeTrip, trips, checkins, photos, itinerary, videos, achievements })
+        const activities = buildActivities({ activeTrip, trips, checkins, photos, itinerary, videos })
 
         // 推荐探索：官方城市地点库里「还没打卡过」的地点，按商圈去重后取 3 条
         const official = await tripApi.officialPlaces('TOKYO').catch(() => [] as PlaceView[])
@@ -108,12 +105,11 @@ export function useHomeData(enabled: boolean) {
         if (!cancelled) {
           setData({
             user, trips, activeTrip, summaries, activeSummary,
-            places, checkins, itinerary, photos, achievements, videos, shares,
+            places, checkins, itinerary, photos, videos, shares,
             stats: {
               places: activeSummary?.places ?? visitedPlaceIds.size,
               placesTotal: places.length,
               photos: totals.photos,
-              achievements: totals.achievements,
               trips: trips.length
             },
             activities,
@@ -140,9 +136,8 @@ function buildActivities(input: {
   photos: PhotoView[]
   itinerary: ItineraryView[]
   videos: VideoProjectView[]
-  achievements: AchievementView[]
 }): Activity[] {
-  const { activeTrip, trips, checkins, photos, itinerary, videos, achievements } = input
+  const { activeTrip, trips, checkins, photos, itinerary, videos } = input
   const tripId = activeTrip?.id
   const items: Activity[] = []
   const cover = activeTrip?.coverImage || undefined
@@ -192,15 +187,6 @@ function buildActivities(input: {
     at: v.completedAt || v.createdAt,
     href: tripId ? `/trips/${tripId}/video` : '/trips',
     thumbnail: (() => { const p = photos.find(x => x.id === v.photoIds[0]); return p ? photoThumb(p) : undefined })() || newestPhoto || cover
-  }))
-
-  achievements.filter(a => a.earned && a.earnedAt).forEach(a => items.push({
-    id: `achievement-${a.id}`, kind: 'achievement',
-    title: `解锁成就「${a.name}」`,
-    detail: a.description || '继续记录可解锁更多成就',
-    at: a.earnedAt || null,
-    href: tripId ? `/trips/${tripId}/achievements` : '/trips',
-    thumbnail: cover
   }))
 
   trips.forEach(t => items.push({

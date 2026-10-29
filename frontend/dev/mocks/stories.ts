@@ -4,7 +4,7 @@ import { ID_BASE, MOCK_TRIP_HOKKAIDO, MOCK_TRIP_KYOTO, MOCK_TRIP_TOKYO } from '.
 
 export const defaultStorySettings = (): StorySettings => ({
   showTitle: true, showDate: true, showPlaceNames: true, showCheckinText: true, showWeather: false, showStats: true,
-  showAchievements: true, showEnding: true, segments: [], visualStyle: 'NATURAL'
+  showAchievements: false, showEnding: true, segments: [], visualStyle: 'NATURAL'
 })
 
 /**
@@ -14,13 +14,13 @@ export const defaultStorySettings = (): StorySettings => ({
 export const mockVideos: VideoProject[] = [
   {
     id: ID_BASE.video + 1, tripId: MOCK_TRIP_TOKYO, name: '东京五日散步 · Journal', templateCode: 'JOURNAL', aspectRatio: '9:16', duration: 30, quality: '1080p',
-    resolution: '1080×1920', watermark: false, musicCode: 'SB_WANDERLUST', coverPhotoId: ID_BASE.photo + 13, showText: true, showAchievements: true,
+    resolution: '1080×1920', watermark: false, musicCode: 'SB_WANDERLUST', coverPhotoId: ID_BASE.photo + 13, showText: true, showAchievements: false,
     settings: defaultStorySettings(), status: 'COMPLETED', progress: 100, renderer: 'MOCK', outputUrl: 'https://example.invalid/mock/tokyo-journal.mp4',
     photoIds: [1, 4, 5, 9, 11, 13].map(n => ID_BASE.photo + n), createdAt: '2026-09-26T13:00:00', updatedAt: '2026-09-26T13:02:00', completedAt: '2026-09-26T13:02:00'
   },
   {
     id: ID_BASE.video + 2, tripId: MOCK_TRIP_KYOTO, name: '京都春日漫游 · Journal', templateCode: 'JOURNAL', aspectRatio: '9:16', duration: 15, quality: '720p',
-    resolution: '720×1280', watermark: true, musicCode: 'KM_MORNING', coverPhotoId: ID_BASE.photo + 21, showText: true, showAchievements: true,
+    resolution: '720×1280', watermark: true, musicCode: 'KM_MORNING', coverPhotoId: ID_BASE.photo + 21, showText: true, showAchievements: false,
     settings: defaultStorySettings(), status: 'COMPLETED', progress: 100, renderer: 'MOCK', outputUrl: 'https://example.invalid/mock/kyoto-journal.mp4',
     photoIds: [21, 22, 24].map(n => ID_BASE.photo + n), createdAt: '2026-04-08T11:00:00', updatedAt: '2026-04-08T11:01:00', completedAt: '2026-04-08T11:01:00'
   }

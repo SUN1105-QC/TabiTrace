@@ -1,14 +1,14 @@
 'use client'
 
 /**
- * 公开分享页（未登录也可访问）：旅行标题与日期 → 封面 → 旅行数据 → 精选照片 → 按天时间轴 → 已获得的成就。
+ * 公开分享页（未登录也可访问）：旅行标题与日期 → 封面 → 旅行数据 → 精选照片 → 按天时间轴。
  * 移动端优先：数据 2×2、照片三列、时间轴紧凑；数据全部来自 GET /share/{token}，没有的内容就不显示。
  */
 
 import { PageContainer } from '@/components/common/PageContainer'
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { CalendarDays, Camera, MapPin, Trophy } from 'lucide-react'
+import { CalendarDays, Camera, MapPin, Building2 } from 'lucide-react'
 import { SiteHeader } from '@/components/common/SiteHeader'
 import { TripCoverImage } from '@/components/trip/TripCoverImage'
 import { tripApi, type PublicShareView } from '@/services/tabitrace-api'
@@ -42,7 +42,6 @@ function Share({ data }: { data: PublicShareView }) {
   const { trip, summary } = data
   const hero = data.featuredPhotos?.[0]
   const photos = (data.featuredPhotos ?? []).slice(hero ? 1 : 0, (hero ? 1 : 0) + 6)
-  const earned = (data.achievements ?? []).filter(a => a.earned)
   const days = (data.timeline ?? []).filter(d => d.items?.length)
 
   return (
@@ -62,7 +61,7 @@ function Share({ data }: { data: PublicShareView }) {
         <Stat icon={<CalendarDays size={16} />} value={summary.days} label="天" />
         <Stat icon={<MapPin size={16} />} value={summary.places} label="地点" />
         <Stat icon={<Camera size={16} />} value={summary.photos} label="照片" />
-        <Stat icon={<Trophy size={16} />} value={summary.achievements} label="成就" />
+        <Stat icon={<Building2 size={16} />} value={summary.cities} label="城市" />
       </div>
 
       {photos.length > 0 && (
@@ -103,14 +102,6 @@ function Share({ data }: { data: PublicShareView }) {
         </section>
       )}
 
-      {earned.length > 0 && (
-        <section className="mt-8">
-          <h2 className="font-serif text-2xl sm:text-3xl">获得的成就</h2>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {earned.map(a => <span key={a.id} className="inline-flex items-center gap-1.5 rounded-full border border-warm/25 bg-warm/10 px-3 py-1.5 text-xs font-bold text-warm"><Trophy size={12} />{a.name}</span>)}
-          </div>
-        </section>
-      )}
     </>
   )
 }

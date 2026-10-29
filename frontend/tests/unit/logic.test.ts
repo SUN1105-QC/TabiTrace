@@ -155,8 +155,8 @@ describe('表单校验与错误映射', () => {
 describe('旅行总结与成果准备度', () => {
   const summary = (over: Partial<TripSummary> = {}): TripSummary => ({
     tripId: 1, title: 't', status: 'ACTIVE', planType: 'FREE', days: 3, places: 4, photos: 6, cities: 1, areas: 2,
-    officialPlacesCompleted: 0, officialPlacesTotal: 0, explorationRate: 0, achievements: 1,
-    dailyRecords: [], readiness: { featuredPhotos: 1, achievementCount: 1, recordedDays: 2, shareReady: true, videoReady: true }, ...over
+    officialPlacesCompleted: 0, officialPlacesTotal: 0, explorationRate: 0,
+    dailyRecords: [], readiness: { featuredPhotos: 1, recordedDays: 2, shareReady: true, videoReady: true }, ...over
   })
   it('总结句只用真实统计', () => {
     expect(summarySentence({ destinationName: '东京' }, summary())).toBe('这次东京旅行一共 3 天，记录了 4 个地点，留下 6 张照片，其中 2 天留下了旅行记录。')
@@ -166,6 +166,6 @@ describe('旅行总结与成果准备度', () => {
     const r = calculateTravelReadiness({ id: 1, status: 'ACTIVE' }, summary())
     expect(r.items.map(i => i.key)).toEqual(['days', 'featured', 'story', 'finish'])
     expect(r.percent).toBe(Math.round(((2 / 3) + (1 / 3) + 1 + 0) / 4 * 100))
-    expect(calculateTravelReadiness({ id: 1, status: 'COMPLETED' }, summary({ readiness: { featuredPhotos: 5, achievementCount: 1, recordedDays: 3, shareReady: true, videoReady: true } })).percent).toBe(100)
+    expect(calculateTravelReadiness({ id: 1, status: 'COMPLETED' }, summary({ readiness: { featuredPhotos: 5, recordedDays: 3, shareReady: true, videoReady: true } })).percent).toBe(100)
   })
 })

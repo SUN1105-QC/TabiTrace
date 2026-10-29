@@ -51,16 +51,24 @@ public class VideoService {
     private final com.tabitrace.photo.storage.StorageService storage;
     /** 「我的音乐」：自定义音乐的主人、状态与会员检查都在 UserMusicService.requireUsable */
     private final UserMusicService userMusic;
+    private final com.tabitrace.cost.CostControlService costs;
 
     public VideoService(VideoProjectMapper mapper, VideoProjectPhotoMapper projectPhotos, PhotoMapper photos, TripService trips,
                         VideoCatalogMapper catalog, StoryboardService storyboards, ObjectMapper json, com.tabitrace.photo.storage.StorageService storage) {
-        this(mapper, projectPhotos, photos, trips, catalog, storyboards, json, storage, null);
+        this(mapper, projectPhotos, photos, trips, catalog, storyboards, json, storage, null, null);
+    }
+
+    public VideoService(VideoProjectMapper mapper, VideoProjectPhotoMapper projectPhotos, PhotoMapper photos, TripService trips,
+                        VideoCatalogMapper catalog, StoryboardService storyboards, ObjectMapper json, com.tabitrace.photo.storage.StorageService storage,
+                        UserMusicService userMusic) {
+        this(mapper,projectPhotos,photos,trips,catalog,storyboards,json,storage,userMusic,null);
     }
 
     @org.springframework.beans.factory.annotation.Autowired
     public VideoService(VideoProjectMapper mapper, VideoProjectPhotoMapper projectPhotos, PhotoMapper photos, TripService trips,
                         VideoCatalogMapper catalog, StoryboardService storyboards, ObjectMapper json, com.tabitrace.photo.storage.StorageService storage,
-                        UserMusicService userMusic) {
+                        UserMusicService userMusic,com.tabitrace.cost.CostControlService costs) {
+        this.costs=costs;
         this.userMusic = userMusic;
         this.storage = storage;
         this.mapper = mapper;
@@ -186,6 +194,7 @@ public class VideoService {
     /** 开始生成 / 失败重试 / 已完成后重新生成，都走这里。分镜在此刻冻结，Worker 只按冻结结果渲染。 */
     @Transactional
     public VideoProjectView render(Long userId, Long id) {
+        if(costs!=null)costs.lockRendering(userId);
         VideoProjectEntity p = requireOwned(userId, id);
         TripEntity t = trips.requireWritable(userId, p.tripId);
         if (List.of("QUEUED", "PROCESSING").contains(p.status)) {
@@ -214,6 +223,7 @@ public class VideoService {
         if (mapper.queue(p) == 0) {
             throw new BusinessException("VIDEO_ALREADY_RENDERING", "这个视频正在生成中，请等待完成", HttpStatus.CONFLICT);
         }
+        if(costs!=null)costs.reserveRender(userId,v.duration());
         return view(mapper.findById(id), t);
     }
 
@@ -237,7 +247,7 @@ public class VideoService {
         p.musicSource = src.musicSource;
         p.userMusicId = src.userMusicId;
         p.showText = src.showText;
-        p.showAchievements = src.showAchievements;
+        p.showAchievements = false;
         p.settingsJson = src.settingsJson;
         p.status = "DRAFT";
         p.progress = 0;
@@ -248,11 +258,15 @@ public class VideoService {
 
     @Transactional
     public void delete(Long userId, Long id) {
-        VideoProjectEntity p = requireOwned(userId, id);
+        // Serializes deletion with Worker claim/publication. Never act on a stale status snapshot.
+        VideoProjectEntity p = mapper.lockById(id);
+        if (p == null) throw new BusinessException("VIDEO_PROJECT_NOT_FOUND", "视频项目不存在或已被删除", HttpStatus.NOT_FOUND);
+        if (!userId.equals(p.userId)) throw new BusinessException("VIDEO_FORBIDDEN", "不能访问其他用户的视频项目", HttpStatus.FORBIDDEN);
         trips.requireWritable(userId, p.tripId);
         if ("PROCESSING".equals(p.status)) {
             throw new BusinessException("VIDEO_PROCESSING", "正在生成的视频不能删除，请等待完成后再删除", HttpStatus.CONFLICT);
         }
+        mapper.enqueueOutputDeletion(p);
         mapper.delete(id);
     }
 
@@ -411,13 +425,12 @@ public class VideoService {
     }
 
     private VideoProjectView view(VideoProjectEntity p, TripEntity t) {
-        StorySettings settings = p.settingsJson != null
-                ? json.readValue(p.settingsJson, StorySettings.class)
-                : StoryboardService.normalize(null, p.showText, p.showAchievements).toDto();
+        StorySettings settings = StoryboardService.normalize(p.settingsJson == null
+                ? null : json.readValue(p.settingsJson, StorySettings.class), p.showText, false).toDto();
         boolean pro = "PRO".equals(t.planType);
         return new VideoProjectView(p.id, p.tripId, p.name, p.templateCode, p.aspectRatio, p.duration, p.quality,
                 StoryboardService.resolution(p.aspectRatio, p.quality), !pro, p.musicCode, p.musicSource, p.userMusicId, p.coverPhotoId,
-                Boolean.TRUE.equals(p.showText), Boolean.TRUE.equals(p.showAchievements),
+                Boolean.TRUE.equals(p.showText), false,
                 settings, p.status, p.progress, p.renderStage, p.renderer, p.outputUrl, p.errorCode, p.errorMessage, p.renderWarning,
                 projectPhotos.photoIds(p.id), p.createdAt, p.updatedAt, p.completedAt,
                 // 音乐不可用、已回退为无音乐生成时，成片里没有这首音乐，也就不需要署名

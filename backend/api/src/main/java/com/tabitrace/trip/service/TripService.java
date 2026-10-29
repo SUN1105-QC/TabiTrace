@@ -1,7 +1,6 @@
 package com.tabitrace.trip.service;
 
 import com.tabitrace.common.BusinessException;
-import com.tabitrace.achievement.service.AchievementService;
 import com.tabitrace.city.entity.OfficialCityEntity;
 import com.tabitrace.city.mapper.OfficialCityMapper;
 import com.tabitrace.place.entity.PlaceEntity;
@@ -18,10 +17,10 @@ import java.util.List;
 
 @Service
 public class TripService {
-    private final TripMapper mapper; private final PlaceMapper places; private final TripPlaceMapper tripPlaces; private final AchievementService achievements; private final OfficialCityMapper officialCities;
+    private final TripMapper mapper; private final PlaceMapper places; private final TripPlaceMapper tripPlaces; private final OfficialCityMapper officialCities;
     /** 免费版同时可保留的 FREE 旅行数（归档的不计） */
     public static final int FREE_ACTIVE_TRIP_LIMIT=1;
-    public TripService(TripMapper mapper,PlaceMapper places,TripPlaceMapper tripPlaces,AchievementService achievements,OfficialCityMapper officialCities){this.officialCities=officialCities;this.mapper=mapper;this.places=places;this.tripPlaces=tripPlaces;this.achievements=achievements;}
+    public TripService(TripMapper mapper,PlaceMapper places,TripPlaceMapper tripPlaces,OfficialCityMapper officialCities){this.officialCities=officialCities;this.mapper=mapper;this.places=places;this.tripPlaces=tripPlaces;}
 
     @Transactional
     public TripView create(Long userId,CreateTripRequest r){
@@ -44,7 +43,7 @@ public class TripService {
         validateDates(r.startDate(),r.endDate()); TripEntity t=requireWritable(userId,id);t.title=r.title();t.destinationName=r.destinationName();t.countryCode=blankToNull(r.countryCode());t.city=blankToNull(r.city());t.startDate=r.startDate();t.endDate=r.endDate();t.peopleCount=r.peopleCount()==null?1:r.peopleCount();t.coverImage=blankToNull(r.coverImage());mapper.update(t);return view(mapper.findById(id));
     }
     @Transactional public void delete(Long userId,Long id){requireOwned(userId,id);mapper.delete(id);}
-    @Transactional public TripView complete(Long userId,Long id){requireWritable(userId,id);mapper.complete(id);achievements.evaluate(userId,id,"TRIP_COMPLETED");return view(mapper.findById(id));}
+    @Transactional public TripView complete(Long userId,Long id){requireWritable(userId,id);mapper.complete(id);return view(mapper.findById(id));}
     @Transactional public TripView archive(Long userId,Long id){TripEntity t=requireOwned(userId,id);if(!"ARCHIVED".equals(t.status))mapper.updateStatus(id,"ARCHIVED");return view(mapper.findById(id));}
     // 归档视为旅行已结束且不保留原状态，取消归档后统一恢复为 COMPLETED
     @Transactional public TripView unarchive(Long userId,Long id){TripEntity t=requireOwned(userId,id);if(!"ARCHIVED".equals(t.status))return view(t);if("FREE".equals(t.planType)&&mapper.countFreeTrips(userId)>=FREE_ACTIVE_TRIP_LIMIT)throw new BusinessException("FREE_TRIP_LIMIT","免费版同时只能保留 1 个 FREE 旅行，请先归档其他旅行或升级 Trip Pro");mapper.updateStatus(id,"COMPLETED");return view(mapper.findById(id));}

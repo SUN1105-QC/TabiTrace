@@ -1,6 +1,5 @@
 package com.tabitrace.trip;
 
-import com.tabitrace.achievement.service.AchievementService;
 import com.tabitrace.city.entity.OfficialCityEntity;
 import com.tabitrace.city.mapper.OfficialCityMapper;
 import com.tabitrace.common.BusinessException;
@@ -28,7 +27,7 @@ class TripCreateOfficialTest {
     @BeforeEach
     void setUp() {
         trips = mock(TripMapper.class); places = mock(PlaceMapper.class); tripPlaces = mock(TripPlaceMapper.class); cities = mock(OfficialCityMapper.class);
-        service = new TripService(trips, places, tripPlaces, mock(AchievementService.class), cities);
+        service = new TripService(trips, places, tripPlaces, cities);
         doAnswer(i -> { ((TripEntity) i.getArgument(0)).id = 42L; return 1; }).when(trips).insert(any());
     }
 

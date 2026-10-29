@@ -62,7 +62,7 @@ public class UserService {
         if (r.shareLinkExpiryDays() != null) u.shareLinkExpiryDays = requireExpiryDays(r.shareLinkExpiryDays());
         if (r.notifyTripReminder() != null) u.notifyTripReminder = r.notifyTripReminder();
         if (r.notifyStory() != null) u.notifyStory = r.notifyStory();
-        if (r.notifyAchievement() != null) u.notifyAchievement = r.notifyAchievement();
+        u.notifyAchievement = false; // Retired preference, retained only for schema compatibility.
         if (r.notifyShare() != null) u.notifyShare = r.notifyShare();
         mapper.updateProfile(u);
         return AuthService.view(require(id));

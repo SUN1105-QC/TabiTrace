@@ -1,40 +1,34 @@
 'use client'
 
 /**
- * 通知中心：后端没有独立通知表，这里由真实业务数据推导（成就解锁、视频渲染、分享访问、
+ * 通知中心：后端没有独立通知表，这里由真实业务数据推导（视频渲染、分享访问、
  * 行程日期、免费额度），已读状态存在本地。不使用任何假数据。
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Bell, Clock3, Film, Share2, Trophy, TriangleAlert } from 'lucide-react'
+import { Bell, Clock3, Film, Share2, TriangleAlert } from 'lucide-react'
 import { relativeTime, toDate, localDateKey } from '@/lib/time'
 import { tr } from '@/i18n'
 import { useT } from '@/components/common/PreferencesProvider'
-import type { AchievementView, ShareLinkView, TripSummary, TripView, UserView, VideoProjectView } from '@/services/tabitrace-api'
+import type { ShareLinkView, TripSummary, TripView, UserView, VideoProjectView } from '@/services/tabitrace-api'
 
-export type NotificationItem = { id: string; icon: 'trophy' | 'film' | 'share' | 'clock' | 'warn'; title: string; body: string; at: string | null; href: string }
+export type NotificationItem = { id: string; icon: 'film' | 'share' | 'clock' | 'warn'; title: string; body: string; at: string | null; href: string }
 
 export function buildNotifications(input: {
   trip: TripView | null
   summary: TripSummary | null
-  achievements: AchievementView[]
   videos: VideoProjectView[]
   shares: ShareLinkView[]
   /** 设置中心“通知”里的分类开关；未设置的分类默认显示 */
-  prefs?: Pick<UserView, 'notifyTripReminder' | 'notifyStory' | 'notifyAchievement' | 'notifyShare'> | null
+  prefs?: Pick<UserView, 'notifyTripReminder' | 'notifyStory' | 'notifyShare'> | null
 }): NotificationItem[] {
   const { trip, summary, prefs } = input
-  const achievements = prefs?.notifyAchievement === false ? [] : input.achievements
   const videos = prefs?.notifyStory === false ? [] : input.videos
   const shares = prefs?.notifyShare === false ? [] : input.shares
   const tripReminder = prefs?.notifyTripReminder !== false
   const items: NotificationItem[] = []
   if (!trip) return items
-
-  achievements.filter(a => a.earned && a.earnedAt).forEach(a => {
-    items.push({ id: `ach-${a.id}`, icon: 'trophy', title: tr('notify.achievementTitle', { name: a.name }), body: a.description || tr('notify.achievementBody'), at: a.earnedAt!, href: `/trips/${trip.id}/achievements` })
-  })
 
   videos.forEach(v => {
     if (v.status === 'COMPLETED' && v.completedAt) {
@@ -65,7 +59,7 @@ export function buildNotifications(input: {
 }
 
 const READ_KEY = 'tabitrace-notifications-read-at'
-const ICONS = { trophy: Trophy, film: Film, share: Share2, clock: Clock3, warn: TriangleAlert }
+const ICONS = { film: Film, share: Share2, clock: Clock3, warn: TriangleAlert }
 
 export function NotificationCenter({ items }: { items: NotificationItem[] }) {
   const router = useRouter()

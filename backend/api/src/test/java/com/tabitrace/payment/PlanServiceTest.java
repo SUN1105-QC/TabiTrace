@@ -55,5 +55,8 @@ class PlanServiceTest {
         assertTrue(p.sharePro().tileSize() > p.shareFree().tileSize());
         assertEquals(2, p.storyTemplates().size());   // 停用的模板不展示
         assertEquals(2, p.storyMusic().size());       // 待审核（音频未导入）与已下架的曲目不展示
+        assertTrue(p.videoUsageLimits().enforced());
+        assertEquals(20,p.videoUsageLimits().dailyRenders());
+        assertEquals(6000,p.videoUsageLimits().dailyOutputSeconds());
     }
 }

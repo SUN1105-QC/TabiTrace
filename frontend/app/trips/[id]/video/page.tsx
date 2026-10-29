@@ -68,7 +68,7 @@ const defaultSettings = (): StorySettings => ({
   showCheckinText: true,
   showWeather: true,
   showStats: true,
-  showAchievements: true,
+  showAchievements: false,
   showEnding: true,
   segments: [],
   visualStyle: 'NATURAL',

@@ -13,7 +13,6 @@ public interface MemoryMapper {
     class NoteRow { public String note; public String placeNameSnapshot; }
     class StoryRow { public Long id; public Long tripId; public String tripTitle; public String name; public String templateCode; public Integer duration; public String outputUrl; public String renderer; public Long coverPhotoId; public LocalDateTime completedAt; public LocalDateTime updatedAt; }
     class ShareRow { public Long id; public Long tripId; public String tripTitle; public String shareToken; public Long viewCount; public LocalDateTime createdAt; }
-    class AchievementRow { public String code; public String name; public String description; public Long tripId; public String tripTitle; public LocalDateTime earnedAt; }
 
     /** 最近结束的旅行在前 */
     @Select("SELECT * FROM trips WHERE user_id=#{userId} AND status IN ('COMPLETED','ARCHIVED') ORDER BY end_date DESC,id DESC")
@@ -67,13 +66,4 @@ public interface MemoryMapper {
     @Select("SELECT COUNT(*) FROM photos p JOIN trips t ON t.id=p.trip_id WHERE t.user_id=#{userId} AND t.status IN ('COMPLETED','ARCHIVED') AND YEAR(t.start_date)=#{year}")
     int countPhotosInYear(@Param("userId") Long userId, @Param("year") int year);
 
-    @Select("""
-      SELECT a.code,a.name,a.description,ua.trip_id,t.title AS trip_title,ua.earned_at
-      FROM user_achievements ua JOIN achievements a ON a.id=ua.achievement_id LEFT JOIN trips t ON t.id=ua.trip_id
-      WHERE ua.user_id=#{userId} ORDER BY ua.earned_at DESC,ua.id DESC LIMIT #{limit}
-      """)
-    List<AchievementRow> recentAchievements(@Param("userId") Long userId, @Param("limit") int limit);
-
-    /** 不同成就的个数（同一成就在多段旅行里获得只算一次） */
-    @Select("SELECT COUNT(DISTINCT achievement_id) FROM user_achievements WHERE user_id=#{userId}") int countAchievements(Long userId);
 }

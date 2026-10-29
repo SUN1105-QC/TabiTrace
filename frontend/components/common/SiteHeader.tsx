@@ -63,13 +63,12 @@ export function SiteHeader() {
       const stored = Number(localStorage.getItem(ACTIVE_TRIP_KEY) || 0)
       const trip = rows.find(t => t.id === stored) || rows.find(t => t.status !== 'ARCHIVED') || rows[0] || null
       if (!trip) { setNotifyInput(null); return }
-      const [summary, achievements, videos, shares] = await Promise.all([
+      const [summary, videos, shares] = await Promise.all([
         tripApi.summary(trip.id).catch(() => null),
-        tripApi.achievements(trip.id).catch(() => []),
         tripApi.videos(trip.id).catch(() => []),
         tripApi.shares(trip.id).catch(() => [])
       ])
-      setNotifyInput({ trip, summary, achievements, videos, shares, prefs: me })
+      setNotifyInput({ trip, summary, videos, shares, prefs: me })
     } catch { /* 外壳数据失败不阻塞页面本身 */ }
   }, [])
 
@@ -170,7 +169,6 @@ function titleKey(pathname: string): MessageKey {
   if (pathname === '/trips/new') return 'titles.newTrip'
   if (pathname.includes('/map')) return 'titles.map'
   if (pathname.includes('/gallery') || pathname.includes('/photos')) return 'titles.photos'
-  if (pathname.includes('/achievements')) return 'titles.achievements'
   if (pathname.includes('/summary')) return 'titles.summary'
   if (pathname.includes('/share')) return 'titles.share'
   if (pathname.includes('/video')) return 'titles.story'

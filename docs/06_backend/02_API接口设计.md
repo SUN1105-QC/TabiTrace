@@ -32,6 +32,7 @@
 |---|---|---|
 | GET / PUT | `/users/me` | 读取 / 修改资料与偏好 |
 | GET | `/users/me/overview` | 账户概览：旅行、地点、照片数，FREE 名额，每段旅行的方案与支付，价格 |
+| GET | `/users/me/usage` | 当前账号 UTC 日视频用量、启用的账号限额及登记媒体空间估算；不返回其他账号或全站用量 |
 | POST | `/users/me/avatar/presign` | 头像上传地址 |
 | PUT / DELETE | `/users/me/avatar` | 保存（原图 + 小图）/ 移除头像 |
 | POST | `/users/me/password` | 修改密码（退出其他设备） |
@@ -50,7 +51,8 @@
 | POST | `/trips/{id}/archive`、`/trips/{id}/unarchive` | 归档 / 取消归档 |
 | GET | `/trips/{id}/summary` | 总结与成果准备度 |
 | POST | `/trips/{id}/complete` | 标记完成 |
-| GET | `/trips/{tripId}/achievements` | 成就与进度 |
+
+成就 API 已于 2026-10-29 移除；不再开放 `GET /trips/{tripId}/achievements`。旧响应中的成就兼容字段固定为空 / 0，通知与视频开关固定为 false。
 
 ### 目的地、官方城市、地点
 | 方法 | 路径 | 权限 | 说明 |
@@ -127,11 +129,16 @@
 ### 支付与方案
 | 方法 | 路径 | 权限 | 说明 |
 |---|---|---|---|
-| GET | `/plans/trip-pro` | 公开 | 方案配置：价格、FREE 限制、Story / 分享图规格、模板与曲库目录、能否付款 |
+| GET | `/plans/trip-pro` | 公开 | 方案配置：价格、FREE 限制、Story / 分享图规格、模板与曲库目录、能否付款；`videoUsageLimits` 返回实际生效的视频限额开关、每日次数和累计成片秒数，供购买前展示 |
 | POST | `/trips/{tripId}/payments/checkout` | 本人旅行 | Trip Pro 付款（mock 时立即成功） |
 | GET | `/trips/{tripId}/payments/latest` | 本人旅行 | 最近一次支付 |
 | POST | `/payments/lifetime/checkout` | 登录 | 终身 Pro 付款 |
 | GET | `/payments/lifetime/latest` | 登录 | 最近一次终身 Pro 支付 |
+| GET | `/payments` | 登录 | 本人最近 100 条付款记录，包含退款金额 |
+| GET | `/payments/{id}` | 本人订单 | 查询本地订单，不触发渠道请求 |
+| POST | `/payments/{id}/refresh` | 本人订单 | 查询渠道并同步状态，同订单 10 秒内合并查询 |
+| POST | `/payments/{id}/resume` | 本人订单 | 继续原订单，复用 Stripe Session / 幂等键 |
+| POST | `/payments/{id}/cancel` | 本人订单 | 关闭仍开放的 Checkout，不执行退款 |
 | POST | `/payments/stripe/webhook` | 公开（Stripe 签名） | Stripe 回调 |
 
 ### 运维

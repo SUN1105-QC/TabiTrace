@@ -7,13 +7,12 @@
 import Link from 'next/link'
 import { useEffect, useRef } from 'react'
 import { ArrowRight, Check, Circle, Film, Image as ImageIcon, MapPin } from 'lucide-react'
-import type { AchievementView, TripSummary, TripView } from '@/services/tabitrace-api'
+import type { TripSummary, TripView } from '@/services/tabitrace-api'
 import type { VideoProject } from '@/types/video'
 import type { GalleryItem } from '@/utils/gallery'
 import { calculateTravelReadiness } from '@/utils/trip'
 import { dayLabel, dayTitle } from '@/utils/travel-map'
 import { hasExploreGuide, journeyHighlights, summarySentence, type DailyRecord } from '@/utils/summary'
-import { AchievementBadge } from '@/components/achievements/AchievementBadge'
 import { photoThumb } from '@/utils/photo-variants'
 
 /* ---------------------------------------------------------------- 概览（2 × 3） */
@@ -22,7 +21,7 @@ export function SummaryOverview({ trip, s }: { trip: TripView; s: TripSummary })
   const guide = hasExploreGuide(s)
   const cells: [string, string | number, string][] = [
     ['days', s.days, '天'], ['places', s.places, '地点'], ['photos', s.photos, '照片'],
-    ['achievements', s.achievements, '成就'], ['areas', s.areas, '区域']
+    ['cities', s.cities, '城市'], ['areas', s.areas, '区域']
   ]
   return (
     <section className="su-card su-overview" aria-label="旅行概览">
@@ -141,8 +140,8 @@ function DayDetail({ id, tripId, days, day, places, photos }: {
 
 /* ---------------------------------------------------------------- 旅程亮点 */
 
-export function JourneyHighlights({ s, hideAchievements = false, onPickDay }: { s: TripSummary; hideAchievements?: boolean; onPickDay?: (date: string) => void }) {
-  const rows = journeyHighlights(s).filter(r => !(hideAchievements && r.key === 'achievements'))
+export function JourneyHighlights({ s, onPickDay }: { s: TripSummary; onPickDay?: (date: string) => void }) {
+  const rows = journeyHighlights(s)
   if (rows.length === 0) return null
   return (
     <section className="su-card" aria-labelledby="su-hl-title">
@@ -157,26 +156,6 @@ export function JourneyHighlights({ s, hideAchievements = false, onPickDay }: { 
           </div>
         ))}
       </dl>
-    </section>
-  )
-}
-
-/* ---------------------------------------------------------------- 本次成就 */
-
-export function AchievementsPreview({ tripId, earned }: { tripId: number; earned: AchievementView[] }) {
-  if (earned.length === 0) return null
-  return (
-    <section className="su-card" aria-labelledby="su-ach-title">
-      <div className="su-head-row">
-        <h2 id="su-ach-title" className="su-h2">本次成就</h2>
-        <span className="su-muted">{earned.length} 个</span>
-      </div>
-      <ul className="su-badges">
-        {earned.slice(0, 4).map(a => (
-          <li key={a.id}><AchievementBadge achievement={a} size={48} /><span>{a.name}</span></li>
-        ))}
-      </ul>
-      <Link href={`/trips/${tripId}/achievements`} className="su-link">查看全部成就 <ArrowRight size={14} aria-hidden="true" /></Link>
     </section>
   )
 }

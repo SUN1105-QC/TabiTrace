@@ -13,7 +13,7 @@ export const enUS: Messages = {
   },
   nav: {
     home: 'Home', myTrips: 'My trips', createTrip: 'New trip', mapCheckin: 'Map & check-ins', photos: 'Photos', travelStory: 'Travel Story',
-    explore: 'Explore', memories: 'Memories', achievements: 'Achievements', settings: 'Settings', upgradePro: 'Upgrade to Trip Pro',
+    explore: 'Explore', memories: 'Memories', settings: 'Settings', upgradePro: 'Upgrade to Trip Pro',
     upgradeProSub: 'Unlock more for your trips', taglineTop: 'Travel,', taglineBottom: 'and make every departure count.', mainNav: 'Main navigation', secondaryNav: 'More',
     newContent: 'New', closeNav: 'Close navigation', openNav: 'Open navigation', artwork: 'Travel illustration', brandHome: 'TabiTrace home'
   },
@@ -23,12 +23,12 @@ export const enUS: Messages = {
   },
   mobileNav: { label: 'Mobile navigation', home: 'Home', trips: 'Trips', checkin: 'Check in', checkinLabel: 'Quick check-in', share: 'Share', me: 'Me' },
   titles: {
-    home: 'Home', trips: 'My trips', newTrip: 'New trip', map: 'Map & check-ins', photos: 'Photos', achievements: 'Achievements', summary: 'Trip summary',
+    home: 'Home', trips: 'My trips', newTrip: 'New trip', map: 'Map & check-ins', photos: 'Photos', summary: 'Trip summary',
     share: 'Share', story: 'Travel Story', exploreTokyo: 'Explore Tokyo', explore: 'Explore cities', memories: 'Memories', pricing: 'Trip Pro',
     settings: 'Settings', fallback: 'TabiTrace'
   },
   tripNav: {
-    label: 'Trip pages', overview: 'Overview', map: 'Map & check-ins', mapShort: 'Map', photos: 'Photos', achievements: 'Achievements', summary: 'Summary',
+    label: 'Trip pages', overview: 'Overview', map: 'Map & check-ins', mapShort: 'Map', photos: 'Photos', summary: 'Summary',
     share: 'Share', shareShort: 'Share', video: 'Travel Story', videoShort: 'Story'
   },
   publicNav: {
@@ -43,7 +43,6 @@ export const enUS: Messages = {
   notify: {
     button: 'Notifications', buttonUnread: 'Notifications, {count} unread', list: 'Notification list', title: 'Notifications', count: '{count}',
     empty: 'No travel updates yet. Reminders will show up here after your first check-in.',
-    achievementTitle: 'Achievement unlocked: {name}', achievementBody: 'Keep recording to unlock more',
     storyDoneTitle: 'Travel Story is ready', storyDoneBody: '{template} template · {photos} photos',
     storyFailTitle: 'Travel Story failed', storyFailBody: 'You can generate it again on the Travel Story page',
     shareTitle: 'Your share link was opened {count} times', shareBody: 'Someone viewed your travel story',
@@ -101,7 +100,6 @@ export const enUS: Messages = {
       inApp: 'In-app notifications', inAppDesc: 'What appears in the bell notification center. Changes are saved immediately.', updated: 'Notification settings updated',
       trip: 'Trip reminders', tripDesc: 'When a trip is about to start, or has ended but isn’t wrapped up yet.',
       story: 'Travel Story', storyDesc: 'When a Travel Story finishes generating or fails.',
-      achievement: 'Achievements', achievementDesc: 'When you unlock a new achievement.',
       share: 'Share activity', shareDesc: 'When someone opens your share link.',
       quotaNote: 'Reminders about running out of free quota always show, so check-ins or uploads don’t stop unexpectedly during a trip.',
       email: 'Email notifications', emailRow: 'Email reminders', emailDesc: 'TabiTrace doesn’t send travel notification emails yet (account security emails such as sign-up codes still arrive). A switch will appear here once they’re available.',

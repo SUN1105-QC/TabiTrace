@@ -12,7 +12,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * 9:16 / 4:5 / 16:9 × 三个模板 × 开场 / 照片 / 成就 / 结尾：画面尺寸正确，版式按比例重新排（不是裁切），
+ * 9:16 / 4:5 / 16:9 × 三个模板 × 开场 / 照片 / 结尾：画面尺寸正确，版式按比例重新排（不是裁切），
  * 文字没有被画到画面外（最后一行文字的底部仍在画面内）。关键帧另存到 target/aspect-frames 便于人工检查。
  */
 class ScenePainterAspectTest {
@@ -43,7 +43,6 @@ class ScenePainterAspectTest {
         Path dir = Path.of("target/aspect-frames");
         Files.createDirectories(dir);
         BufferedImage p = photo();
-        List<String> many = List.of("初次打卡", "城市漫步者", "夜行者", "美食家", "收集者", "旅行摄影师");
         for (int i = 0; i < SIZES.length; i++) {
             int w = SIZES[i][0], h = SIZES[i][1];
             for (String tpl : new String[]{"JOURNAL", "MINIMAL", "CITY"}) {
@@ -51,10 +50,9 @@ class ScenePainterAspectTest {
                 BufferedImage[] frames = {
                         painter.opening(p, "MY JOURNEY", "秋天的东京漫步与京都之旅", "2026.10.01 - 2026.10.05", "东京"),
                         painter.photo(p, "浅草寺", "10.01 10:00 · 台东区 · 晴 22°C", "雷门的灯笼比想象中还要大，人很多但很热闹。", true, 1, 12),
-                        painter.achievements("旅行成就", "解锁 6 项成就", many),
                         painter.ending(p, "秋天的东京漫步", "5 天 4 晚", "10 个地点 · 12 张照片", "东京，下次再见。", ScenePainterAspectTest.class.getSimpleName())
                 };
-                String[] kinds = {"opening", "photo", "achievements", "ending"};
+                String[] kinds = {"opening", "photo", "ending"};
                 for (int k = 0; k < frames.length; k++) {
                     assertEquals(w, frames[k].getWidth());
                     assertEquals(h, frames[k].getHeight());

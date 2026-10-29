@@ -1,6 +1,6 @@
 /** Trip Pro 页面内容：全部由方案配置推导，不写死价格与规格，也不承诺已经下线的功能 */
 import { describe, expect, it } from 'vitest'
-import { isOneTimePerTrip, planBenefits, planComparison, planFaq, planPrice, type TripProPlan } from '@/utils/plan'
+import { isOneTimePerTrip, planBenefits, planComparison, planFaq, planPrice, videoUsageTerms, type TripProPlan } from '@/utils/plan'
 
 const plan: TripProPlan = {
   price: { amount: 400, currency: 'CNY' }, billing: 'ONE_TIME_PER_TRIP', renews: false, expires: false,
@@ -16,6 +16,13 @@ const plan: TripProPlan = {
 }
 
 describe('Trip Pro 方案内容', () => {
+  it('购买前展示服务端启用的视频额度，监控模式和旧接口不展示硬限额',()=>{
+    expect(videoUsageTerms(plan)).toBeNull()
+    const updated={...plan,videoUsageLimits:{enforced:true,dailyRenders:20,dailyOutputSeconds:6000}}
+    expect(videoUsageTerms(updated)).toContain('20 次')
+    expect(videoUsageTerms(updated)).toContain('6000 秒')
+    expect(videoUsageTerms({...updated,videoUsageLimits:{...updated.videoUsageLimits,enforced:false}})).toBeNull()
+  })
   it('价格与一次性承诺来自方案配置', () => {
     expect(planPrice(plan)).toBe('¥4')
     expect(isOneTimePerTrip(plan)).toBe(true)

@@ -1,6 +1,6 @@
 /**
  * 旅行总结页的纯逻辑：规则生成的总结文案、旅程亮点、默认选中的日期。
- * 只使用真实统计（天数、地点、照片、有记录的天数、目的地、成就），不推测心情、天气、评价等用户没有提供的信息。
+ * 只使用真实统计（天数、地点、照片、有记录的天数、目的地），不推测心情、天气、评价等用户没有提供的信息。
  */
 
 import type { TripSummary, TripView } from '@/services/tabitrace-api'
@@ -29,7 +29,6 @@ export function journeyHighlights(s: TripSummary): Highlight[] {
   if (busiest) rows.push({ key: 'busiest', label: '最充实的一天', value: `${shortDay(busiest.date)} · ${busiest.checkins} 次打卡`, date: busiest.date })
   const photoDay = pickMax(s.dailyRecords, d => d.photos)
   if (photoDay) rows.push({ key: 'photos', label: '照片最多', value: `${shortDay(photoDay.date)} · ${photoDay.photos} 张`, date: photoDay.date })
-  if (s.achievements > 0) rows.push({ key: 'achievements', label: '已解锁成就', value: `${s.achievements} 个` })
   return rows
 }
 

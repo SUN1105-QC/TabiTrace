@@ -1,6 +1,5 @@
 package com.tabitrace.memory.service;
 
-import com.tabitrace.achievement.mapper.AchievementMapper;
 import com.tabitrace.memory.dto.MemoryDtos.*;
 import com.tabitrace.memory.mapper.MemoryMapper;
 import com.tabitrace.memory.mapper.MemoryMapper.PhotoRow;
@@ -16,29 +15,28 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 /**
- * 旅行回忆中心：把已完成 / 已归档旅行的统计、照片、Travel Story、分享页、成就聚合成一次请求。
+ * 旅行回忆中心：把已完成 / 已归档旅行的统计、照片、Travel Story、分享页聚合成一次请求。
  * 所有数字都来自数据库里的真实数据；缺什么就返回空，由前端隐藏对应模块。
  */
 @Service
 public class MemoryService {
     static final int MOMENTS = 3;
     static final int HIGHLIGHT_PHOTOS = 8;
-    static final int RECENT_ACHIEVEMENTS = 6;
     static final int MAX_PAGE = 24;
     /** 往年今日：与今天相差不超过这么多天都算「同一天」 */
     static final int FLASHBACK_DAYS = 3;
 
     private final MemoryMapper mapper;
     private final SummaryService summaries;
-    private final AchievementMapper achievements;
+
     private final UserMapper users;
     private final String publicUrl;
 
-    public MemoryService(MemoryMapper mapper, SummaryService summaries, AchievementMapper achievements,
+    public MemoryService(MemoryMapper mapper, SummaryService summaries,
                          UserMapper users, @Value("${app.public-url:http://localhost:3000}") String publicUrl) {
         this.mapper = mapper;
         this.summaries = summaries;
-        this.achievements = achievements;
+
         this.users = users;
         this.publicUrl = publicUrl.replaceAll("/$", "");
     }
@@ -66,14 +64,8 @@ public class MemoryService {
         int photoYear = mapper.countPhotosInYear(userId, year) > 0 ? year : 0;
         List<MemoryPhoto> photos = mapper.highlightPhotos(userId, year, HIGHLIGHT_PHOTOS).stream()
                 .map(p -> new MemoryPhoto(p.id, p.tripId, p.tripTitle, p.imageUrl, p.thumbUrl, p.mediumUrl, p.originalUrl, p.width, p.height, Boolean.TRUE.equals(p.featured), p.capturedAt != null ? p.capturedAt : p.createdAt)).toList();
-        // 同一成就可能在多段旅行里各获得一次，只保留最近的那一次
-        Set<String> seen = new HashSet<>();
-        List<MemoryAchievement> recent = mapper.recentAchievements(userId, RECENT_ACHIEVEMENTS * 5).stream()
-                .filter(a -> seen.add(a.code)).limit(RECENT_ACHIEVEMENTS)
-                .map(a -> new MemoryAchievement(a.code, a.name, a.description, a.tripId, a.tripTitle, a.earnedAt)).toList();
-
         return new MemoriesView(overview, page, archived.size() > size, timeline, creations(stories, shares, covers), photos, photoYear,
-                recent, mapper.countAchievements(userId), flashback(archived, today, covers));
+                List.of(), 0, flashback(archived, today, covers));
     }
 
     /** 「查看更多」：按同样的排序继续往后取 */
@@ -95,7 +87,7 @@ public class MemoryService {
         List<MemoryMapper.StoryRow> tripStories = stories.stream().filter(v -> t.id.equals(v.tripId)).toList();
         int tripShares = (int) shares.stream().filter(x -> t.id.equals(x.tripId)).count();
         return new MemoryTrip(t.id, t.title, t.destinationName, cityOf(t), t.countryCode, t.status, t.startDate, t.endDate,
-                s.days(), s.places(), s.photos(), achievements.countEarned(t.id), cover, moments, Math.max(0, s.photos() - moments.size()),
+                s.days(), s.places(), s.photos(), 0, cover, moments, Math.max(0, s.photos() - moments.size()),
                 n == null ? null : new Note(n.note.trim(), n.placeNameSnapshot),
                 tripStories.size(), tripStories.isEmpty() ? null : tripStories.get(0).id, tripShares);
     }

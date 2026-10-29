@@ -16,7 +16,6 @@ export const mockUser: UserView = {
   emailNotifications: false,
   notifyTripReminder: true,
   notifyStory: true,
-  notifyAchievement: true,
   notifyShare: true,
   createdAt: '2026-03-01T02:00:00'
 }
@@ -40,7 +39,6 @@ export const emptyUser: UserView = {
   emailNotifications: false,
   notifyTripReminder: true,
   notifyStory: true,
-  notifyAchievement: true,
   notifyShare: true,
   createdAt: '2026-09-27T00:00:00'
 }

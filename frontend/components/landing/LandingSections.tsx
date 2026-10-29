@@ -162,7 +162,7 @@ export function MemoriesBanner() {
       </div>
       <div className="ld-memories-copy">
         <h2 id="ld-mem-title">旅行结束了，<br />回忆才刚刚开始。</h2>
-        <p>旅行完成后，它会进入你的旅行回忆：那年今日、走过的城市、解锁的成就，都能随时回看。</p>
+        <p>旅行完成后，它会进入你的旅行回忆：那年今日、走过的城市、留下的照片，都能随时回看。</p>
         <ul>
           <li><BookOpenText size={16} aria-hidden="true" />旅行回忆</li>
           <li><Share2 size={16} aria-hidden="true" />分享成果</li>

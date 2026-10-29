@@ -2,19 +2,19 @@
  * Mock 模式的内存数据库：启动时把 dev/mocks 里的固定数据深拷贝一份，写操作只改这份内存，
  * 刷新页面后恢复为原始 Fixture，绝不会写入本地数据库或对象存储。
  *
- * 派生数据（总结、成就、时间线、最近记录、回忆、账户概览、分镜）都按后端的真实规则从基础数据计算，
+ * 派生数据（总结、时间线、最近记录、回忆、账户概览、分镜）都按后端的真实规则从基础数据计算，
  * 所以在 Mock 模式下新增打卡 / 照片后，各页面看到的是同一份、互相一致的数据。
  */
 
 import { ApiError } from '@/services/api'
 import type {
-  AccountOverview, AchievementView, CheckinView, ItineraryView, PaymentView, PhotoView, PlaceView, PublicShareView, RecentRecord,
+  AccountOverview, CheckinView, ItineraryView, PaymentView, PhotoView, PlaceView, PublicShareView, RecentRecord,
   ShareLinkView, TimelineDay, TripPlanView, TripSummary, TripView, UserView
 } from '@/services/tabitrace-api'
 import type { Creation, MemoriesView, MemoryTrip } from '@/services/memories'
 import type { Scene, Storyboard, VideoDraft, VideoProject } from '@/types/video'
 import { offsetIso, pad, toDate, zonedParts } from '@/lib/time'
-import { mockAchievementDefs, MOCK_TOKYO_OFFICIAL_TOTAL } from '@/dev/mocks/achievements'
+const MOCK_TOKYO_OFFICIAL_TOTAL = 30
 import { mockCheckins } from '@/dev/mocks/checkins'
 import { ID_BASE } from '@/dev/mocks/ids'
 import { mockPhotos } from '@/dev/mocks/photos'
@@ -242,7 +242,7 @@ export class MockStore {
     return { action, affected: targets.length }
   }
 
-  // ---------- 派生：时间线、最近记录、总结、成就 ----------
+  // ---------- 派生：时间线、最近记录、总结 ----------
   timeline(tripId: number): TimelineDay[] {
     const days = new Map<string, TimelineDay>()
     for (const c of this.checkinsOf(tripId)) {
@@ -266,26 +266,6 @@ export class MockStore {
   private isTokyo(t: TripView) { return t.city === '东京' || t.destinationName === '东京' }
   private officialCount(tripId: number) { const official = new Set((this.tripPlaces[tripId] ?? []).filter(p => p.sourceType === 'OFFICIAL').map(p => p.id)); return this.checkins.filter(c => c.tripId === tripId && c.placeId && official.has(c.placeId)).length }
 
-  achievements(tripId: number): AchievementView[] {
-    const t = this.trip(tripId)
-    const cs = this.checkinsOf(tripId), ps = this.photosOf(tripId)
-    const names = new Set(cs.map(c => c.placeName))
-    return mockAchievementDefs.filter(d => d.type === 'GLOBAL' || this.isTokyo(t)).map(d => {
-      const requirements = d.places ? d.places.map(name => ({ name, done: names.has(name) })) : []
-      const current =
-        d.conditionType === 'CHECKIN_COUNT' ? cs.length
-        : d.conditionType === 'PHOTO_COUNT' ? ps.length
-        : d.conditionType === 'AREA_COUNT' ? new Set(cs.map(c => c.area).filter(Boolean)).size
-        : d.conditionType === 'TRIP_COMPLETED' ? (t.status === 'COMPLETED' || t.status === 'ARCHIVED' ? 1 : 0)
-        : d.conditionType === 'OFFICIAL_CHECKIN_COUNT' ? this.officialCount(tripId)
-        : requirements.filter(r => r.done).length
-      const earned = current >= d.target
-      // 解锁时间：达成条件的那一次打卡（或完成旅行的结束日），数据不变时结果固定
-      const earnedAt = !earned ? undefined : d.conditionType === 'TRIP_COMPLETED' ? `${t.endDate}T12:00:00` : (cs[Math.min(cs.length - 1, Math.max(0, d.target - 1))]?.checkinTime ?? ps[ps.length - 1]?.createdAt)
-      return { id: d.id, code: d.code, name: d.name, description: d.description, type: d.type, cityCode: d.cityCode, earned, progress: Math.min(100, Math.round(current * 100 / d.target)), earnedAt, conditionType: d.conditionType, current, target: d.target, requirements }
-    })
-  }
-
   summary(tripId: number): TripSummary {
     const t = this.trip(tripId)
     const cs = this.checkinsOf(tripId), ps = this.photosOf(tripId)
@@ -298,14 +278,13 @@ export class MockStore {
       dailyRecords.push({ date, checkins, photos, hasRecord: checkins > 0 || photos > 0 })
     }
     const official = this.officialCount(tripId), officialTotal = this.isTokyo(t) ? MOCK_TOKYO_OFFICIAL_TOTAL : 0
-    const earned = this.achievements(tripId).filter(a => a.earned).length
     const places = new Set(cs.map(c => (c.placeId ? `id:${c.placeId}` : `name:${c.placeName.trim().toLowerCase()}`))).size
     return {
       tripId: t.id, title: t.title, status: t.status, planType: t.planType, days: dailyRecords.length, places, photos: ps.length,
       cities: new Set(cs.map(() => t.city).filter(Boolean)).size, areas: new Set(cs.map(c => c.area).filter(Boolean)).size,
       officialPlacesCompleted: official, officialPlacesTotal: officialTotal, explorationRate: officialTotal ? Math.min(100, Math.round(official * 100 / officialTotal)) : 0,
-      achievements: earned, dailyRecords,
-      readiness: { featuredPhotos: ps.filter(p => p.featured).length, achievementCount: earned, recordedDays: dailyRecords.filter(d => d.hasRecord).length, shareReady: cs.length > 0, videoReady: ps.length >= 3 && cs.length > 0 }
+      dailyRecords,
+      readiness: { featuredPhotos: ps.filter(p => p.featured).length, recordedDays: dailyRecords.filter(d => d.hasRecord).length, shareReady: cs.length > 0, videoReady: ps.length >= 3 && cs.length > 0 }
     }
   }
 
@@ -331,7 +310,7 @@ export class MockStore {
     const t = this.trip(s.tripId)
     const round = (v?: number) => (v == null ? v : Math.round(v * 100) / 100)
     const timeline = this.timeline(t.id).map(d => ({ ...d, items: d.items.map(i => (this.user.shareExactLocation ? i : { ...i, checkin: { ...i.checkin, latitude: round(i.checkin.latitude), longitude: round(i.checkin.longitude) } })) }))
-    return { trip: t, summary: this.summary(t.id), timeline, featuredPhotos: this.photosOf(t.id).filter(p => p.featured), achievements: this.achievements(t.id), ownerNickname: this.user.nickname }
+    return { trip: t, summary: this.summary(t.id), timeline, featuredPhotos: this.photosOf(t.id).filter(p => p.featured), ownerNickname: this.user.nickname }
   }
 
   // ---------- 支付 ----------
@@ -356,7 +335,7 @@ export class MockStore {
 
   // ---------- 账户 ----------
   updateUser(r: Partial<UserView>) {
-    const allowed = ['nickname', 'bio', 'locale', 'timezone', 'distanceUnit', 'shareExactLocation', 'shareLinkExpiryDays', 'notifyTripReminder', 'notifyStory', 'notifyAchievement', 'notifyShare'] as const
+    const allowed = ['nickname', 'bio', 'locale', 'timezone', 'distanceUnit', 'shareExactLocation', 'shareLinkExpiryDays', 'notifyTripReminder', 'notifyStory', 'notifyShare'] as const
     if (r.nickname !== undefined && !r.nickname.trim()) fail(400, 'INVALID_NICKNAME', '昵称不能为空')
     for (const k of allowed) if (r[k] !== undefined) (this.user as Record<string, unknown>)[k] = typeof r[k] === 'string' ? (r[k] as string).trim() : r[k]
     return this.user
@@ -389,7 +368,7 @@ export class MockStore {
       const stories = this.videos.filter(v => v.tripId === t.id && v.status === 'COMPLETED')
       return {
         id: t.id, title: t.title, destinationName: t.destinationName, city: t.city ?? t.destinationName, countryCode: t.countryCode, status: t.status, startDate: t.startDate, endDate: t.endDate,
-        days: s.days, places: s.places, photos: ps.length, achievements: s.achievements, cover: t.coverImage ?? featured[0]?.imageUrl ?? ps[0]?.imageUrl ?? null,
+        days: s.days, places: s.places, photos: ps.length, cover: t.coverImage ?? featured[0]?.imageUrl ?? ps[0]?.imageUrl ?? null,
         moments: moments.map(p => ({ id: p.id, imageUrl: p.imageUrl })), moreMoments: Math.max(0, ps.length - moments.length),
         note: note ? { text: note.note!, place: note.placeName } : null, stories: stories.length, latestStoryId: stories[stories.length - 1]?.id ?? null,
         shareLinks: this.shares.filter(x => x.tripId === t.id).length
@@ -405,14 +384,13 @@ export class MockStore {
       ...this.shares.filter(s => tripIds.has(s.tripId)).map(s => ({ type: 'SHARE_LINK' as const, id: s.id, tripId: s.tripId, tripTitle: titleOf(s.tripId), preview: trips.find(t => t.id === s.tripId)?.cover ?? null, url: s.url, createdAt: s.createdAt, views: s.viewCount }))
     ].sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''))
     const photos = this.photos.filter(p => tripIds.has(p.tripId) && p.featured).map(p => ({ id: p.id, tripId: p.tripId, tripTitle: titleOf(p.tripId), imageUrl: p.imageUrl, featured: p.featured, takenAt: p.capturedAt ?? null }))
-    const achievements = [...tripIds].flatMap(id => this.achievements(id).filter(a => a.earned).map(a => ({ code: a.code, name: a.name, description: a.description, tripId: id, tripTitle: titleOf(id), earnedAt: a.earnedAt ?? null })))
     const thisYear = String(new Date().getFullYear())
     return {
       overview: { archivedTrips: trips.length, cities: new Set(trips.map(t => t.city)).size, photos: trips.reduce((n, t) => n + t.photos, 0), creations: creations.length },
       trips: trips.slice(0, limit), hasMore: trips.length > limit,
       timeline: trips.map(t => ({ id: t.id, title: t.title, city: t.city, startDate: t.startDate, endDate: t.endDate, cover: t.cover })),
       creations, photos, photoYear: trips.some(t => t.startDate.startsWith(thisYear)) ? Number(thisYear) : 0,
-      achievements, achievementCount: achievements.length, flashback: null
+      flashback: null
     }
   }
   memoryPage(offset: number, limit: number) { const all = this.memoryTrips(); return { trips: all.slice(offset, offset + limit), hasMore: all.length > offset + limit } }
@@ -428,7 +406,7 @@ export class MockStore {
     const resolution = w >= h ? `${Math.round(base * w / h)}×${base}` : `${base}×${Math.round(base * h / w)}`
     const fields = {
       templateCode: draft.templateCode, aspectRatio: draft.aspectRatio, duration: draft.duration, quality: pro ? draft.quality : '720p', resolution, watermark: !pro, musicCode: draft.musicCode,
-      coverPhotoId: draft.coverPhotoId, showText: draft.settings.showTitle, showAchievements: draft.settings.showAchievements,
+      coverPhotoId: draft.coverPhotoId, showText: draft.settings.showTitle, showAchievements: false,
       settings: { ...defaultStorySettings(), ...draft.settings }, photoIds: draft.photoIds, updatedAt: nowUtc()
     }
     if (id) { const v = this.video(id); Object.assign(v, fields, { status: 'DRAFT', progress: 0, outputUrl: null, completedAt: null, renderStage: null }); return v }
@@ -457,7 +435,6 @@ export class MockStore {
     const cs = this.checkinsOf(tripId)
     const chosen = new Set(draft.photoIds)
     const ps = this.photosOf(tripId).filter(p => !chosen.size || chosen.has(p.id))
-    const earned = this.achievements(tripId).filter(a => a.earned).map(a => a.name)
     const dot = (d: string) => d.replaceAll('-', '.')
     const md = (iso: string) => { const d = toDate(iso)!; const p = zonedParts(d, this.zone); return `${pad(p.month)}.${pad(p.day)} ${pad(p.hour)}:${pad(p.minute)}` }
     const scenes: Omit<Scene, 'start'>[] = []
@@ -468,7 +445,6 @@ export class MockStore {
       if (!shots.length) continue
       scenes.push({ key: `place-${c.id}`, type: 'PLACE', title: c.placeName, subtitle: `${md(c.checkinTime)}${c.area ? ` · ${c.area}` : ''}`, duration: 2 * shots.length, photoIds: shots.map(p => p.id), enabled: true, pinned: false, meta: { note: s.showCheckinText ? c.note : undefined, shots: shots.map(() => 2), checkinId: c.id, placeName: c.placeName } })
     }
-    if (s.showAchievements && earned.length) scenes.push({ key: 'achievements', type: 'ACHIEVEMENTS', title: '旅行成就', subtitle: `解锁 ${earned.length} 项成就`, duration: 2.5, photoIds: [], enabled: true, pinned: false, meta: { items: earned } })
     if (s.showEnding) scenes.push({ key: 'ending', type: 'ENDING', title: t.title, subtitle: `${this.summary(tripId).days} 天`, duration: 2.5, photoIds: ps.slice(-1).map(p => p.id), enabled: true, pinned: true, meta: { stats: `${cs.length} 个地点 · ${ps.length} 张照片`, tagline: 'Every Journey · A Better You', endingText: s.endingText ?? undefined } })
     // 按目标时长等比缩放，保证总时长与设置一致
     const raw = scenes.reduce((n, x) => n + x.duration, 0) || 1

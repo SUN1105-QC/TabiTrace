@@ -36,6 +36,7 @@ public class VideoJobPoller {
     private final JdbcTemplate jdbc;
     private final FfmpegRenderer renderer;
     private final WorkerStorage storage;
+    private final VideoOutputLifecycle outputs;
     private final long heartbeatSeconds;
     private final long shutdownGraceSeconds;
     /** 只在轮询线程上读写：第一次拾取任务之前清扫上次异常退出的遗留文件 */
@@ -52,12 +53,13 @@ public class VideoJobPoller {
         return t;
     });
 
-    public VideoJobPoller(JdbcTemplate jdbc, FfmpegRenderer renderer, WorkerStorage storage,
+    public VideoJobPoller(JdbcTemplate jdbc, FfmpegRenderer renderer, WorkerStorage storage, VideoOutputLifecycle outputs,
                           @Value("${worker.heartbeat-seconds:15}") long heartbeatSeconds,
                           @Value("${worker.shutdown-grace-seconds:20}") long shutdownGraceSeconds) {
         this.jdbc = jdbc;
         this.renderer = renderer;
         this.storage = storage;
+        this.outputs = outputs;
         this.heartbeatSeconds = heartbeatSeconds;
         this.shutdownGraceSeconds = shutdownGraceSeconds;
     }
@@ -104,18 +106,10 @@ public class VideoJobPoller {
                 @Override public void warn(String code) { warning.updateAndGet(w -> w == null ? code : w.contains(code) ? w : w + "," + code); }
             });
             jdbc.update("UPDATE video_projects SET render_stage='UPLOADING',progress=95,updated_at=UTC_TIMESTAMP() WHERE id=? AND status='PROCESSING'", job.id());
-            WorkerStorage.Result saved;
-            try {
-                saved = storage.save(job, file);
-            } catch (Exception ex) {
-                throw new RenderFailure("STORAGE_FAILED", "视频已合成，但保存到存储失败", ex);
-            }
-            int done = jdbc.update(
-                    "UPDATE video_projects SET status='COMPLETED',progress=100,render_stage=NULL,output_key=?,output_url=?,error_code=NULL,error_message=NULL,render_warning=?,completed_at=UTC_TIMESTAMP(),updated_at=UTC_TIMESTAMP() WHERE id=? AND status='PROCESSING'",
-                    saved.key(), saved.url(), warning.get(), job.id());
-            if (done == 0) log.warn("视频项目 {} 渲染完成时已不在 PROCESSING 状态（可能已被判定超时），结果未写回", job.id());
+            boolean done = outputs.publish(job, file, warning.get());
+            if (!done) log.warn("视频项目 {} 已被删除或不在 PROCESSING 状态，跳过发布并清理本地结果", job.id());
             // 成片已在对象存储：本地文件立即删除
-            if (storage.remote()) renderer.discard(job.id());
+            if (storage.remote() || !done) renderer.discard(job.id());
         } catch (Exception ex) {
             if (requeueCurrent) requeue(job, ex);
             else if (ex instanceof RenderFailure f) fail(job, f.code(), describe(f));

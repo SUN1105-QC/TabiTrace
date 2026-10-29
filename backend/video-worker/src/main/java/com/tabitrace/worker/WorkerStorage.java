@@ -10,6 +10,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.core.sync.ResponseTransformer;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 
 import java.io.IOException;
 import java.net.URI;
@@ -20,9 +21,22 @@ import java.nio.file.StandardCopyOption;
 @Component
 public class WorkerStorage {
     private final String mode,bucket,publicBase,localPublicBase;private final S3Client s3;
+    @org.springframework.beans.factory.annotation.Autowired
     public WorkerStorage(@Value("${worker.storage.mode:mock}") String mode,@Value("${worker.storage.r2.endpoint:}") String endpoint,@Value("${worker.storage.r2.access-key:}") String access,@Value("${worker.storage.r2.secret-key:}") String secret,@Value("${worker.storage.r2.bucket:}") String bucket,@Value("${worker.storage.r2.public-base-url:}") String publicBase,@Value("${worker.storage.local.public-base-url:http://localhost:3000/generated-videos}") String localPublicBase){this.mode=mode;this.bucket=bucket;this.publicBase=publicBase==null?"":publicBase.replaceAll("/$","");this.localPublicBase=localPublicBase.replaceAll("/$","");if("r2".equalsIgnoreCase(mode)){this.s3=S3Client.builder().endpointOverride(URI.create(endpoint)).region(Region.of("auto")).credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(access,secret))).build();}else this.s3=null;}
     public Result save(VideoJob job,Path file){if(s3==null)return new Result(file.toAbsolutePath().toString(),localPublicBase+"/project-"+job.id()+"/output.mp4");String key="users/"+job.userId()+"/trips/"+job.tripId()+"/videos/"+job.id()+".mp4";s3.putObject(PutObjectRequest.builder().bucket(bucket).key(key).contentType("video/mp4").build(),RequestBody.fromFile(file));return new Result(key,publicBase+"/"+key);}
     public record Result(String key,String url){}
+
+    WorkerStorage(S3Client client, String bucket) {
+        this.mode = "r2"; this.bucket = bucket; this.s3 = client;
+        this.publicBase = ""; this.localPublicBase = "";
+    }
+
+    /** Derive the exact output key from server-owned IDs; never accept a client path for deletion. */
+    public void deleteOutput(long userId, long tripId, long projectId) {
+        if (userId <= 0 || tripId <= 0 || projectId <= 0) throw new IllegalArgumentException("Invalid video ownership");
+        if (s3 != null) s3.deleteObject(DeleteObjectRequest.builder().bucket(bucket)
+                .key("users/" + userId + "/trips/" + tripId + "/videos/" + projectId + ".mp4").build());
+    }
 
     /** 成片保存在对象存储（r2）：本地文件上传后即可删除 */
     public boolean remote(){return s3!=null;}

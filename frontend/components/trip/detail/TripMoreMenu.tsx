@@ -92,7 +92,7 @@ export function TripMoreMenu({ trip, onChanged, onToast }: { trip: TripView; onC
       {mode === 'delete' && (
         <ConfirmDialog
           title="删除这段旅行？"
-          body={<p>「{trip.title}」的打卡、照片、成就、分享链接和 Travel Story 会一起删除，且无法恢复。</p>}
+          body={<p>「{trip.title}」的打卡、照片、分享链接和 Travel Story 会一起删除，且无法恢复。</p>}
           onCancel={() => { if (!busy) setMode(null) }}
           actions={<>
             <button type="button" className="st-btn" onClick={() => setMode(null)} disabled={busy}>取消</button>

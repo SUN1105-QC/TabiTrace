@@ -23,7 +23,7 @@ const s = await login()
 const trips = await call('GET', '/trips', { token: s.token })
 const tripId = trips.data?.[0]?.id
 if (!tripId) throw new Error('测试账号需要至少一段旅行')
-const ROUTES = ['/', '/trips', '/trips/new', `/trips/${tripId}`, `/trips/${tripId}/map`, `/trips/${tripId}/gallery`, `/trips/${tripId}/video`, `/trips/${tripId}/summary`, `/trips/${tripId}/share`, `/trips/${tripId}/achievements`, '/memories', '/profile', '/pricing', '/explore', '/explore/tokyo']
+const ROUTES = ['/', '/trips', '/trips/new', `/trips/${tripId}`, `/trips/${tripId}/map`, `/trips/${tripId}/gallery`, `/trips/${tripId}/video`, `/trips/${tripId}/summary`, `/trips/${tripId}/share`, '/memories', '/profile', '/pricing', '/explore', '/explore/tokyo']
 const b = await openBrowser()
 try {
   await b.session(s.refresh)

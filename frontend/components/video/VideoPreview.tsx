@@ -14,7 +14,7 @@ import { timecode } from '@/utils/video-status'
 import { photoMedium } from '@/utils/photo-variants'
 
 /** 预览只播放这几类段落（旧版本冻结的分镜里可能还有已移除的地图段落，直接跳过） */
-const PLAYABLE = new Set(['OPENING', 'PLACE', 'ACHIEVEMENTS', 'ENDING'])
+const PLAYABLE = new Set(['OPENING', 'PLACE', 'ENDING'])
 
 type Chip = { label: string; value: string }
 
@@ -185,18 +185,6 @@ function Slide({ scene, shot, photo, watermark, tpl }: {
   tpl: string
 }) {
   const wm = watermark ? <span className="ts-wm">旅迹 TabiTrace</span> : null
-
-  if (scene.type === 'ACHIEVEMENTS') {
-    return (
-      <div className="ts-s-paper">
-        <small>ACHIEVEMENTS</small>
-        <b>{scene.title}</b>
-        <span>{scene.subtitle}</span>
-        <ul>{(scene.meta.items ?? []).map(i => <li key={i}><i>★</i>{i}</li>)}</ul>
-        {wm}
-      </div>
-    )
-  }
 
   if (scene.type === 'ENDING') {
     const bg = photo(scene.photoIds[0])

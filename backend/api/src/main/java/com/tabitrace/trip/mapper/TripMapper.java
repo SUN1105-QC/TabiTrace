@@ -11,6 +11,7 @@ public interface TripMapper {
       VALUES(#{userId},#{title},#{destinationName},#{countryCode},#{city},#{startDate},#{endDate},#{peopleCount},#{coverImage},#{planType},#{status},#{visibility},UTC_TIMESTAMP(),UTC_TIMESTAMP())
       """) @Options(useGeneratedKeys=true,keyProperty="id") int insert(TripEntity trip);
     @Select("SELECT * FROM trips WHERE id=#{id}") TripEntity findById(Long id);
+    @Select("SELECT user_id FROM trips WHERE id=#{id} FOR UPDATE") Long lockOwner(Long id);
     @Select("SELECT * FROM trips WHERE user_id=#{userId} ORDER BY start_date DESC,id DESC") List<TripEntity> findByUser(Long userId);
     @Select("SELECT COUNT(*) FROM trips WHERE user_id=#{userId} AND plan_type='FREE' AND status<>'ARCHIVED'") int countFreeTrips(Long userId);
     @Update("""

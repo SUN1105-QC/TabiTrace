@@ -219,7 +219,7 @@ public class AuthService {
         return new UserView(u.id,u.email,u.nickname,u.avatarUrl,u.avatarSmallUrl,u.bio,u.locale,u.timezone,u.distanceUnit==null?"KM":u.distanceUnit,
                 u.defaultVisibility,Boolean.TRUE.equals(u.shareExactLocation),u.shareLinkExpiryDays==null?0:u.shareLinkExpiryDays,
                 Boolean.TRUE.equals(u.emailNotifications),!Boolean.FALSE.equals(u.notifyTripReminder),!Boolean.FALSE.equals(u.notifyStory),
-                !Boolean.FALSE.equals(u.notifyAchievement),!Boolean.FALSE.equals(u.notifyShare),u.createdAt,
+                false,!Boolean.FALSE.equals(u.notifyShare),u.createdAt,
                 u.lifetimeProAt!=null,u.lifetimeProAt);
     }
 }

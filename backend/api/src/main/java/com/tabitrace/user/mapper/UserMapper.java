@@ -21,6 +21,8 @@ public interface UserMapper {
     /** 最终删除：只删仍在冷静期且已到期的账号（用户在此之前撤销则不删）；其余数据随外键级联删除 */
     @Delete("DELETE FROM users WHERE id=#{id} AND status='DELETION_PENDING' AND deletion_scheduled_at<=UTC_TIMESTAMP()")
     int deleteIfDue(Long id);
+    @Select("SELECT id FROM users WHERE id=#{id} AND status='DELETION_PENDING' AND deletion_scheduled_at<=UTC_TIMESTAMP() FOR UPDATE")
+    Long lockDueForDeletion(Long id);
     @Insert("""
         INSERT INTO users(email,password_hash,nickname,status,locale,timezone,default_visibility,email_notifications,created_at,updated_at)
         VALUES(#{email},#{passwordHash},#{nickname},'ACTIVE',#{locale},#{timezone},#{defaultVisibility},#{emailNotifications},UTC_TIMESTAMP(),UTC_TIMESTAMP())

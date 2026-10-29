@@ -21,7 +21,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 /**
- * 把「旅行数据 + 用户设置」自动编排成分镜：开场 → 地点照片段落 →（成就）→ 结尾。
+ * 把「旅行数据 + 用户设置」自动编排成分镜：开场 → 地点照片段落 → 结尾。
  * 预览接口和开始生成都走这里；生成时结果会冻结到 video_projects.storyboard_json，Worker 只按它渲染。
  */
 @Service
@@ -65,12 +65,12 @@ public class StoryboardService {
     public static Settings normalize(StorySettings s, Boolean legacyText, Boolean legacyAchievements) {
         if (s == null) {
             return new Settings(null, null, true, true, true, legacyText == null || legacyText, true, true,
-                    legacyAchievements == null || legacyAchievements, true, List.of(), "NATURAL", MusicCues.DEFAULT_VOLUME);
+                    false, true, List.of(), "NATURAL", MusicCues.DEFAULT_VOLUME);
         }
         String style = s.visualStyle() == null ? "NATURAL" : s.visualStyle().trim().toUpperCase(Locale.ROOT);
         return new Settings(trimToNull(s.title()), trimToNull(s.endingText()), on(s.showTitle()), on(s.showDate()),
                 on(s.showPlaceNames()), on(s.showCheckinText()), on(s.showWeather()), on(s.showStats()),
-                on(s.showAchievements()), on(s.showEnding()), s.segments() == null ? List.of() : s.segments(),
+                false, on(s.showEnding()), s.segments() == null ? List.of() : s.segments(),
                 VISUAL_STYLES.contains(style) ? style : "NATURAL",
                 s.musicVolume() == null ? MusicCues.DEFAULT_VOLUME : Math.max(0, Math.min(100, s.musicVolume())));
     }
@@ -111,18 +111,6 @@ public class StoryboardService {
         List<Draft> middle = new ArrayList<>(buildPlaces(s, ordered, checkinById, template, zone));
         if (s.showWeather() && tripCheckins.stream().noneMatch(c -> c.weatherText != null && !c.weatherText.isBlank())) {
             notices.add("这趟旅行的打卡还没有天气数据，已自动跳过天气信息");
-        }
-        if (s.showAchievements()) {
-            List<String> earned = catalog.earnedAchievementNames(userId, trip.id);
-            if (earned.isEmpty()) {
-                notices.add("这趟旅行还没有解锁成就，已跳过成就段落");
-            } else {
-                Draft a = new Draft("achievements", "ACHIEVEMENTS", false, 3.0);
-                a.title = "旅行成就";
-                a.subtitle = "解锁 " + earned.size() + " 项成就";
-                a.meta.put("items", earned.subList(0, Math.min(6, earned.size())));
-                middle.add(a);
-            }
         }
         middle = applyOverrides(middle, s.segments());
 

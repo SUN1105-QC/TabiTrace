@@ -13,7 +13,7 @@ public class MemoryController {
     private final MemoryService service;
     public MemoryController(MemoryService service) { this.service = service; }
 
-    /** 旅行回忆中心首屏：概览、第一页归档旅行、往年今日、作品、时间轴、照片与成就 */
+    /** 旅行回忆中心首屏：概览、第一页归档旅行、往年今日、作品、时间轴与照片 */
     @GetMapping public ApiResponse<MemoriesView> memories(@RequestParam(defaultValue = "6") int limit) {
         return ApiResponse.ok(service.memories(SecurityUtils.currentUser().id(), limit));
     }

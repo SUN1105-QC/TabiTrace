@@ -23,7 +23,7 @@ public interface AccountMapper {
         SELECT t.id AS trip_id, t.title, t.destination_name, t.start_date, t.end_date, t.plan_type, t.status,
                p.amount, p.currency, p.provider, p.paid_at
         FROM trips t
-        LEFT JOIN payments p ON p.id = (SELECT MAX(p2.id) FROM payments p2 WHERE p2.trip_id = t.id AND p2.status = 'PAID')
+        LEFT JOIN payments p ON p.id = (SELECT MAX(p2.id) FROM payments p2 WHERE p2.trip_id = t.id AND p2.status IN ('PAID','PARTIALLY_REFUNDED'))
         WHERE t.user_id = #{userId}
         ORDER BY t.start_date DESC, t.id DESC
         """)

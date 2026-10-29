@@ -72,7 +72,7 @@ export function TripStatusCard({ s }: { s: TripProState }) {
           <>
             <p className="pr-badge is-pro"><CheckCircle2 size={16} aria-hidden="true" /> 已解锁 Trip Pro</p>
             <p className="pr-trip-note">{lifetime ? <><Crown size={13} aria-hidden="true" /> 买断终身 Pro：账号下所有旅行都已解锁</> : '这段旅行永久有效：打卡与照片不限数量，成果可高清无水印导出。'}</p>
-            <PayNotice state={pay} message={payMessage} trip={trip} mock={mockPaid} />
+            <PayNotice state={pay} message={payMessage} trip={trip} mock={mockPaid} onRetry={() => void s.recheckTrip()} />
             <div className="pr-trip-actions">
               <Link href={`/trips/${trip.id}/share`} className="pr-btn is-primary"><Share2 size={15} aria-hidden="true" /> 查看分享成果</Link>
               <Link href={`/trips/${trip.id}/video`} className="pr-btn"><Film size={15} aria-hidden="true" /> 制作 Travel Story</Link>
@@ -88,7 +88,7 @@ export function TripStatusCard({ s }: { s: TripProState }) {
             {(usage.checkinFull || usage.photoFull) && (
               <p className="pr-limit" role="status"><CircleAlert size={15} aria-hidden="true" /> {usage.checkinFull && usage.photoFull ? '打卡和照片' : usage.checkinFull ? '打卡' : '照片'}已达到免费上限，已记录的内容不会丢失；升级后可以继续记录。</p>
             )}
-            <PayNotice state={pay} message={payMessage} trip={trip} mock={mockPaid} />
+            <PayNotice state={pay} message={payMessage} trip={trip} mock={mockPaid} onRetry={() => void s.recheckTrip()} />
             <UpgradeButton trip={trip} plan={plan} state={pay} onClick={() => void checkout()} />
             <PayNotes plan={plan} />
           </>

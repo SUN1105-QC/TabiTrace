@@ -42,18 +42,19 @@ export function LifetimeButton({ plan, owned, state, onClick }: { plan: TripProP
   )
 }
 
-export function PayNotice({ state, message, trip, mock, lifetime = false }: { state: PayState; message: string; trip: TripView | null; mock: boolean; lifetime?: boolean }) {
+export function PayNotice({ state, message, trip, mock, lifetime = false, onRetry }: { state: PayState; message: string; trip: TripView | null; mock: boolean; lifetime?: boolean; onRetry?: () => void }) {
   if (state === 'idle' || state === 'loading') return null
   const map: Record<Exclude<PayState, 'idle' | 'loading'>, { icon: typeof Info; tone: string; text: string }> = {
     confirming: { icon: Loader2, tone: 'is-info', text: '支付已提交，正在确认结果…' },
+    pending: { icon: Info, tone: 'is-info', text: '支付结果尚未确认，请查询原订单，请勿重复付款。' },
     success: { icon: CheckCircle2, tone: 'is-ok', text: `${lifetime ? '买断成功，终身 Pro 已生效，账号下所有旅行都已解锁。' : `支付成功，「${trip?.title ?? '这段旅行'}」已解锁 Trip Pro。`}${mock ? '（本地开发环境为模拟支付，没有产生真实扣款）' : ''}` },
     already: { icon: CheckCircle2, tone: 'is-ok', text: lifetime ? '你已经拥有终身 Pro，无需重复购买。' : `「${trip?.title ?? '这段旅行'}」已经是 Trip Pro，无需重复购买。` },
-    cancelled: { icon: Info, tone: 'is-info', text: '你已取消支付，没有产生扣款。可以随时再次升级。' },
+    cancelled: { icon: Info, tone: 'is-info', text: '你已离开付款页。是否已付款以订单查询为准；可以在付款记录中继续或关闭原订单。' },
     failed: { icon: CircleAlert, tone: 'is-bad', text: `支付未完成：${message || '请稍后再试'}` }
   }
   const m = map[state]
   const Icon = m.icon
-  return <p className={`pr-notice ${m.tone}`} role={state === 'failed' ? 'alert' : 'status'}><Icon size={16} className={state === 'confirming' ? 'pr-spin' : ''} aria-hidden="true" /> {message && state === 'confirming' ? message : m.text}</p>
+  return <div className={`pr-notice ${m.tone}`} role={state === 'failed' ? 'alert' : 'status'}><Icon size={16} className={state === 'confirming' ? 'pr-spin' : ''} aria-hidden="true" /> {message && ['confirming', 'pending'].includes(state) ? message : m.text}{state === 'pending' && onRetry && <button type="button" className="pr-btn" onClick={onRetry}>重新查询</button>}</div>
 }
 
 /** 本地开发环境 / 金额低于最低收款额时的说明 */
@@ -61,7 +62,7 @@ export function PayNotes({ plan, lifetime = false }: { plan: TripProPlan; lifeti
   return (
     <>
       {!plan.realPayments && <p className="pr-mock"><Info size={13} aria-hidden="true" /> 当前是本地开发环境：会模拟支付成功，不会产生真实扣款。</p>}
-      {!lifetime && plan.unavailableReason === 'BELOW_MINIMUM' && <p className="pr-mock"><Info size={13} aria-hidden="true" /> 单次升级 {planPrice(plan)} 需要接入微信支付 / 支付宝后才能付款；现在可以选择「买断 · 终身 Pro」。</p>}
+      {!lifetime && plan.unavailableReason === 'BELOW_MINIMUM' && <p className="pr-mock"><Info size={13} aria-hidden="true" /> 当前支付渠道暂不支持单次升级 {planPrice(plan)}；可以查看「买断 · 终身 Pro」是否开放付款。</p>}
     </>
   )
 }

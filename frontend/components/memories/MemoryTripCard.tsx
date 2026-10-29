@@ -8,7 +8,7 @@
 
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
-import { ArrowRight, Film, Image as ImageIcon, MapPin, MoreHorizontal, Share2, Trophy } from 'lucide-react'
+import { ArrowRight, Film, Image as ImageIcon, MapPin, MoreHorizontal, Share2 } from 'lucide-react'
 import { memorySrcSet } from '@/services/memories'
 import type { MemoryTrip } from '@/services/memories'
 import { dateRange, statLine, statusLabel } from '@/utils/memories'
@@ -71,7 +71,6 @@ function MoreMenu({ trip }: { trip: MemoryTrip }) {
         <div className="mm-menu" role="menu">
           <Link role="menuitem" href={`/trips/${trip.id}/map`}><MapPin size={13} /> 地图与打卡</Link>
           <Link role="menuitem" href={`/trips/${trip.id}/gallery`}><ImageIcon size={13} /> 全部照片</Link>
-          <Link role="menuitem" href={`/trips/${trip.id}/achievements`}><Trophy size={13} /> 旅行成就</Link>
         </div>
       )}
     </div>

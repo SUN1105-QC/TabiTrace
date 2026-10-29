@@ -38,7 +38,7 @@ python3 deploy/lightsail/check-env.py /srv/sunows/apps/tabi/shared/.env
 bash deploy/lightsail/deploy.sh
 ```
 
-检查失败会停止发布并只列变量名，不会用 Mock 或开发密钥启动生产 API。`deploy.sh` 构建三个镜像，启动并等待健康检查；MySQL 的 V1–V19 迁移由 API 执行。数据库更新后回滚旧代码不等于回滚数据库；升级前需备份，禁止使用 `down -v`。
+检查失败会停止发布并只列变量名，不会用 Mock 或开发密钥启动生产 API。`deploy.sh` 构建三个镜像；若现有 MySQL 正在运行，会先将一致性数据库快照保存到受限的 `shared/backups/`，压缩文件校验通过后才更新容器并等待健康检查。当前 MySQL 迁移为 V1–V22，由 API 执行。数据库更新后回滚旧代码不等于回滚数据库；禁止使用 `down -v`。备份包含业务数据，应保持目录 0700、文件 0600，不对外提供下载。
 
 只构建镜像可以在外部服务尚未准备时执行，不启动应用：
 

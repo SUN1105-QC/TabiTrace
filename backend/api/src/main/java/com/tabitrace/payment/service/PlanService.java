@@ -6,6 +6,7 @@ import com.tabitrace.trip.service.TripService;
 import com.tabitrace.video.mapper.VideoCatalogMapper;
 import com.tabitrace.video.service.VideoService;
 import org.springframework.stereotype.Service;
+import com.tabitrace.cost.CostProperties;
 
 import java.util.List;
 
@@ -30,15 +31,19 @@ public class PlanService {
     public record CatalogItem(String name, String plan) {}
     /** 买断 · 终身 Pro：一次付款，账号下现有与以后新建的所有旅行都是 PRO */
     public record LifetimePlan(Price price, String billing, boolean paymentsAvailable, String unavailableReason) {}
+    public record VideoUsageLimits(boolean enforced,long dailyRenders,long dailyOutputSeconds) {}
     /** paymentsAvailable：单次旅行升级能否付款；unavailableReason：NOT_CONFIGURED（支付未开放）/ BELOW_MINIMUM（金额低于 Stripe 最低额，需要国内支付渠道） */
     public record TripProPlan(Price price, String billing, boolean renews, boolean expires, boolean realPayments, boolean paymentsAvailable,
                               String unavailableReason, LifetimePlan lifetime,
                               FreeLimits freeLimits, StoryTier storyFree, StoryTier storyPro, ShareTier shareFree, ShareTier sharePro,
-                              List<CatalogItem> storyTemplates, List<CatalogItem> storyMusic) {}
+                              List<CatalogItem> storyTemplates, List<CatalogItem> storyMusic,VideoUsageLimits videoUsageLimits) {}
 
     private final VideoCatalogMapper catalog;
     private final PaymentService payments;
-    public PlanService(VideoCatalogMapper catalog, PaymentService payments) { this.catalog = catalog; this.payments = payments; }
+    private final CostProperties costs;
+    public PlanService(VideoCatalogMapper catalog, PaymentService payments) { this(catalog,payments,new CostProperties()); }
+    @org.springframework.beans.factory.annotation.Autowired
+    public PlanService(VideoCatalogMapper catalog, PaymentService payments,CostProperties costs) { this.catalog = catalog; this.payments = payments; this.costs=costs; }
 
     public TripProPlan tripPro() {
         return new TripProPlan(
@@ -53,6 +58,7 @@ public class PlanService {
                 new StoryTier(VideoService.PRO_MAX_PHOTOS, VideoService.PRO_DURATIONS, VideoService.PRO_QUALITY, false),
                 SHARE_FREE, SHARE_PRO,
                 catalog.templates().stream().filter(t -> Boolean.TRUE.equals(t.enabled)).map(t -> new CatalogItem(t.name, t.plan)).toList(),
-                catalog.music().stream().filter(com.tabitrace.video.entity.VideoMusicEntity::usable).map(m -> new CatalogItem(m.name, m.plan)).toList());
+                catalog.music().stream().filter(com.tabitrace.video.entity.VideoMusicEntity::usable).map(m -> new CatalogItem(m.name, m.plan)).toList(),
+                new VideoUsageLimits(costs.isEnforce(),costs.getAccountDailyRenders(),costs.getAccountDailySeconds()));
     }
 }

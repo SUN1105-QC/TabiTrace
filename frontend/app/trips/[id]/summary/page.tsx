@@ -2,7 +2,7 @@
 
 /**
  * 旅行总结。数据来自 useTripSummaryData（手机与桌面共用，只请求一次）。
- * - 手机（<768px）：紧凑概览（2×3）→ 这趟旅行 → 按天回看（一次一天）→ 旅程亮点 → 本次成就 → 旅行成果
+ * - 手机（<768px）：紧凑概览（2×3）→ 这趟旅行 → 按天回看（一次一天）→ 旅程亮点 → 旅行成果
  * - 平板 / 桌面：保持原有布局（统计格 + 每天记录 + 旅行成果），旅行成果与手机共用同一组件
  */
 
@@ -16,13 +16,13 @@ import { tripApi } from '@/services/tabitrace-api'
 import { useTripSummaryData } from '@/hooks/useTripSummaryData'
 import { formatTripDateRange } from '@/utils/journey'
 import { defaultSummaryDay } from '@/utils/summary'
-import { AchievementsPreview, DailyReview, JourneyHighlights, OutputReadiness, SummaryOverview, SummarySkeleton } from '@/components/trip/summary/SummaryParts'
+import { DailyReview, JourneyHighlights, OutputReadiness, SummaryOverview, SummarySkeleton } from '@/components/trip/summary/SummaryParts'
 import { photoMedium } from '@/utils/photo-variants'
 
 export default function SummaryPage() {
   const params = useParams<{ id: string }>()
   const tripId = Number(params.id)
-  const { data, error, loading, reload, byDay, earned, story, storyCover, activeShare } = useTripSummaryData(tripId)
+  const { data, error, loading, reload, byDay, story, storyCover, activeShare } = useTripSummaryData(tripId)
   const [selectedDay, setSelectedDay] = useState('')
   const [completing, setCompleting] = useState(false)
   const [toast, setToast] = useState('')
@@ -68,8 +68,7 @@ export default function SummaryPage() {
             <div className="su-mobile only-mobile">
               <SummaryOverview trip={trip} s={s} />
               <DailyReview tripId={tripId} s={s} selected={selectedDay} onSelect={setSelectedDay} places={byDay.places} photos={byDay.photos} />
-              <JourneyHighlights s={s} hideAchievements={earned.length > 0} onPickDay={d => { setSelectedDay(d); document.getElementById('su-daily-title')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }} />
-              <AchievementsPreview tripId={tripId} earned={earned} />
+              <JourneyHighlights s={s} onPickDay={d => { setSelectedDay(d); document.getElementById('su-daily-title')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }} />
               {output}
             </div>
 
@@ -78,7 +77,7 @@ export default function SummaryPage() {
               <div className="mt-8 grid gap-4 sm:grid-cols-3 lg:grid-cols-6">
                 {([
                   ['天', s.days], ['地点', s.places], ['照片', s.photos], ['区域', s.areas],
-                  ['探索度', s.officialPlacesTotal > 0 ? `${s.explorationRate}%` : '—'], ['成就', s.achievements]
+                  ['探索度', s.officialPlacesTotal > 0 ? `${s.explorationRate}%` : '—'], ['城市', s.cities]
                 ] as [string, string | number][]).map(([label, value]) => (
                   <div key={label} className="rounded-2xl border border-black/[.07] bg-white/50 p-4">
                     <div className="font-serif text-3xl text-vermilion">{value}</div>
