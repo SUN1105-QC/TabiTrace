@@ -19,6 +19,8 @@
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{margin:0;background:var(--canvas);color:var(--ink);font-family:Inter,"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif}
+/* viewport-fit=cover 后内容会铺到刘海与横屏两侧；顶部和左右在 body 上统一让开（普通设备均为 0），底部由各底栏自行处理 */
+body{padding-top:env(safe-area-inset-top);padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
 button,input,textarea,select{font:inherit}
 button{cursor:pointer}
 a{text-decoration:none;color:inherit}

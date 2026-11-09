@@ -2,7 +2,7 @@ import './globals.css'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import 'leaflet/dist/leaflet.css'
 import './usability.css'
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { cookies } from 'next/headers'
 import { QuickCheckInProvider } from '@/components/checkin/QuickCheckInProvider'
 import { PreferencesProvider } from '@/components/common/PreferencesProvider'
@@ -17,7 +17,19 @@ export const metadata: Metadata = {
   title: SITE_TITLE,
   description: SITE_DESCRIPTION,
   openGraph: { title: SITE_TITLE, description: SITE_DESCRIPTION, siteName: SITE_NAME, locale: 'zh_CN', type: 'website' },
-  twitter: { card: 'summary', title: SITE_TITLE, description: SITE_DESCRIPTION }
+  twitter: { card: 'summary', title: SITE_TITLE, description: SITE_DESCRIPTION },
+  // 添加到主屏幕后全屏打开、不显示地址栏（manifest 见 app/manifest.ts）。
+  // Next 只输出 mobile-web-app-capable，旧版 iOS 还认 apple-mobile-web-app-capable，一并补上
+  appleWebApp: { capable: true, title: '旅迹', statusBarStyle: 'default' },
+  other: { 'apple-mobile-web-app-capable': 'yes' }
+}
+
+/** 内容铺到全面屏边缘，各组件已用 env(safe-area-inset-*) 避开刘海和底部横条；页面级 viewport（登录等）只追加键盘行为 */
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  themeColor: '#FBF7F1'
 }
 
 /**
