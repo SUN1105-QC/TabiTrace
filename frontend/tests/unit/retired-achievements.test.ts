@@ -10,7 +10,7 @@ describe('成就下线后的兼容行为', () => {
     for (const id of [null, 42]) {
       const nav = sidebarItems(id)
       expect([...nav.main, ...nav.secondary].some(item => /achievement/i.test(item.href + item.label))).toBe(false)
-      expect(nav.secondary.some(item => item.href === '/memories')).toBe(true)
+      expect([...nav.main, ...nav.secondary].some(item => item.href === '/memories')).toBe(true)
     }
   })
 

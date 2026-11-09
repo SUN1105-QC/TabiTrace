@@ -58,6 +58,7 @@ public class WorkerStorage {
         Path part = target.resolveSibling(target.getFileName() + ".part");
         Files.deleteIfExists(part);
         s3.getObject(GetObjectRequest.builder().bucket(musicBucket == null || musicBucket.isBlank() ? bucket : musicBucket).key(key).build(), ResponseTransformer.toFile(part));
+        // 完整下载到临时文件后再替换缓存，避免下一次渲染误读到尚未下载完的音频。
         Files.move(part, target, StandardCopyOption.REPLACE_EXISTING);
         return target;
     }
@@ -66,6 +67,7 @@ public class WorkerStorage {
      * 「我的音乐」（用户上传）：只接受这个用户自己目录下的路径 user-music/{userId}/...。
      * 本地模式直接读 API 的本地存储目录；r2 模式从主存储桶下载到缓存（路径里是随机 UUID，文件不会被覆盖，可以缓存）。
      */
+    // 用户音乐与历史系统曲库分开处理；先校验账号路径，再按本地或 R2 模式取文件。
     public Path userMusic(String key, long userId, Path localRoot, Path cacheDir) throws IOException {
         String prefix = "user-music/" + userId + "/";
         if (key == null || key.contains("..") || key.contains("\\") || !key.startsWith(prefix) || key.length() <= prefix.length()) throw new IOException("invalid user music key");

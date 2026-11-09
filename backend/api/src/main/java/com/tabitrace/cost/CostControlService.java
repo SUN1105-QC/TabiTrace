@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.*;
 import java.time.*;
 import java.util.Map;
 
+/** 将队列名额和每日额度纳入渲染事务；用量估算用于告警，不代表已核实的存储硬容量。 */
 @Service
 public class CostControlService {
     private final CostMapper mapper;
@@ -20,7 +21,7 @@ public class CostControlService {
     public record Media(long photoBytes,long musicReservedBytes,long videoBytes,long variantEstimateBytes,long unknownPhotos,long unknownVideos){}
     public record Usage(LocalDate day,long renderRequests,long outputSeconds,long activeRenders,Limits limits,Media media){}
 
-    /** Must be the first DB operation in VideoService.render, before its active-count snapshot. */
+    /** 必须先锁全站再锁账号，且先于活跃任务计数，避免并发请求同时读到空余名额。 */
     @Transactional(propagation=Propagation.MANDATORY)
     public void lockRendering(Long userId){
         if(mapper.lockGlobal()==null)throw new IllegalStateException("Missing video-render lock migration");
@@ -29,10 +30,11 @@ public class CostControlService {
             throw new BusinessException("VIDEO_GLOBAL_QUEUE_LIMIT","视频生成队列已满，请稍后再试",HttpStatus.TOO_MANY_REQUESTS,Map.of("retryAfter",30));
     }
 
-    /** Queue transition and usage reservation share the caller's transaction. Failed validation consumes nothing. */
+    /** 额度预占与任务入队共用调用方事务；校验失败回滚，不能消耗次数或累计时长。 */
     @Transactional(propagation=Propagation.MANDATORY)
     public void reserveRender(Long userId,int seconds){
         if(seconds<=0)throw new IllegalArgumentException("Invalid render duration");
+        // 按统一 UTC 日期记账，避免用户时区不同导致额度重置口径不一致。
         LocalDate day=LocalDate.now(clock); String scope="user:"+userId;
         mapper.ensureDaily("global",day,null); mapper.ensureDaily(scope,day,userId);
         CostMapper.Daily global=mapper.lockDaily("global",day),account=mapper.lockDaily(scope,day);
@@ -58,6 +60,7 @@ public class CostControlService {
                 new Limits(props.isEnforce(),props.getAccountDailyRenders(),props.getAccountDailySeconds()),
                 new Media(s.photoBytes,s.musicBytes,s.videoBytes,s.variantEstimateBytes,s.unknownPhotos,s.unknownVideos));
     }
+    /** 统计已登记媒体和尺寸版本估算，只触发阈值告警，不据此拒绝上传。 */
     public void observeStorage(Long userId){
         CostMapper.Storage s=mapper.storage(userId);
         long estimate=Math.addExact(Math.addExact(s.photoBytes,s.musicBytes),Math.addExact(s.videoBytes,s.variantEstimateBytes));

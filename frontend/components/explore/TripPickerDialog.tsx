@@ -12,7 +12,8 @@ import type { TripView } from '@/services/tabitrace-api'
 
 const STATUS: Record<string, string> = { PLANNING: '计划中', ONGOING: '进行中', COMPLETED: '已完成' }
 
-export function TripPickerDialog({ signedIn, trips, placeName, current, onPick, onClose }: {
+export function TripPickerDialog({ signedIn, trips, placeName, current, onPick, onClose, returnTo = '/explore/tokyo' }: {
+  returnTo?: string
   signedIn: boolean
   trips: TripView[]
   /** 正在加入的地点；为空表示只是更换当前旅行 */
@@ -22,7 +23,7 @@ export function TripPickerDialog({ signedIn, trips, placeName, current, onPick, 
   onClose: () => void
 }) {
   const [picked, setPicked] = useState<number | null>(current?.id ?? null)
-  const next = encodeURIComponent('/explore/tokyo')
+  const next = encodeURIComponent(returnTo)
 
   if (!signedIn) {
     return (

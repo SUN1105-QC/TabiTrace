@@ -1,6 +1,7 @@
 import './globals.css'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import 'leaflet/dist/leaflet.css'
+import './usability.css'
 import type { Metadata } from 'next'
 import { cookies } from 'next/headers'
 import { QuickCheckInProvider } from '@/components/checkin/QuickCheckInProvider'

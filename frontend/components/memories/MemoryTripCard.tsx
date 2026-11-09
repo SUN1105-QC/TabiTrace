@@ -80,7 +80,7 @@ function MoreMenu({ trip }: { trip: MemoryTrip }) {
 function Actions({ trip }: { trip: MemoryTrip }) {
   return (
     <div className="mm-trip-actions">
-      <Link href={`/trips/${trip.id}/summary`} className="mm-btn is-primary">回看这段旅程 <ArrowRight size={14} /></Link>
+      <Link href={`/trips/${trip.id}/map`} className="mm-btn is-primary">回看这段旅程 <ArrowRight size={14} /></Link>
       <Link href={`/trips/${trip.id}/share`} className="mm-text-btn">查看成果</Link>
       <Link href={`/trips/${trip.id}/video`} className="mm-text-btn">Travel Story</Link>
       <MoreMenu trip={trip} />
@@ -97,7 +97,7 @@ export function MemoryTripCard({ trip }: { trip: MemoryTrip }) {
       </div>
       <div className="mm-trip-body">
         <p className="mm-dest"><MapPin size={12} /> {trip.city}</p>
-        <h3>{trip.title}</h3>
+        <h3 title={trip.title}>{trip.title}</h3>
         <p className="mm-date">{dateRange(trip.startDate, trip.endDate)}{trip.days ? ` · ${trip.days} 天` : ''}</p>
         <Summary trip={trip} />
         <p className="mm-stats">{statLine(trip)}</p>
@@ -119,12 +119,12 @@ export function FeaturedMemoryCard({ trip }: { trip: MemoryTrip }) {
       <div className="mm-featured-body">
         <p className="mm-eyebrow">LATEST MEMORY</p>
         <p className="mm-dest"><MapPin size={12} /> {trip.city}</p>
-        <h2>{trip.title}</h2>
+        <h2 title={trip.title}>{trip.title}</h2>
         <p className="mm-date">{dateRange(trip.startDate, trip.endDate)}{trip.days ? ` · ${trip.days} 天` : ''}</p>
         <Summary trip={trip} />
         <p className="mm-stats">{statLine(trip)}</p>
         <Creations trip={trip} />
-        <Link href={`/trips/${trip.id}/summary`} className="mm-btn is-primary">回看这段旅程 <ArrowRight size={14} /></Link>
+        <Link href={`/trips/${trip.id}/map`} className="mm-btn is-primary">回看这段旅程 <ArrowRight size={14} /></Link>
       </div>
     </article>
   )

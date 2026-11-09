@@ -12,12 +12,13 @@ import tools.jackson.databind.JsonNode;
 import java.time.*;
 import java.util.*;
 
+/** 负责支付渠道交互与对账编排；行锁、订单状态和权益更新交给独立的短事务服务。 */
 @Service
 public class PaymentService {
     public static final String PRODUCT_TRIP_PRO = "TRIP_PRO", PRODUCT_LIFETIME = "LIFETIME";
     public static final int TRIP_PRO_AMOUNT = 400, LIFETIME_AMOUNT = 100000;
     public static final String TRIP_PRO_CURRENCY = "CNY";
-    /** Local guard only. Stripe's actual minimum depends on settlement currency. */
+    /** 本地最低金额保护；渠道实际最低金额仍取决于结算币种，不能代替渠道校验。 */
     public static final int DEFAULT_STRIPE_MIN_AMOUNT = 400;
     private static final Set<String> SESSION_EVENTS = Set.of("checkout.session.completed", "checkout.session.async_payment_succeeded",
             "checkout.session.async_payment_failed", "checkout.session.expired");
@@ -51,7 +52,7 @@ public class PaymentService {
 
     private CheckoutResponse start(Long userId, Long tripId, String product, int amount) {
         requireChargeable(amount);
-        // Reconcile before deciding whether an existing order is still payable.
+        // 先向渠道核实已有订单，再判断是否继续付款，避免本地状态滞后导致重复开单。
         PaymentEntity pending = mapper.pendingByUser(userId);
         if (pending != null && pending.providerPaymentId != null && "STRIPE".equals(pending.provider)) reconcile(pending.id);
         PaymentEntity p = tx.prepare(userId, tripId, product, amount, realPayments() ? "STRIPE" : "MOCK");
@@ -75,7 +76,7 @@ public class PaymentService {
         JsonNode session;
         if (p.providerPaymentId != null) session = stripe.checkout(p.providerPaymentId);
         else {
-            // Stripe may prune idempotency keys after 24h. Never silently create a second Session.
+            // 渠道可能在 24 小时后清理幂等键；接近窗口上限且未绑定会话的订单必须人工核实，不能直接再开一次。
             if (p.createdAt != null && p.createdAt.isBefore(LocalDateTime.now(ZoneOffset.UTC).minusHours(23)))
                 throw new BusinessException("PAYMENT_REVIEW_REQUIRED", "原订单创建结果尚未确认，请联系客服核实后再付款", HttpStatus.CONFLICT);
             session = createSession(p);
@@ -88,7 +89,7 @@ public class PaymentService {
     }
 
     public PaymentView latest(Long userId, Long tripId) {
-        // Ownership remains mandatory even if there is no payment record.
+        // 即使尚无付款记录，也先校验旅行归属，不能通过查询订单绕过旅行权限。
         tx.requireTrip(userId, tripId);
         PaymentEntity p = mapper.latestByTrip(tripId);
         return p == null ? null : view(p);
@@ -97,7 +98,7 @@ public class PaymentService {
     public List<PaymentView> history(Long userId) { return mapper.history(userId).stream().map(PaymentService::view).toList(); }
     public PaymentView get(Long userId, Long id) { return view(tx.owned(userId, id)); }
 
-    /** User-triggered refresh is rate-limited and never issues a charge or refund. */
+    /** 用户主动刷新只限频对账，不发起新扣款或退款。 */
     public PaymentView refresh(Long userId, Long id) {
         PaymentEntity p = tx.owned(userId, id);
         if ("STRIPE".equals(p.provider) && mapper.claimRefresh(id) == 1)
@@ -116,6 +117,7 @@ public class PaymentService {
     }
 
     public void webhook(String payload, String signature) {
+        // 必须先验证渠道签名，再读取事件；后续会回查渠道会话，不直接信任推送中的支付结果。
         JsonNode event = stripe.verifyWebhook(payload, signature);
         String type = event.path("type").asText(), eventId = event.path("id").asText();
         boolean disputeEvent = type.startsWith("charge.dispute.");
@@ -130,7 +132,7 @@ public class PaymentService {
             session = stripe.sessionForIntent(intent);
         }
         String id = session.path("metadata").path("payment_id").asText();
-        // Events belonging to another application on the same Stripe account are ignored.
+        // 同一渠道账号可能服务多个应用；没有本应用订单标识的事件直接忽略。
         if (id.isBlank()) return;
         Long paymentId;
         try { paymentId = Long.valueOf(id); } catch (NumberFormatException e) { throw PaymentTransactions.mismatch(); }
@@ -139,7 +141,7 @@ public class PaymentService {
         apply(paymentId, session, eventId, type);
     }
 
-    /** Also used by the scheduled repair job; current Stripe state is the source of truth. */
+    /** 用户刷新与定时补偿共用对账流程，以渠道当前状态为准修复本地记录。 */
     public PaymentEntity reconcile(Long id) {
         PaymentEntity p = mapper.findById(id);
         if (p == null || !"STRIPE".equals(p.provider)) return p;
@@ -169,7 +171,7 @@ public class PaymentService {
         boolean firstAttempt=attempt.checkoutAttempts == 1;
         try { return stripe.createCheckout(attempt, publicUrl); }
         catch (BusinessException e) {
-            // A rejection on a retry does not prove an earlier timed-out request created no Session.
+            // 重试被拒绝也不能证明先前超时请求未创建会话，不能据此直接释放原订单。
             if (firstAttempt && "STRIPE_CHECKOUT_REJECTED".equals(e.getCode())) tx.rejectCreation(p.id);
             throw e;
         }

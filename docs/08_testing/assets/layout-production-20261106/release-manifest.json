@@ -1,0 +1,49 @@
+{
+  "tag": "layout-20261106-v1",
+  "baseRelease": "map-export-20261105-v1",
+  "backendReused": true,
+  "scope": "Fix tablet drawer, search results/landscape sizing, long trip titles and timeline photo wrapping",
+  "baselineArchiveSha256": "e371dcd195c942a4af66e2eb2d77dde39947f6053f757c55dfee6cd314aea93f",
+  "files": [
+    {
+      "path": "frontend/app/globals.css",
+      "beforeSha256": "4fb652ba34fbd408ce5ed6fe7bc6b40fd46af4b21f6e4c127a1b1652343f2a1c",
+      "sha256": "eb8f383abd05ff460828279e007ca7bc3c5a58b3772f22220634cf319c8e3817"
+    },
+    {
+      "path": "frontend/app/trips/page.tsx",
+      "beforeSha256": "2597d4738ef1004baffd0408543305ffbc0f99a7768095bd88ce8854db2137b9",
+      "sha256": "7ab177a4fb52d7e4b76d276ad955a1618dca201f9c2ab6bacdcdaab7481eab7d"
+    },
+    {
+      "path": "frontend/components/common/GlobalSearch.tsx",
+      "beforeSha256": "4cf6d104ac0caa0e80b873899083950ca89075b5a9a1ec905ba3967d54f208a7",
+      "sha256": "fd31874555e3645671af4e7c1e73bdcad4a79177feca44d60adc71910e6cb0be"
+    },
+    {
+      "path": "frontend/components/home/RecentActivities.tsx",
+      "beforeSha256": "4240e6f92106764110da1a99dfa39da50b5fcc4b4144ab7eb7cd37b1c5f4665c",
+      "sha256": "0c49005aac2782105051c24c685d695e02af53ee9102dc748ed1d65ee4572607"
+    },
+    {
+      "path": "frontend/components/memories/MemoryTripCard.tsx",
+      "beforeSha256": "b55753344b3c48d5fc993a5b4f727d876fba100c4064789e678c1399c0fe54dd",
+      "sha256": "2628e8f3a33b76fb114ee96cf3e816bdcb5e1b1feb8297a7a45f92feef0b7108"
+    },
+    {
+      "path": "frontend/components/pro/TripStatusCard.tsx",
+      "beforeSha256": "a0454cc7da8627433f0b88b3ae7e12de4b8edccc788e5e1e4c2bad947c04497d",
+      "sha256": "2f73f9ebe504686a0f949a0bfa33a9681a045357a38f7181f1e6990efec00978"
+    },
+    {
+      "path": "e2e/fixtures/layout-ui.mjs",
+      "beforeSha256": null,
+      "sha256": "1ff80f6eaf3e8127a61f405d8324c382cd1a294af04f0ced97219c3c58f8c6b7"
+    },
+    {
+      "path": "e2e/tools/check-layout-regressions.mjs",
+      "beforeSha256": null,
+      "sha256": "dc582bcd8277b3fbc4320b2005b503775e81e71e52267542fd675ba6eac9bb59"
+    }
+  ]
+}

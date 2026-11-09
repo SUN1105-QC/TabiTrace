@@ -90,7 +90,7 @@ export default function NewTripPage() {
         try { officialAdded = (await tripApi.places(trip.id)).filter(p => p.sourceType === 'OFFICIAL').length } catch { officialAdded = null }
       }
       setCreated({ trip, officialAdded })
-      goTimer.current = window.setTimeout(() => router.push(`/trips/${trip.id}`), 2800)
+      goTimer.current = window.setTimeout(() => router.push(`/trips/${trip.id}/map`), 2800)
     } catch (err) {
       setSubmitError(err instanceof Error && err.message ? err.message : '创建旅行失败，请稍后再试')
       submitting.current = false
@@ -125,11 +125,14 @@ export default function NewTripPage() {
           </aside>
 
           <form className="cj-form" onSubmit={submit} noValidate aria-label="创建旅行">
-            <div className="cj-mobile-preview">
+            <details className="cj-mobile-preview"><summary>查看旅行预览</summary>
               <JourneyPreview compact title={title} destination={destination} startDate={startDate} endDate={endDate} travelers={travelers} joinOfficial={joinOfficial} />
-            </div>
+            </details>
 
             <Step n="01" title="这次要去哪里？">
+              <Field label="目的地" htmlFor="cj-destination">
+                <DestinationSearch id="cj-destination" value={destination} onChange={chooseDestination} error={errors.destination} />
+              </Field>
               <Field label="旅行名称" htmlFor="cj-title" error={errors.title}>
                 <input
                   id="cj-title" className="cj-input" maxLength={200} autoComplete="off"
@@ -139,10 +142,6 @@ export default function NewTripPage() {
                   aria-invalid={Boolean(errors.title)} aria-describedby={errors.title ? 'cj-title-error' : undefined}
                 />
               </Field>
-              <Field label="目的地" htmlFor="cj-destination">
-                <DestinationSearch id="cj-destination" value={destination} onChange={chooseDestination} error={errors.destination} />
-              </Field>
-              {official && <OfficialGuideCard guide={official} join={joinOfficial} onJoin={setJoinOfficial} />}
             </Step>
 
             <Step n="02" title="什么时候出发？">
@@ -164,9 +163,10 @@ export default function NewTripPage() {
               </Field>
             </Step>
 
-            <Step n="03" title="准备这趟旅行" hint="创建后自动就绪，不需要额外设置。">
+            <details className="cj-setup-details"><summary>旅行会自动准备什么？{official ? ' · 可选官方指南' : ''}</summary>
+              {official && <OfficialGuideCard guide={official} join={joinOfficial} onJoin={setJoinOfficial} />}
               <SetupItems official={official && joinOfficial ? official : null} />
-            </Step>
+            </details>
 
             <section className="cj-final" aria-label="创建摘要">
               <CreateSummary title={title} destination={destination} startDate={startDate} endDate={endDate} travelers={travelers} joinOfficial={joinOfficial} />
@@ -181,7 +181,7 @@ export default function NewTripPage() {
         </div>
       </PageContainer>
 
-      {created && <JourneySuccess trip={created.trip} officialAdded={created.officialAdded} onGo={() => { window.clearTimeout(goTimer.current); router.push(`/trips/${created.trip.id}`) }} />}
+      {created && <JourneySuccess trip={created.trip} officialAdded={created.officialAdded} onGo={() => { window.clearTimeout(goTimer.current); router.push(`/trips/${created.trip.id}/map`) }} />}
     </main>
   )
 }

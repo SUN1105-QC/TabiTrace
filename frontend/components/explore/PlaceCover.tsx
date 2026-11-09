@@ -27,8 +27,8 @@ export function PlaceCover({ place, className = '', eager = false, sizes = COVER
   }
   return (
     <span className={`ex-cover is-text tone-${coverTone(place)} ${className}`} role="img" aria-label={place.name}>
-      <small>TOKYO · {place.category}</small>
-      <b>{place.area ?? '东京'}</b>
+      <small>{place.city ?? '城市探索'} · {place.category}</small>
+      <b>{place.area ?? place.city ?? '街区'}</b>
       <i>{place.name}</i>
     </span>
   )

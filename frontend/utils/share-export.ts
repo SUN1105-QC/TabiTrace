@@ -77,13 +77,13 @@ export async function exportGridTiles(card: HTMLElement, baseName: string, spec:
 const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
 /**
- * 交付多张图片：手机上优先用系统分享面板（可一次「存储 9 张图像」到相册），
+ * 交付导出文件：手机上优先用系统分享面板（图片可一次「存储 9 张图像」到相册），
  * 不支持或被拒绝时逐张下载。返回实际采用的方式。
  */
 export async function deliverFiles(files: ExportFile[]): Promise<'shared' | 'cancelled' | 'downloaded'> {
   const touch = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches
   if (touch && typeof navigator.canShare === 'function') {
-    const shareFiles = files.map(f => new File([f.blob], f.name, { type: 'image/png' }))
+    const shareFiles = files.map(f => new File([f.blob], f.name, { type: f.blob.type || 'application/octet-stream' }))
     if (navigator.canShare({ files: shareFiles })) {
       try {
         await navigator.share({ files: shareFiles })

@@ -100,6 +100,7 @@ async function callRefresh(): Promise<string | null> {
 
 async function refreshAccessToken(): Promise<string | null> {
   if (!hasSession()) return null
+  // 同一标签页的并发请求共用一次续期，避免轮换 refresh Cookie 时互相覆盖。
   if (refreshPromise) return refreshPromise
   refreshPromise = (async () => {
     try {
@@ -141,6 +142,7 @@ export async function stageDevUpload(storageKey: string, blob: Blob) {
   if (loading) (await loading).stageUpload(storageKey, blob)
 }
 
+/** 统一处理开发数据源、访问令牌、会话续期与错误封装；业务组件不各自维护一套请求规则。 */
 async function request<T>(path: string, init: RequestInit, auth: boolean, allowRefresh: boolean): Promise<T> {
   const dev = await devRoute(path, init)
   if (dev) return dev.data as T
@@ -166,6 +168,7 @@ async function request<T>(path: string, init: RequestInit, auth: boolean, allowR
     if (cause instanceof DOMException && cause.name === 'AbortError') throw cause
     throw new ApiError('无法连接服务器，请检查网络后重试', 0, 'NETWORK_ERROR')
   }
+  // 续期后的重试会把 allowRefresh 置为 false，防止无效会话反复刷新形成请求循环。
   if (response.status === 401 && auth && allowRefresh) {
     const refreshed = await refreshAccessToken()
     if (refreshed) return request<T>(path, init, auth, false)

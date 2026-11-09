@@ -17,6 +17,7 @@ import { ImageOff, Maximize2, X } from 'lucide-react'
 import { toPng } from 'html-to-image'
 import { SiteHeader } from '@/components/common/SiteHeader'
 import { LiveTripSubnav } from '@/components/trip/LiveTripSubnav'
+import { CheckinExportButton } from '@/components/checkin/CheckinExportButton'
 import { ShareResultLong } from '@/components/share/ShareResultLong'
 import { ShareGridCard } from '@/components/share/ShareGridCard'
 import { TravelScrapbookTemplate } from '@/components/share/scrapbook/TravelScrapbookTemplate'
@@ -27,13 +28,13 @@ import { PosterMaterialPanel } from '@/components/share/poster/PosterMaterialPan
 import { ShareScaleFrame } from '@/components/share/ShareScaleFrame'
 import { NineGridEditor, type GridEditState } from '@/components/share/studio/NineGridEditor'
 import { ShareActionBar, ShareLinkCard, ShareTemplateTabs, TripProCard, type ShareMode } from '@/components/share/studio/ShareStudioParts'
-import { DEFAULT_GRID_OPTIONS, gridSlotCount, placeInSlot, scopePhotos, swapSlots, type GridOptions } from '@/utils/share-grid'
+import { DEFAULT_GRID_OPTIONS, gridPhotos, gridSlotCount, placeInSlot, scopePhotos, swapSlots, type GridOptions } from '@/utils/share-grid'
 import { DEFAULT_POSTER_OPTIONS, buildPosterData, type PosterOptions } from '@/utils/poster-data'
 import { exportPosterPng } from '@/utils/export-poster'
 import { deliverFiles, exportGridTiles, upgradeImagesForExport, waitForImages } from '@/utils/share-export'
 import { shareTierOf, watermarkDataUrl } from '@/utils/share-tier'
 import type { TripProPlan } from '@/utils/plan'
-import { planApi, tripApi, type ItineraryView, type PhotoView, type ShareLinkView, type TimelineDay, type TripSummary, type TripView } from '@/services/tabitrace-api'
+import { planApi, tripApi, type ItineraryView, type PhotoView, type PlaceView, type ShareLinkView, type TimelineDay, type TripSummary, type TripView } from '@/services/tabitrace-api'
 
 const NO_EDIT: GridEditState = { activeSlot: null, pending: null }
 const nextFrame = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))
@@ -50,6 +51,8 @@ export default function SharePage() {
   const [itinerary, setItinerary] = useState<ItineraryView[]>([])
   const [loading, setLoading] = useState(true)
   const [mode, setMode] = useState<ShareMode>('poster')
+  const [purpose, setPurpose] = useState<'images' | 'records' | 'links'>('images')
+  const [places, setPlaces] = useState<PlaceView[]>([])
   const [error, setError] = useState('')
   const [toast, setToast] = useState('')
   const [exporting, setExporting] = useState('')
@@ -80,6 +83,7 @@ export default function SharePage() {
     }
   }, [tripId])
   useEffect(() => { void reload() }, [reload])
+  useEffect(() => { let alive = true; tripApi.places(tripId).then(rows => { if (alive) setPlaces(rows) }).catch(() => {}); return () => { alive = false } }, [tripId])
   // 分享图规格（Free / Pro）来自方案配置；读不到时 shareTierOf 用与后端一致的默认值
   useEffect(() => { planApi.tripPro().then(setPlan).catch(() => setPlan(null)) }, [])
   const tier = shareTierOf(trip, plan)
@@ -116,7 +120,7 @@ export default function SharePage() {
       return posterData ? <CityPoster data={posterData} tripId={t.id} /> : null
     }
     if (scrapbook) return <TravelScrapbookTemplate trip={t} summary={s} timeline={timeline} photos={photos} options={gridOpts} {...slot} />
-    if (mode === 'nine') return <ShareGridCard trip={t} summary={s} timeline={timeline} photos={photos} options={gridOpts} {...slot} />
+    if (mode === 'nine') return <ShareGridCard trip={t} timeline={timeline} photos={photos} options={gridOpts} {...slot} />
     return <ShareResultLong trip={t} summary={s} timeline={timeline} photos={photos} />
   }
 
@@ -207,9 +211,10 @@ export default function SharePage() {
   function selectSlot(slot: number, fromPreview = false) {
     const list = chosen()
     if (edit.pending != null) {
-      setChosen(placeInSlot(list, edit.pending, slot, slots))
+      const visible = gridPhotos(photos, timeline, gridOpts, slots).map(p => p.id)
+      setChosen(placeInSlot(visible, edit.pending, slot, slots))
       setEdit(NO_EDIT)
-      setToast(`已替换第 ${Math.min(slot, list.length) + 1} 格`)
+      setToast(`已替换第 ${Math.min(slot, visible.length) + 1} 格`)
       return
     }
     if (edit.activeSlot === slot) { setEdit(NO_EDIT); return }
@@ -228,8 +233,9 @@ export default function SharePage() {
   function pickPhoto(photoId: number) {
     const list = chosen()
     if (edit.activeSlot != null) {
-      setChosen(placeInSlot(list, photoId, edit.activeSlot, slots))
-      setToast(`已放入第 ${Math.min(edit.activeSlot, list.length) + 1} 格`)
+      const visible = gridPhotos(photos, timeline, gridOpts, slots).map(p => p.id)
+      setChosen(placeInSlot(visible, photoId, edit.activeSlot, slots))
+      setToast(`已放入第 ${Math.min(edit.activeSlot, visible.length) + 1} 格`)
       setEdit(NO_EDIT)
       return
     }
@@ -248,6 +254,11 @@ export default function SharePage() {
           <h1>{trip?.title || '分享成果'}</h1>
         </header>
         <LiveTripSubnav tripId={tripId} />
+        <nav className="ss-purpose" aria-label="选择导出用途">
+          {([['records', '保存旅行记录'], ['images', '制作图片作品'], ['links', '发送访问链接']] as const).map(([key, text]) => <button key={key} type="button" aria-pressed={purpose === key} onClick={() => setPurpose(key)}>{text}</button>)}
+        </nav>
+        {purpose === 'records' && <section className="ss-card ss-records"><h2>保存旅行记录</h2><p>选择 PDF、PNG、JPG 或 CSV，保存整趟旅行或某一天的打卡。</p><p>PDF 和图片可附带旅行地图与照片；CSV 保存文字表格。</p>{trip && <CheckinExportButton trip={trip} timeline={timeline} currentDay="ALL" places={places} />}</section>}
+        {purpose === 'links' && trip && <ShareLinkCard links={links} creating={creating} onCreate={() => void createShare()} onCopy={l => void copyLink(l)} onRevoke={l => void revokeLink(l)} />}
 
         {error && (
           <div className="ss-alert" role="alert">
@@ -256,14 +267,18 @@ export default function SharePage() {
           </div>
         )}
 
+        <div className="ss-image-workspace" hidden={purpose !== 'images'}>
         <div className="ss-toolbar">
           <ShareTemplateTabs value={mode} onChange={switchMode} />
+          <div className="ss-desktop-actions">
           <ShareActionBar mode={mode} tilesLabel={scrapbook ? '分别导出照片卡' : undefined} busy={busy || !trip || posterEmpty} progress={exporting} onExport={() => void download()} onExportTiles={() => void downloadTiles()} />
+          </div>
         </div>
         {mode === 'nine' && <NineGridTemplateSelector value={gridOpts.format ?? 'classic'} onChange={format => { setGridOpts(o => ({ ...o, format })); setEdit(NO_EDIT) }} />}
+        <nav className="ss-edit-steps" aria-label="图片制作步骤">{[['ss-materials', '1 选择照片'], ['ss-preview-stage', '2 预览样式'], ['ss-export', '3 导出图片']].map(([id, text]) => <button key={id} type="button" onClick={() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>{text}</button>)}</nav>
 
         <div className="ss-layout">
-          <div className="ss-stage">
+          <div className="ss-stage" id="ss-preview-stage">
             <div className="ss-preview" aria-busy={loading}>
               {loading ? <div className="ss-skeleton" aria-label="正在加载预览" />
                 : trip && summary ? (
@@ -282,7 +297,8 @@ export default function SharePage() {
             )}
           </div>
 
-          <aside className="ss-side">
+          <aside className="ss-side" id="ss-materials">
+            {mode === 'long' && <section className="ss-card"><h2>选择长图照片</h2><p className="ss-desc">每日长图自动使用旅行记录与照片；可先在相册中整理照片，再回来预览。</p><Link href={`/trips/${tripId}/gallery`} className="ss-btn is-ghost">整理照片</Link></section>}
             {mode === 'poster' && trip && posterData && (
               <PosterMaterialPanel trip={trip} timeline={timeline} photos={photos} value={posterOpts} onChange={setPosterOpts}
                 auto={{ mainId: posterData.mainPhoto?.id, secondaryIds: posterData.secondaryPhotos.map(p => p.id) }}
@@ -301,9 +317,10 @@ export default function SharePage() {
                 onLayout={layout => setGridOpts(o => ({ ...o, layout }))}
               />
             )}
-            {trip && <ShareLinkCard links={links} creating={creating} onCreate={() => void createShare()} onCopy={l => void copyLink(l)} onRevoke={l => void revokeLink(l)} />}
-            {trip && <TripProCard trip={trip} tier={tier} />}
           </aside>
+        </div>
+        <section className="ss-export-bar" id="ss-export"><div><h2>导出图片作品</h2><p className="ss-desc">确认照片与样式后，保存你的旅行作品。九宫格不足九张时保留空位。</p></div><ShareActionBar mode={mode} tilesLabel={scrapbook ? '分别导出照片卡' : undefined} busy={busy || !trip || posterEmpty} progress={exporting} onExport={() => void download()} onExportTiles={() => void downloadTiles()} /></section>
+        {trip && <TripProCard trip={trip} tier={tier} />}
         </div>
 
         {toast && <div className="ss-toast" role="status" aria-live="polite">{toast}</div>}

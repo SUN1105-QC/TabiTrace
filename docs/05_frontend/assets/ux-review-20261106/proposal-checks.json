@@ -1,0 +1,112 @@
+[
+  {
+    "name": "Primary action has distinct high contrast colors",
+    "ok": true,
+    "data": {
+      "background": "rgb(181, 76, 30)",
+      "text": "rgb(255, 255, 255)",
+      "font": "Inter, \"PingFang SC\", \"Microsoft YaHei\", sans-serif"
+    }
+  },
+  {
+    "name": "Desktop layout fits 1024",
+    "ok": true,
+    "data": {
+      "inner": 1024,
+      "root": 1024,
+      "variants": [
+        {
+          "label": "桌面旅行工作台",
+          "hidden": false
+        },
+        {
+          "label": "手机随手记录",
+          "hidden": true
+        }
+      ],
+      "controlSize": [
+        30,
+        155.5,
+        155.5,
+        30
+      ]
+    }
+  },
+  {
+    "name": "Desktop layout fits 736",
+    "ok": true,
+    "data": {
+      "inner": 736,
+      "root": 736,
+      "variants": [
+        {
+          "label": "桌面旅行工作台",
+          "hidden": false
+        },
+        {
+          "label": "手机随手记录",
+          "hidden": true
+        }
+      ],
+      "controlSize": [
+        30,
+        155.5,
+        155.5,
+        30
+      ]
+    }
+  },
+  {
+    "name": "Desktop layout fits 320",
+    "ok": true,
+    "data": {
+      "inner": 320,
+      "root": 320,
+      "variants": [
+        {
+          "label": "桌面旅行工作台",
+          "hidden": false
+        },
+        {
+          "label": "手机随手记录",
+          "hidden": true
+        }
+      ],
+      "controlSize": [
+        30,
+        152,
+        152,
+        30
+      ]
+    }
+  },
+  {
+    "name": "Variant switches to phone",
+    "ok": true
+  },
+  {
+    "name": "Record panel opens",
+    "ok": true
+  },
+  {
+    "name": "Saving updates the visible timeline",
+    "ok": true
+  },
+  {
+    "name": "CSV shows text-only export",
+    "ok": true
+  },
+  {
+    "name": "Nine grid retains one empty slot",
+    "ok": true
+  },
+  {
+    "name": "Phone export fits 320",
+    "ok": true
+  },
+  {
+    "name": "No preview runtime errors",
+    "ok": true,
+    "data": []
+  }
+]

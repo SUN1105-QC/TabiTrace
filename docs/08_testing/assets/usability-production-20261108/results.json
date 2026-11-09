@@ -1,0 +1,39 @@
+{
+  "date": "2026-11-08",
+  "web": "https://tabi.sunows.com",
+  "release": "usability-20261108-v3",
+  "base": "security-20261107-2859ac69",
+  "packageSha256": "cf6e30620d5e83dd9d51d757a05858aed4ee9e63ab8c61e8e42713ba818c8e51",
+  "checks": {
+    "workspace": {
+      "passed": 65,
+      "failed": 0
+    },
+    "layout": {
+      "passed": 125,
+      "failed": 0
+    },
+    "public": {
+      "passed": 99,
+      "failed": 0
+    },
+    "export": {
+      "passed": 37,
+      "failed": 0,
+      "errors": []
+    },
+    "settings": {
+      "passed": 36,
+      "failed": 0
+    },
+    "explore": {
+      "passed": 102,
+      "failed": 0
+    }
+  },
+  "scope": "Browser-only test accounts and trips; no real business writes; only Web replaced",
+  "total": {
+    "passed": 464,
+    "failed": 0
+  }
+}

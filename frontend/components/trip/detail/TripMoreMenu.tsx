@@ -1,13 +1,13 @@
 'use client'
 
 /**
- * Hero 右上角“···”：编辑 / 归档（取消归档）/ 删除。
- * 移动端以底部 Action Sheet 打开；删除走通用确认对话框。只提供后端真实支持的操作。
+ * 地图页的旅行管理入口：编辑 / 完成 / 归档（取消归档）/ 删除。
+ * 使用 Action Sheet；删除走通用确认对话框。只提供后端真实支持的操作。
  */
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Archive, ArchiveRestore, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
+import { Archive, ArchiveRestore, Check, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 import { tripApi, type TripView } from '@/services/tabitrace-api'
 import { isArchived } from '@/utils/trip'
@@ -46,6 +46,20 @@ export function TripMoreMenu({ trip, onChanged, onToast }: { trip: TripView; onC
     }
   }
 
+  const complete = async () => {
+    setBusy(true)
+    try {
+      const next = await tripApi.complete(trip.id)
+      onChanged(next)
+      onToast('旅行已完成')
+      setOpen(false)
+    } catch (e) {
+      onToast(e instanceof Error && e.message ? e.message : '操作失败，请重试')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   const remove = async () => {
     setBusy(true)
     try {
@@ -61,8 +75,8 @@ export function TripMoreMenu({ trip, onChanged, onToast }: { trip: TripView; onC
 
   return (
     <>
-      <button ref={trigger} type="button" className="td-more" aria-label="旅行操作" aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen(true)}>
-        <MoreHorizontal size={20} />
+      <button ref={trigger} type="button" className="td-more is-inline" aria-label="旅行操作" aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen(true)}>
+        <MoreHorizontal size={20} /> 旅行操作
       </button>
 
       {open && (
@@ -74,6 +88,9 @@ export function TripMoreMenu({ trip, onChanged, onToast }: { trip: TripView; onC
               <button type="button" onClick={() => { setOpen(false); setMode('edit') }} disabled={archived || busy}>
                 <Pencil size={17} /> <span>编辑旅行{archived && <small>取消归档后才能编辑</small>}</span>
               </button>
+              {!archived && trip.status !== 'COMPLETED' && <button type="button" onClick={() => void complete()} disabled={busy}>
+                <Check size={17} /> <span>完成旅行<small>将这段旅行标记为已完成</small></span>
+              </button>}
               <button type="button" onClick={() => void toggleArchive()} disabled={busy}>
                 {archived ? <ArchiveRestore size={17} /> : <Archive size={17} />}
                 <span>{archived ? '取消归档' : '归档旅行'}<small>{archived ? '恢复后可以继续打卡和编辑' : '归档后只能回看，不能再打卡或修改'}</small></span>

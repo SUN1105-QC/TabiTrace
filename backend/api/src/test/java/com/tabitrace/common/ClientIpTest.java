@@ -17,4 +17,13 @@ class ClientIpTest {
         assertEquals("203.0.113.9", ClientIp.resolve("fd12::1", null, "203.0.113.9", true));
         assertEquals("fd12::1", ClientIp.resolve("fd12::1", null, null, true));
     }
+
+    @Test void containerGatewayNeedsExplicitProxyTrust() {
+        assertEquals("172.20.0.1",ClientIp.resolve("172.20.0.1","203.0.113.9","203.0.113.9",false));
+        assertEquals("203.0.113.9",ClientIp.resolve("172.20.0.1","203.0.113.9","198.51.100.2,203.0.113.9",true));
+    }
+
+    @Test void emptyProxyHopListDoesNotCrashRequest() {
+        assertEquals("172.20.0.1",ClientIp.resolve("172.20.0.1",null,",",true));
+    }
 }

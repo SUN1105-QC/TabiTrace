@@ -21,11 +21,11 @@ export function TravelMemoryBanner({ trips }: { trips: TripView[] }) {
 
 export function ExploreBanner() {
   return (
-    <Link href="/explore/tokyo" className="home-banner explore">
+    <Link href="/explore" className="home-banner explore">
       <img src={hdImage('01-sensoji-kaminarimon')} srcSet={hdSrcSet(hdImage('01-sensoji-kaminarimon'))} sizes="(max-width: 1023px) 50vw, 360px" alt="浅草寺雷门" loading="lazy" decoding="async" />
       <span className="home-banner-body">
         <b>推荐探索 <ArrowRight size={15} /></b>
-        <small>发现更多值得去的地方</small>
+        <small>从国家主题，发现想去的城市</small>
       </span>
     </Link>
   )

@@ -43,7 +43,7 @@ export function MobileTripsView({
       {current && (
         <CurrentTripCard
           title="当前旅程"
-          manageHref={`/trips/${current.id}`}
+          manageHref={`/trips/${current.id}/map`}
           manageLabel="旅行详情"
           trip={current}
           summary={summaries[current.id] ?? null}
@@ -70,7 +70,7 @@ export function MobileTripsView({
               const days = s?.days ?? daysBetween(t.startDate, t.endDate) + 1
               return (
                 <li key={t.id}>
-                  <Link href={`/trips/${t.id}`}>
+                  <Link href={`/trips/${t.id}/map`}>
                     <span className="m-trip-thumb"><TripCoverImage trip={t} alt={t.title} compact sizes="96px" /></span>
                     <span className="m-trip-body">
                       <b>{t.title}</b>

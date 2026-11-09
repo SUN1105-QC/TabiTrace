@@ -2,7 +2,7 @@
 
 /**
  * 「我的音乐」：个人旅行歌单。
- * - 未开通会员：锁定卡片（说明权益 + 开通会员），下面仍可以继续使用旅迹免费音乐
+ * - 未开通会员：锁定卡片（说明权益 + 开通会员），仍可选择无音乐生成
  * - 会员：上传音乐（全宽按钮）· 用量 · 歌单（试听 / 使用 / 重命名 / 删除）· 空状态
  * - 会员到期：只读（可以查看、试听、删除，不能上传和用于新视频）+ 续费提示
  */
@@ -17,7 +17,7 @@ import { MembershipGate } from '@/components/membership/MembershipGate'
 import { UploadMusicDialog } from './UploadMusicDialog'
 import { UserMusicCard } from './UserMusicCard'
 
-export function UserMusicTab({ selection, player, toggle, stop, onSelect, onDeselect, onBrowseSystem }: {
+export function UserMusicTab({ selection, player, toggle, stop, onSelect, onDeselect }: {
   selection: MusicSelection
   player: MusicPlayerState
   toggle: (code: string, url: string | null | undefined) => Promise<void>
@@ -25,7 +25,6 @@ export function UserMusicTab({ selection, player, toggle, stop, onSelect, onDese
   onSelect: (id: number) => void
   /** 正在使用的音乐被删除时，草稿保留引用并提示重新选择；这里只用来停掉试听 */
   onDeselect?: () => void
-  onBrowseSystem: () => void
 }) {
   const { status, library, error, reload, rename, remove, uploaded, playUrl } = useUserMusic()
   const [uploading, setUploading] = useState(false)
@@ -65,8 +64,7 @@ export function UserMusicTab({ selection, player, toggle, stop, onSelect, onDese
         <h4>我的音乐</h4>
         <p>你上传的声音，也可以成为旅途的一部分。</p>
       </div>
-      <MembershipGate feature="CUSTOM_MUSIC" membership={membership} readOnlyChildren
-        footer={<button type="button" className="um-link" onClick={onBrowseSystem}>继续使用旅迹免费音乐 →</button>}>
+      <MembershipGate feature="CUSTOM_MUSIC" membership={membership} readOnlyChildren>
         {canUpload && !uploading && (
           <button type="button" className="vs-btn is-primary um-add" onClick={() => setUploading(true)}>
             <Plus size={16} /> 上传音乐

@@ -7,6 +7,7 @@ import path from 'node:path'
 
 const here = path.dirname(new URL(import.meta.url).pathname).replace(/^\/([A-Za-z]:)/, '$1')
 const SUITES = {
+  'public-smoke': 'flows/public-smoke.mjs',
   'critical-path': 'flows/critical-path.mjs',
   'auth-session': 'flows/auth-session.mjs',
   'mobile-layout': 'flows/mobile-layout.mjs',

@@ -1,5 +1,105 @@
 # 2026-10-26 · Lightsail 发布记录
 
+## 2026-11-08 · 旅行工作台改版发布完成
+
+正式地址 https://tabi.sunows.com 。当前Web和源码版本 `usability-20261108-v3`，指针 `shared/current-release.txt` 已同步。以服务器实际运行的 `security-20261107-2859ac69` 为基线，仅发布19个前端路径（含一份单元测试），保留此前安全和导出功能。
+
+- 包SHA256：`cf6e30620d5e83dd9d51d757a05858aed4ee9e63ab8c61e8e42713ba818c8e51`；服务器检查前后文件哈希，Compose内容不变。未提交或推送Git。
+- 当前旅行导航与切换、任务首页、手机地图视图、照片筛选、创建表单、九宫格计数和导出用途分组已上线；快捷打卡同步当前旅行，归档入口明确只读。详见[验收](../08_testing/07_旅行工作台改版验收_2026-11-08.md)。
+- Linux生产构建和类型检查通过，前端99项单元测试通过，改动文件静态检查0 errors / 19现有warnings。独立预览先通过65项操作和125项布局检查后才切换Web。
+- 公网 **464 / 464**：操作65、布局125、公开99、记录导出37、设置36、探索102。没有前端运行异常。登录及业务数据只注入浏览器，无真实业务写请求；四种格式实际下载成功，地图联合导出仍可用。
+- Web健康、restart=0；API、Worker仍为 `security-20261107-2859ac69`，两者及MySQL的容器ID、镜像和启动时间均保持发布前值。共享配置、数据库、Nginx、TLS均未修改。
+- Web容器ID `1db27d471eb4176e8bdc40dc9843091f31929ae3edcd2456709a1cba26bdd1bf`；镜像ID `sha256:5c3b474129d5d4dc990451c0090b32207b2bb31edc5e665342b8960c019738da`。旧安全版本源码和镜像保留，可以只回退Web。
+- v1/v2为未上线构建迭代；最终独立预览、SSH隧道、临时私钥副本已清理。原私钥未修改。未验证真实注册、上传、打卡、扣款或视频渲染链路。
+
+服务器构建日志 `releases/usability-20261108-v3.log`、切换日志同名 `-switch.log`，本地日志 `backend/.tabitrace/usability-production-*.log`；浏览器结果、截图和导出样例 `usability-production-qa/`。
+
+## 2026-11-07 · 最新功能与安全修复整体发布完成
+
+正式地址 https://tabi.sunows.com 。当前版本 security-20261107-2859ac69，Web/API/Worker 均使用同名镜像；MySQL 保持原实例。当前指针 shared/current-release.txt 已同步，源码位于 releases/security-20261107-2859ac69。原始快照 SHA256：2859ac699fabc59e88a88374230a45e180f764213144afa9770d24e538fdd7d9，771 个文件，服务器校验通过；RELEASE_MANIFEST.json 已保存。未提交或推送 Git。
+
+- 整体包含当前已实现的导出、地图联合导出、布局、探索目录、设置页修复和安全更新。运行时已实际加载确认 Next.js 16.4.5、sharp 0.35.5。最新锁文件生产依赖扫描为 0；开发/测试依赖的14项通告仍在待办，不能称全依赖零风险。
+- 首次 Linux npm ci 发现 @emnapi/core、@emnapi/runtime 1.11.3 缺项，构建中止且旧服务保持运行。已在独立 Linux Node22 容器生成修正锁文件并验证干净安装；原有包版本未改变，仅补齐依赖与元数据。修正锁文件同步本地后重新创建新快照，Linux 三镜像构建全部成功。首次失败的暂存目录 security-20261107-577911e0 保留作记录，未运行其中镜像。
+- 数据库备份：shared/backups/20261107T001124Z-before-security-20261107-2859ac69.sql.gz，27193 字节、0600、gzip校验通过；同前缀 .env 与 .images.txt 记录原共享配置及实际旧镜像。旧 Web=layout-20261106-v1，API/Worker=explore-20261031-689fd547，旧目录和镜像均保留。
+- 三镜像构建通过、Nginx覆盖转发头和API回环绑定检查通过、无活跃排队/渲染任务后才切换。持久化唯一非秘密配置 TRUST_PROXY_HEADERS=true，其余秘密配置保持。API/Web仅回环暴露，Nginx/TLS/防火墙未改。
+- 修复音乐 PATCH 跨域预检：实际 API 预检200且Allow-Methods包含PATCH；恶意来源仍403。客户端IP畸形代理链回退也已发布。
+- 运行时确认 COST_ENFORCE=true、账号每日20次/6000秒、全站同时3个任务。数据库验证23个迁移，当前V23且无需新增迁移；未清理业务数据或媒体对象。
+- API/Web/MySQL健康，Worker启动成功，四容器restart=0。Worker保留了旧本地曲库目录不存在的兼容告警；用户上传音乐在R2模式使用独立下载分支，不据此断言上传音乐不可用。未执行真实用户视频渲染。
+- 公网回归399/399通过：公开页面99、设置36、布局125、探索102、记录导出37；故障、账户与旅行数据只注入测试浏览器，无真实业务写请求。后台基线API247+Worker19、前端99、生产构建均已通过。
+- 未启用Stripe、未真实扣款/退款、未发信或修改真实用户资料。条款页面、开发工具链风险、定时备份恢复和私有音乐桶策略等审计待办仍需后续处理。
+
+服务器日志 releases/security-20261107-2859ac69.log；本地验收日志 backend/.tabitrace/security-production-*.log，JSON/截图/导出样例位于 backend/.tabitrace/security-release-qa/。回退应使用保存的三个实际旧镜像及旧配置，不覆盖迁移后业务数据，不执行 down -v。
+
+## 2026-11-06 · 页面布局与样式修复上线
+
+- 正式地址：https://tabi.sunows.com 。Web 及源码目录已更新为 `layout-20261106-v1`，服务器 `shared/current-release.txt` 已同步。
+- 以现网 `map-export-20261105-v1` 为基线，逐文件核对后只发布 6 个布局相关前端文件与 2 个只读回归文件。修复平板遮罩盖住菜单、搜索结果样式失效、横屏弹窗裁切、长标题撑宽页面和时间轴多照片溢出；极长卡片标题限制行数并保留完整标题提示。
+- 文件前后 SHA256 见 `RELEASE_MANIFEST.json`。发布包 SHA256：`02affbf83f34ae422e3c510dd62529a4a2b1b0b89ba3200ea0de30681da0cc74`。服务器校验包与文件哈希后完成 Linux Webpack 生产构建、TypeScript 检查，只切换 Web。
+- Web 健康、重启计数 0。API、Worker、MySQL 的容器 ID、镜像 ID、启动时间均与发布前一致，未执行数据库迁移，也未改变共享配置。上一版 `map-export-20261105-v1` 源码与镜像保留可回退。
+- 正式域名验收 **224/224 通过**：布局回归 125 项、公开页面检查 99 项。覆盖六种屏宽、普通/200 字符标题、Free 长标题升级按钮、平板导航实际坐标点击、横屏搜索末项、多照片换行与计数、空数据、公开页面安全响应头、旧链接跳转及匿名接口 401。无前端运行错误；业务数据仅在测试浏览器注入，未注册、发信、上传或执行真实购买。
+- [布局修复验收](../08_testing/06_页面布局修复验收_2026-11-06.md) 含截图与测量。公网日志：`backend/.tabitrace/layout-production.log`、`layout-public-smoke.log`；完整截图和报告：`layout-production-qa/`、`layout-public-smoke-qa/`；服务器构建日志：`releases/layout-20261106-v1.log`，本机副本为 `backend/.tabitrace/layout-production-build.log`。
+
+## 2026-11-05 · 旅行地图与打卡记录联合导出上线
+
+- 正式地址：https://tabi.sunows.com 。当前 Web 版本及源码目录为 `map-export-20261105-v1`，`shared/current-release.txt` 已同步；入口为旅行「地图与打卡 → 导出打卡记录 → 包含旅行地图」。
+- 基于生产 `checkin-export-20261104-v1`，发布 11 个相关文件。地图页仅增加关联地点参数；地图渲染、位置逻辑及回归脚本已固化，其他工作区改动没有带入。文件前后 SHA256 记录于 `RELEASE_MANIFEST.json`；发布包 SHA256 为 `7caca9f8fe23ecbe244e3ec471cb014f2abe29439e1624a5b57bcd730b988ca0`。
+- PDF / PNG / JPG 默认先导出地图页，再导出编号对应的打卡记录；地图按所选日期筛选，保留底图署名及来源链接。可取消包含地图，CSV 仍为文字表格。无坐标记录保留文字，底图或 WebGL 不可用时明确生成位置示意图。
+- 服务器 Linux Webpack 生产构建、TypeScript 和健康检查通过。仅切换 Web，API、Worker、MySQL 未重启，无数据库迁移；四个容器重启计数均为 0。旧 `checkin-export-20261104-v1` 源码与镜像保留，可回退。
+- 正式域名浏览器验收：真实 WebGL 底图与无 WebGL 示意回退两种模式各 37 项，共 74 项通过、0 失败；覆盖地图页和记录顺序、按日范围、关联地点坐标回退、取消地图、四种文件下载、45 条完整记录、无坐标、失败照片和桌面/手机界面。无运行异常，无真实账户读写或业务 API 请求。
+- 公网生成的 A4 PDF 分别为 2 页、5 页，全部 7 页已用 Poppler 渲染，PNG SHA256 与此前逐页视觉审核的最终本地样例完全一致。地图、署名链接、中文、续页及页码均保留。`/health`、首页、探索、登录为 200；匿名个人信息接口为 401。
+- 回归脚本：`e2e/tools/check-checkin-export.mjs`；公网日志及报告：`backend/.tabitrace/map-export-production-webgl.log`、`map-export-production-fallback.log` 和同名 `-qa/` 目录；服务器构建日志：`releases/map-export-20261105-v1.log`。未执行真实账户注册、上传或视频链路。
+
+## 2026-11-04 · 打卡记录多格式导出上线
+
+- 正式地址：https://tabi.sunows.com 。当前 Web 版本和源码目录为 `checkin-export-20261104-v1`，`shared/current-release.txt` 已同步；入口为旅行「地图与打卡 → 导出打卡记录」。
+- 以生产 `grid-20261104-v1` 为基线，只更新 11 个导出相关文件。地图页仅加入导出入口，未带入工作区其他改动；文件前后 SHA256 记录于 `RELEASE_MANIFEST.json`。发布包 SHA256：`febcad27c54d4b8d03ff4cc36e952dcbfed21e4d8050b66339d261bd2f9bd3f1`。
+- 支持整趟或按日导出 PDF、PNG、JPG、CSV；可选择照片，长笔记与多张照片可跨页。完整读取时间轴，不受页面 30 条限制；归档旅行可导出，空记录禁用，失败照片保留占位并提示。
+- 服务器 Linux 依赖安装、Webpack 生产构建及 TypeScript 检查通过。仅重建并切换 Web，API、Worker、MySQL 未重启，无迁移；旧 `grid-20261104-v1` 源码和镜像保留可回退。四个容器重启计数均为 0。
+- 公网浏览器验收 27 项通过、0 失败，包括四种文件真实下载、日期筛选、45 条完整记录、长笔记多页 PDF、照片失败提示、桌面及手机对话框、焦点与 Esc、空记录和归档旅行。测试数据只注入浏览器，无真实账户读写或业务 API 请求。
+- 线上生成的单日 PDF 为 1 页、长笔记 PDF 为 4 页，均为 A4，已使用 Poppler 渲染全部页面并检查中文、照片、续页标题与页码。`/health`、首页、探索、登录均 200；匿名个人信息接口仍 401。
+- 验收脚本：`e2e/tools/check-checkin-export.mjs`；公网日志：`backend/.tabitrace/checkin-export-production.log`；报告、导出样例和截图：`backend/.tabitrace/checkin-export-qa/`；服务器构建日志：`releases/checkin-export-20261104-v1.log`。未执行真实账户上传和注册链路。
+
+## 2026-11-04 · 九宫格照片布局上线
+
+- 正式地址：https://tabi.sunows.com 。Web 已发布 `grid-20261104-v1`，源码位于 `/srv/sunows/apps/tabi/releases/grid-20261104-v1`，`shared/current-release.txt` 已同步。
+- 基于线上 `profile-20261031-v2`，仅替换七个九宫格相关文件；全局样式仅应用本次九宫格差异，没有带入工作区其他改动。文件前后 SHA256 记录于 `RELEASE_MANIFEST.json`；补丁包 SHA256 为 `b8ae3513caaf9050f2b725a4362b2c425c86fb097a21b699fe86e1ff191de1c7`。
+- 第 1、5、9 格改为照片位，标准九宫格支持九张照片。照片不足九张时保留空位，不重复照片，上传后自动补齐；预览与导出共用布局。
+- 服务器 Linux 生产构建及 TypeScript 检查通过，前端切换后健康检查正常。仅更新 Web 容器；API、Worker、MySQL 未重启，无数据库迁移。旧源码及镜像保留，可切回 `profile-20261031-v2`。
+- 公网浏览器验收 18 项通过、0 失败：八张照片保留一个空位、九张自动补齐、素材栏九格、第 1 / 5 / 9 格真实鼠标替换、整张 PNG 和九张独立正方形 PNG 导出、1440 / 390 屏宽布局、无运行异常。测试数据仅注入浏览器，没有读取真实账户或向业务 API 发出写请求。
+- 浏览器验收脚本：`backend/.tabitrace/check-grid-production.mjs`；桌面及手机截图：`backend/.tabitrace/grid-production-1440.png`、`grid-production-390.png`；服务器构建日志：`releases/grid-20261104-v1.log`。未执行真实账户上传流程。
+
+## 2026-10-31 · 设置栏目真实点击修复（v2）
+
+Web 已发布 profile-20261031-v2，源码 releases/profile-20261031-v2；后端与数据库未重启、无迁移。
+
+问题已在修复前用真实鼠标点击复现：标签改了地址但未切换选中态和内容。上一轮菜单回归漏测标签按钮。根因：向 replaceState 传入 window.history.state 含 Next.js 内部 __NA 标记，使框架跳过 useSearchParams 通知。改用当前安装版本官方文档的 replaceState(null, ...)；Next 自动复制内部历史状态，同时同步栏目。继续保留其他参数、草稿与未保存确认。
+
+持久化回归脚本 e2e/tools/check-settings-navigation.mjs：桌面1440与手机390各17项，加无运行异常/无真实业务写请求，共36项，本地及公网最终均通过。覆盖六标签真实坐标点击、六组不同内容、左侧快捷入口、未保存取消/放弃、刷新及历史返回。手机点击等待滚动动画结束，避免坐标竞争；未删除或放宽断言。账户与响应数据仅在浏览器注入，不使用真实用户资料、不触发密码修改等写操作。
+
+TypeScript 与服务器 Linux 生产构建通过；目标 ESLint 0错误、1个既有加载effect警告。生产Web健康，重启0。公网日志 backend/.tabitrace/settings-tabs-production.log；服务器日志 releases/profile-20261031-v2.log。
+
+## 2026-10-31 · 账户菜单重复入口热修复
+
+发布 profile-20261031-v1，仅更新 Web；API、Worker、数据库保持原运行版本，不执行迁移。源码位于 releases/profile-20261031-v1，以 explore-20261031-689fd547 为基线，差异及 SHA256 记录于 RELEASE_MANIFEST.json。
+
+原两个菜单均指向 /profile，现改为「个人资料」→ /profile?tab=profile、「账户与安全」→ /profile?tab=security。设置栏目直接从 Next.js 查询参数读取，同页跳转及刷新均同步，保留未保存修改确认。菜单复用现有三语言设置标签，没有新增虚假的个人主页模块。
+
+本地与公网各 8 项浏览器断言全部通过，使用浏览器内虚拟账户，无实际业务写请求。类型检查、Linux 生产构建通过；目标文件 ESLint 0 错误、2 个既有 effect 警告。Web 健康检查通过，旧镜像保留。日志 backend/.tabitrace/profile-navigation-production.log；服务器构建日志 releases/profile-20261031-v1.log。
+
+## 2026-10-31 · 推荐探索 V2 与页面精简已上线
+
+- 正式地址：https://tabi.sunows.com/explore 。发布标签 explore-20261031-689fd547，Web / API / Worker 均使用该标签；MySQL 保持既有容器和数据目录。
+- 从已验证的本地工作区创建源码快照（762 个文件），排除环境文件、私钥、依赖、运行数据。SHA256：689fd54759111b2fd57766b619b4061e87fe81e83ca58f601526a7544e01c0b5，服务器校验通过。未提交或推送 Git。
+- 源码与生产构建位于 /srv/sunows/apps/tabi/releases/explore-20261031-689fd547；旧 repository 保持原状，旧 f32c4aad053e 镜像保留供回退。当前版本指针 shared/current-release.txt。后续操作须使用当前发布目录及 RELEASE_TAG，不能直接从旧 repository 重建覆盖。
+- 三个镜像先全部构建成功，再备份生产数据库。快照：/srv/sunows/apps/tabi/shared/backups/20261031T092542Z-before-explore-20261031-689fd547.sql.gz，gzip 校验通过；未清理任何卷、媒体或既有用户数据。
+- API 启动完成 V23 兼容目录迁移。只新增国家主题、目录条目与城市预告；东京仍为唯一开放城市。公开统计为 3 个国家主题 / 5 座城市 / 1 座开放 / 30 个地点 / 6 条路线。
+- 一并发布自带音乐入口和选择逻辑移除（保留自行上传与无音乐）、旅行总览/总结下线、相关入口与导航调整。历史媒体未删除。
+- /trips/1、/trips/1/summary、/trips/1/achievements 均返回 308 → /trips/1/map；探索及东京页、公开目录、health 均为 200；匿名个人信息和付款接口仍为 401。
+- 四个容器运行，API / Web / MySQL 健康，全部重启计数 0，Worker 运行并通过 Compose 启动检查。Nginx、TLS、防火墙和共享秘密配置未更改。
+- 公网浏览器 102 项通过、0 失败：六种屏宽、筛选与深链接、错误/权限/弱网/空数据/大目录/坏图；无运行时异常，无业务写请求。异常与大目录只在浏览器内注入。
+- 公开方案仍为 paymentsAvailable=false；Stripe 配置未改变。账号每日 20 次 / 6000 秒硬限制继续启用，全站同时 3 个任务的配置沿用。没有执行真实扣款、发信、账号创建或登录后的上传/渲染链路。
+- 生产日志：/srv/sunows/apps/tabi/releases/explore-20261031-689fd547.log；本地公网验收日志 backend/.tabitrace/production-explore-browser.log。
+
 ## 2026-10-30 · 成就下线与费用功能合并发布完成
 
 正式地址：https://tabi.sunows.com 。业务提交 f32c4aad053ed5e10b637bade3ef5bf1bd8e88f7，三个业务镜像标签均为 f32c4aad053e，发布前线上源码为 0a0d9d3、业务镜像为 b7a2e45。

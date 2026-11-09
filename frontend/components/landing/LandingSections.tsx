@@ -74,7 +74,7 @@ const PREVIEWS: { key: string; eyebrow: string; title: string; copy: string; poi
   { key: 'map', eyebrow: 'MAP & CHECK-IN', title: '地图与打卡', copy: '地图是旅行工作台的主角。当天的计划地点按时间编号，打卡过的地点变成橙色，下一站在哪里一目了然。', points: ['按天筛选地图与行程', '到达后一键打卡，自动完成当天计划', '搜索官方地点或添加自定义地点'], shot: PRODUCT_SHOTS.map, sizes: SHOT_SIZES.previewWide },
   { key: 'timeline', eyebrow: 'TIMELINE', title: '旅行时间轴', copy: '计划和真实打卡放在同一条时间轴上：原计划几点、实际几点到达，照片和当时写下的一句话都在旁边。', points: ['“原计划 09:30 · 09:42 已打卡”', '照片、文字与地点放在一起', '按天回看整趟旅程'], shot: PRODUCT_SHOTS.timeline, sizes: SHOT_SIZES.previewNarrow },
   { key: 'gallery', eyebrow: 'GALLERY', title: '照片与精选', copy: '照片按旅行的每一天整理。把喜欢的设为精选，它们会优先出现在分享成果和 Travel Story 里。', points: ['批量上传，自动读取拍摄时间', '按天 / 精选 / 是否关联打卡整理', '设为旅行封面、批量精选'], shot: PRODUCT_SHOTS.gallery, sizes: SHOT_SIZES.previewWide },
-  { key: 'story', eyebrow: 'TRAVEL STORY', title: 'Travel Story 工作台', copy: '选模板、挑照片、定风格，右侧实时预览；确认后生成可以下载的竖屏视频。', points: ['多种模板与背景音乐', '拖动调整镜头顺序', '生成 MP4，可以下载和分享'], shot: PRODUCT_SHOTS.story, sizes: SHOT_SIZES.previewNarrow }
+  { key: 'story', eyebrow: 'TRAVEL STORY', title: 'Travel Story 工作台', copy: '选模板、挑照片、定风格，右侧实时预览；确认后生成可以下载的竖屏视频。', points: ['多种模板，支持上传音乐', '拖动调整镜头顺序', '生成 MP4，可以下载和分享'], shot: PRODUCT_SHOTS.story, sizes: SHOT_SIZES.previewNarrow }
 ]
 
 export function ProductPreviews() {

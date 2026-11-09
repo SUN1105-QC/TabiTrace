@@ -56,8 +56,7 @@ const names = (items: CatalogItem[]) => items.map(i => i.name).join('、')
 
 export function storyDiff(p: TripProPlan) {
   const freeT = p.storyTemplates.filter(t => t.plan === 'FREE'), proT = p.storyTemplates.filter(t => t.plan === 'PRO')
-  const freeM = p.storyMusic.filter(m => m.plan === 'FREE'), proM = p.storyMusic.filter(m => m.plan === 'PRO')
-  return { freeT, proT, freeM, proM }
+  return { freeT, proT }
 }
 
 export type CompareRow = { group: string; label: string; free: string; pro: string }
@@ -69,7 +68,7 @@ const shareQuality = (t: ShareTier) => (t.quality === 'HD' ? '高清' : '标准�
 
 /** Free 与 Trip Pro 的核心差异（10 项）；Travel Story 已不包含路线动画，这里不再列出 */
 export function planComparison(p: TripProPlan): CompareRow[] {
-  const { freeT, freeM } = storyDiff(p)
+  const { freeT } = storyDiff(p)
   const f = p.freeLimits
   const sf = shareFreeOf(p), sp = shareProOf(p)
   return [
@@ -82,7 +81,7 @@ export function planComparison(p: TripProPlan): CompareRow[] {
     { group: 'Travel Story', label: '每个视频的照片', free: `最多 ${p.storyFree.maxPhotos} 张`, pro: `最多 ${p.storyPro.maxPhotos} 张` },
     { group: 'Travel Story', label: '视频清晰度', free: `${q(p.storyFree.quality)}${p.storyFree.watermark ? ' · 带水印' : ' · 无水印'}`, pro: `${q(p.storyPro.quality)}${p.storyPro.watermark ? ' · 带水印' : ' · 无水印'}` },
     { group: 'Travel Story', label: '视频时长', free: secs(p.storyFree.durations), pro: secs(p.storyPro.durations) },
-    { group: 'Travel Story', label: '背景音乐', free: freeM.length ? `${freeM.length} 首基础音乐` : '—', pro: `全部 ${p.storyMusic.length} 首${p.lifetime ? '；上传自己的音乐需买断 · 终身 Pro' : ''}` }
+    { group: 'Travel Story', label: '背景音乐', free: '无音乐；上传自己的音乐需账号会员', pro: '无音乐；上传自己的音乐需账号会员' }
   ]
 }
 
@@ -97,7 +96,7 @@ export function planBenefits(p: TripProPlan): Benefit[] {
     { key: 'record', title: '完整旅行记录', desc: '不再限制这趟旅行的地点与照片，值得留下的都能留下。', fact: `打卡、照片不再限 ${f.checkinsPerTrip} 次 / ${f.photosPerTrip} 张` },
     { key: 'share', title: '高清分享成果', desc: `城市海报、九宫格、每日长图，以${shareQuality(sp)}${sp.watermark ? '' : '、无水印'}的方式保存和分享。`, fact: `海报宽 ${sp.posterWidth}px${sp.watermark ? '' : ' · 无水印'}` },
     { key: 'story', title: 'Travel Story', desc: '更多模板、更多照片，把这趟旅行剪成一支完整的竖屏短片。', fact: `${q(p.storyPro.quality)}${p.storyPro.watermark ? '' : ' 无水印'} · 最长 ${longest} 秒 · ${p.storyPro.maxPhotos} 张照片` },
-    { key: 'style', title: '个性化表达', desc: '全部视频模板与背景音乐，让成片更像你的这一趟。', fact: `${p.storyTemplates.length} 款模板 · ${p.storyMusic.length} 首音乐` }
+    { key: 'style', title: '个性化表达', desc: '全部视频模板，搭配不同画面风格，让成片更像你的这一趟。', fact: `${p.storyTemplates.length} 款模板 · 多种视频风格` }
   ]
 }
 
@@ -114,7 +113,7 @@ export function planFaq(p: TripProPlan): Faq[] {
   list.push({ q: '升级后可以取消吗？', a: '已解锁的 Trip Pro 权益会一直保留在这段旅行上，不会自动取消，也不会再次扣款。具体退款规则以平台说明为准。' })
   if (p.lifetime) {
     list.push({ q: '买断 · 终身 Pro 和 Trip Pro 有什么区别？', a: `Trip Pro（${price}）只解锁当前这一段旅行；买断 · 终身 Pro（${life}）一次付款，账号下现有和以后新建的所有旅行都自动是 Trip Pro，并开通账号会员。` })
-    list.push({ q: '自定义上传音乐需要什么权限？', a: '上传自己的音乐属于账号会员权益，买断 · 终身 Pro 会一并开通。单次 Trip Pro 可以使用全部内置背景音乐，但不包含上传自己的音乐。' })
+    list.push({ q: '自定义上传音乐需要什么权限？', a: '上传自己的音乐属于账号会员权益，买断 · 终身 Pro 会一并开通。单次 Trip Pro 不包含上传音乐权益；也可以选择无音乐生成视频。' })
   }
   return list
 }

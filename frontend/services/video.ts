@@ -1,11 +1,10 @@
-/** Travel Story 接口。模板、音乐都来自后端目录；FREE / PRO 规则由后端最终校验。 */
+/** Travel Story 接口。模板来自后端目录；音乐使用用户上传的 /user/music。 */
 
 import { api, jsonBody } from './api'
-import type { Storyboard, VideoDraft, VideoMusic, VideoProject, VideoTemplate } from '@/types/video'
+import type { Storyboard, VideoDraft, VideoProject, VideoTemplate } from '@/types/video'
 
 export const videoApi = {
   templates: () => api<VideoTemplate[]>('/video-templates'),
-  music: () => api<VideoMusic[]>('/video-music'),
 
   list: (tripId: number) => api<VideoProject[]>(`/trips/${tripId}/video-projects`),
   get: (id: number) => api<VideoProject>(`/video-projects/${id}`),

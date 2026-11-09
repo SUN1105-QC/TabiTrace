@@ -54,6 +54,8 @@ public class TripService {
         OfficialCityEntity c=t.city==null?null:officialCities.findActiveByCity(t.city);
         return c!=null?c:officialCities.findActiveByCity(t.destinationName);
     }
+    /** 探索进度按实际已开放城市统计，与创建旅行时加入的官方指南使用同一匹配规则。 */
+    public String officialCityName(TripEntity t){OfficialCityEntity c=officialCityOf(t);return c==null?null:c.name;}
     public static boolean isTokyo(TripEntity t){return "东京".equals(t.city)||"Tokyo".equalsIgnoreCase(t.city)|| (t.destinationName!=null&&(t.destinationName.contains("东京")||t.destinationName.toLowerCase().contains("tokyo")));}
     public static TripView view(TripEntity t){return new TripView(t.id,t.title,t.destinationName,t.countryCode,t.city,t.startDate,t.endDate,t.peopleCount,t.coverImage,t.planType,t.status,t.visibility,t.createdAt);}
     private static void validateDates(java.time.LocalDate s,java.time.LocalDate e){if(e.isBefore(s))throw new BusinessException("INVALID_TRIP_DATES","结束日期不能早于开始日期");}

@@ -22,9 +22,9 @@ import { USER_UPDATED_EVENT, tripApi, userApi, type TripView, type UserView } fr
 import { useQuickCheckIn } from '@/components/checkin/QuickCheckInProvider'
 import { usePreferences } from '@/components/common/PreferencesProvider'
 import type { MessageKey } from '@/i18n'
+import { ACTIVE_TRIP_KEY, ACTIVE_TRIP_CHANGED } from '@/lib/active-trip'
 
 const APP_PREFIXES = ['/trips', '/explore', '/pricing', '/profile', '/memories']
-const ACTIVE_TRIP_KEY = 'tabitrace-live-trip-id'
 
 export function SiteHeader() {
   const pathname = usePathname()
@@ -38,6 +38,7 @@ export function SiteHeader() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [user, setUser] = useState<UserView | null>(null)
   const [trips, setTrips] = useState<TripView[]>([])
+  const [rememberedTrip, setRememberedTrip] = useState<number | null>(null)
   // 通知只保存原始数据，渲染时按当前语言与时区生成文案（切换语言后通知也跟着变）
   const [notifyInput, setNotifyInput] = useState<Parameters<typeof buildNotifications>[0] | null>(null)
   const { t, locale, timeZone } = usePreferences()
@@ -49,10 +50,12 @@ export function SiteHeader() {
   const isAppRoute = pathname === '/' ? session : APP_PREFIXES.some(p => pathname.startsWith(p))
 
   const activeTripId = useMemo(() => {
-    const stored = typeof window === 'undefined' ? 0 : Number(localStorage.getItem(ACTIVE_TRIP_KEY) || 0)
+    const routeTrip = Number(pathname.match(/^\/trips\/(\d+)(?:\/|$)/)?.[1])
+    if (routeTrip) return routeTrip
+    const stored = rememberedTrip ?? (typeof window === 'undefined' ? 0 : Number(localStorage.getItem(ACTIVE_TRIP_KEY) || 0))
     if (stored && trips.some(t => t.id === stored)) return stored
     return trips.find(t => t.status !== 'ARCHIVED')?.id ?? trips[0]?.id ?? null
-  }, [trips, mounted, checkinVersion])
+  }, [trips, mounted, checkinVersion, pathname, rememberedTrip])
 
   // 工作区外壳所需的轻量数据：当前用户 + 旅行列表 + 通知（通知基于当前旅行真实数据推导）
   const load = useCallback(async () => {
@@ -71,6 +74,12 @@ export function SiteHeader() {
       setNotifyInput({ trip, summary, videos, shares, prefs: me })
     } catch { /* 外壳数据失败不阻塞页面本身 */ }
   }, [])
+
+  useEffect(() => {
+    const changed = () => { setRememberedTrip(Number(localStorage.getItem(ACTIVE_TRIP_KEY) || 0)); void load() }
+    window.addEventListener(ACTIVE_TRIP_CHANGED, changed)
+    return () => window.removeEventListener(ACTIVE_TRIP_CHANGED, changed)
+  }, [load])
 
   useEffect(() => { if (mounted && isAppRoute) void load() }, [mounted, isAppRoute, pathname, checkinVersion, load])
 
@@ -155,8 +164,8 @@ export function SiteHeader() {
         onOpenMenu={() => setDrawer(true)}
       />
       {/* 旅行详情及其子页面在手机上使用紧凑顶栏，把首屏留给旅行本身 */}
-      <MobileTopBar user={user} notifications={notifications} onOpenSearch={() => setSearchOpen(true)} compact={/^\/trips\/\d+(\/|$)/.test(pathname)} />
-      <MobileBottomNav activeTripId={activeTripId} />
+      <MobileTopBar user={user} notifications={notifications} onOpenSearch={() => setSearchOpen(true)} compact={pathname === '/' || pathname === '/trips/new' || /^\/trips\/\d+(\/|$)/.test(pathname)} />
+      <MobileBottomNav activeTripId={activeTripId} readOnly={trips.find(trip => trip.id === activeTripId)?.status === 'ARCHIVED'} />
       {searchOpen && <GlobalSearch activeTripId={activeTripId} onClose={() => setSearchOpen(false)} />}
       <div className="workspace-spacer" />
     </>
@@ -169,7 +178,6 @@ function titleKey(pathname: string): MessageKey {
   if (pathname === '/trips/new') return 'titles.newTrip'
   if (pathname.includes('/map')) return 'titles.map'
   if (pathname.includes('/gallery') || pathname.includes('/photos')) return 'titles.photos'
-  if (pathname.includes('/summary')) return 'titles.summary'
   if (pathname.includes('/share')) return 'titles.share'
   if (pathname.includes('/video')) return 'titles.story'
   if (pathname.startsWith('/explore/tokyo')) return 'titles.exploreTokyo'

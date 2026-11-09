@@ -33,7 +33,7 @@ export function HeroJourneyCard({ user, trip }: { user: UserView | null; trip: T
           <Link href={trip ? `/trips/${trip.id}/map` : '/trips/new'} className="hero-ghost-button">
             继续记录 <ArrowRight size={14} />
           </Link>
-          {trip && <Link href={`/trips/${trip.id}`} className="hero-ghost-button">查看旅行详情</Link>}
+          {trip && <Link href={`/trips/${trip.id}/map`} className="hero-ghost-button">进入旅行</Link>}
         </div>
       </div>
 

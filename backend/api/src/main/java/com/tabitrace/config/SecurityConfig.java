@@ -24,6 +24,7 @@ import java.util.List;
 public class SecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter) throws Exception {
+        // 业务接口使用 JWT；仅凭 Cookie 的刷新/退出由 RefreshCookies 校验来源，仍需保留该防护。
         http.csrf(csrf -> csrf.disable())
             .cors(cors -> {})
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -54,7 +55,8 @@ public class SecurityConfig {
     CorsConfigurationSource corsConfigurationSource(@Value("${app.cors.allowed-origins:http://localhost:3000}") String origins) {
         CorsConfiguration cfg = new CorsConfiguration();
         cfg.setAllowedOrigins(Arrays.stream(origins.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList());
-        cfg.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
+        // 上传音乐重命名使用 PATCH；允许预检不等于免鉴权，来源仍必须命中配置白名单。
+        cfg.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
         cfg.setAllowedHeaders(List.of("Authorization","Content-Type","Stripe-Signature"));
         cfg.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

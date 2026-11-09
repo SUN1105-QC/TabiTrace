@@ -9,10 +9,12 @@
 import { PageContainer } from '@/components/common/PageContainer'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { Camera, Plus, RefreshCcw, TriangleAlert } from 'lucide-react'
+import { List, Map, RefreshCcw, TriangleAlert } from 'lucide-react'
 import { SiteHeader } from '@/components/common/SiteHeader'
 import { LiveTripSubnav } from '@/components/trip/LiveTripSubnav'
+import { TripMoreMenu } from '@/components/trip/detail/TripMoreMenu'
 import { useQuickCheckIn, type QuickCheckInPrefill } from '@/components/checkin/QuickCheckInProvider'
+import { CheckinExportButton } from '@/components/checkin/CheckinExportButton'
 import { TripMapCanvas, type PreviewPoint } from '@/components/map/workspace/TripMapCanvas'
 import { DaySelector, JourneyPanel } from '@/components/map/workspace/JourneyPanel'
 import { TravelTimeline } from '@/components/map/workspace/TravelTimeline'
@@ -44,6 +46,8 @@ export default function TripMapWorkspace() {
   const [toast, setToast] = useState('')
   const [geo, setGeo] = useState<{ lat: number; lng: number } | null>(null)
   const [unit, setUnit] = useState<DistanceUnit>('KM')
+  const [mobileView, setMobileView] = useState<'list' | 'map' | 'records'>('list')
+  useEffect(() => { const frame = requestAnimationFrame(() => window.dispatchEvent(new Event('resize'))); return () => cancelAnimationFrame(frame) }, [mobileView])
   const [destination, setDestination] = useState<{ center: [number, number]; official: { code: string; name: string } | null } | null>(null)
   const toastTimer = useRef<number | undefined>(undefined)
   const seenVersion = useRef(checkinVersion)
@@ -59,7 +63,8 @@ export default function TripMapWorkspace() {
     try {
       const [t, p, i, tl] = await Promise.all([tripApi.get(tripId), tripApi.places(tripId), tripApi.itinerary(tripId), tripApi.timeline(tripId)])
       setTrip(t); setPlaces(p); setItinerary(i); setTimeline(tl); setLoadError('')
-      setDay(d => d ?? defaultDay(tripDays(t), localDateKey(new Date())))
+      const validDays = tripDays(t)
+      setDay(d => d !== null && (d === 'ALL' || validDays.includes(d)) ? d : defaultDay(validDays, localDateKey(new Date())))
     } catch (e) {
       const msg = e instanceof Error && e.message ? e.message : '请稍后再试'
       if (quiet) showToast(`刷新失败：${msg}`); else setLoadError(msg)
@@ -72,7 +77,7 @@ export default function TripMapWorkspace() {
   // 从快速打卡「查看时间轴」进入（#tm-timeline-title）：数据加载完、时间轴渲染出来后再滚过去
   useEffect(() => {
     if (loading || window.location.hash !== '#tm-timeline-title') return
-    const id = window.setTimeout(() => document.getElementById('tm-timeline-title')?.scrollIntoView({ block: 'start' }), 150)
+    const id = window.setTimeout(() => { setMobileView('records'); window.setTimeout(() => document.getElementById('tm-timeline-title')?.scrollIntoView({ block: 'start' }), 50) }, 150)
     return () => window.clearTimeout(id)
   }, [loading])
   // 快速打卡保存成功 → 刷新 Marker、面板和时间轴
@@ -115,7 +120,7 @@ export default function TripMapWorkspace() {
 
   const distance = useCallback((s: JourneyStop) => (geo && s.lat !== undefined && s.lng !== undefined ? formatKm(distanceKm(geo, { latitude: s.lat, longitude: s.lng } as PlaceView), unit) : null), [geo, unit])
 
-  const select = useCallback((key: string) => { setPreview(null); setSelectedKey(key); setSelectNonce(n => n + 1) }, [])
+  const select = useCallback((key: string) => { setPreview(null); setSelectedKey(key); setSelectNonce(n => n + 1); setMobileView('map') }, [])
   const changeDay = (d: DayKey) => { setDay(d); setSelectedKey(null); setPreview(null) }
 
   const checkin = (s: JourneyStop) => openQuickCheckIn(tripId, { placeId: s.placeId, placeName: s.name, area: s.area, itineraryItemId: s.itineraryId, date: s.date })
@@ -123,17 +128,20 @@ export default function TripMapWorkspace() {
 
   const removePlan = async (s: JourneyStop) => {
     if (!s.itineraryId) return
+    if (!window.confirm(`从行程移除「${s.name}」？已保存的打卡和照片会保留。`)) return
     try { await tripApi.deleteItinerary(tripId, s.itineraryId); showToast(`已从行程移除 · ${s.name}`); await load(true) }
     catch (e) { showToast(e instanceof Error && e.message ? e.message : '移除失败，请重试') }
   }
   const undo = async (s: JourneyStop) => {
     if (!s.checkinId) return
+    if (!window.confirm(`撤销「${s.name}」的打卡？这条记录将被删除，不能恢复。关联照片会保留在相册中。`)) return
     try { await tripApi.deleteCheckin(s.checkinId); showToast(`已撤销打卡 · ${s.name}`); await load(true) }
     catch (e) { showToast(e instanceof Error && e.message ? e.message : '撤销失败，请重试') }
   }
   const showRecord = (s: JourneyStop) => {
+    setMobileView('records')
     setSelectedKey(s.selectKey)
-    document.getElementById(`tl-${s.key}`)?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    window.setTimeout(() => document.getElementById(`tl-${s.key}`)?.scrollIntoView({ block: 'center', behavior: 'smooth' }), 50)
   }
 
   if (loadError) {
@@ -157,7 +165,13 @@ export default function TripMapWorkspace() {
       <PageContainer variant="wide" className="tm-page">
         <header className="tm-head">
           <p className="tm-eyebrow">TRAVEL MAP</p>
-          <h1>{trip?.title ?? '旅行地图'}</h1>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h1>{trip?.title ?? '旅行地图'}</h1>
+            {trip && <div className="flex flex-wrap items-center gap-2">
+              <CheckinExportButton trip={trip} timeline={timeline} currentDay={selectedDay} places={places} />
+              <TripMoreMenu trip={trip} onChanged={next => { setTrip(next); void load(true) }} onToast={showToast} />
+            </div>}
+          </div>
           <LiveTripSubnav tripId={tripId} />
         </header>
 
@@ -165,7 +179,10 @@ export default function TripMapWorkspace() {
           <>
             {days.length > 0 && <DaySelector days={days} value={selectedDay} onChange={changeDay} />}
             {readOnly && <p className="tm-readonly">这段旅行已归档，只能查看。取消归档后才能继续安排和打卡。</p>}
-            <div className="tm-layout">
+            <div className="tm-view-switch" role="group" aria-label="旅行查看方式">
+              {([['list', '行程', List], ['map', '地图', Map], ['records', '记录', List]] as const).map(([key, label, Icon]) => <button key={key} type="button" aria-pressed={mobileView === key} onClick={() => setMobileView(key)}><Icon size={16} />{label}</button>)}
+            </div>
+            <div className={`tm-layout tm-view-${mobileView}`}>
               <div className="tm-map-area">
                 <TripMapCanvas
                   points={points} route={route} selectedKey={selectedKey} selectNonce={selectNonce} onSelect={select} fitKey={String(selectedDay)} center={destination?.center}
@@ -186,22 +203,14 @@ export default function TripMapWorkspace() {
               </aside>
               <div className="tm-timeline-area">
                 <TravelTimeline days={days} stops={dayStops} selectedKey={selectedKey} readOnly={readOnly} onSelect={select} onUndo={s => void undo(s)} />
+                {!dayStops.some(s => s.status === 'done') && <p className="tm-readonly">这个范围还没有打卡记录，点击底部相机记录这一刻。</p>}
               </div>
             </div>
-
-            {!readOnly && (
-              <div className="tm-mobile-actions">
-                <button type="button" className="tm-btn" onClick={() => setAdding(true)}><Plus size={16} /> 添加地点</button>
-                <button type="button" className="tm-btn is-primary" onClick={() => quickCheckin(next ? { placeId: next.stop.placeId, placeName: next.stop.name, area: next.stop.area, itineraryItemId: next.stop.itineraryId, date: next.stop.date } : undefined)}>
-                  <Camera size={16} /> 快速打卡
-                </button>
-              </div>
-            )}
 
             {adding && (
               <AddPlaceDialog
                 trip={trip} official={destination?.official ?? null} days={days} day={selectedDay} inTrip={inTrip} hidden={picking} picked={picked}
-                onRequestPick={() => { setPicked(null); setPicking(true); showToast('点击地图选择位置') }}
+                onRequestPick={() => { setPicked(null); setPicking(true); setMobileView('map'); showToast('点击地图选择位置') }}
                 onClose={() => { setAdding(false); setPicking(false); setPicked(null) }}
                 onDone={(msg, focus) => {
                   setAdding(false); setPicked(null); showToast(msg)
@@ -209,7 +218,7 @@ export default function TripMapWorkspace() {
                   void load(true)
                 }}
                 onCheckin={prefill => quickCheckin(prefill)}
-                onPreview={p => { setAdding(false); setSelectedKey(null); setPreview(p) }}
+                onPreview={p => { setAdding(false); setSelectedKey(null); setPreview(p); setMobileView('map') }}
               />
             )}
           </>

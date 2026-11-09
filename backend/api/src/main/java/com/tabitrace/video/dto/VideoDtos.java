@@ -57,7 +57,7 @@ public final class VideoDtos {
             Boolean showAchievements,
             @Valid StorySettings settings,
             @NotNull List<Long> photoIds,
-            /** 音乐来源：SYSTEM（musicCode）/ USER（userMusicId，「我的音乐」）/ NONE；为空时按提交的字段推断 */
+            /** 音乐来源：USER（userMusicId，「我的音乐」）/ NONE；SYSTEM 和非空自带音乐代码已停用 */
             String musicSource,
             Long userMusicId) {
         public UpsertVideoProjectRequest(String templateCode, String aspectRatio, Integer duration, String musicCode, String quality,

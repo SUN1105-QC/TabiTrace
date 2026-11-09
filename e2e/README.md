@@ -8,6 +8,7 @@
 cd frontend
 npm run test:e2e                         # 默认套件：critical-path、auth-session、mobile-layout、images、trip-pro、storage
 node ../e2e/run.mjs auth-session         # 只跑某个套件
+node ../e2e/run.mjs public-smoke         # 仅公开只读检查，不需要测试账号
 ```
 
 | 变量 | 说明 | 默认 |
@@ -26,6 +27,7 @@ node ../e2e/run.mjs auth-session         # 只跑某个套件
 
 | 套件 | 内容 |
 |---|---|
+| `public-smoke` | 无需登录的只读发布检查：公网页面、安全响应头、成就旧链接跳转、账号接口鉴权、公开限额，以及 360 / 1440 下的标题、溢出、成就残留与运行时错误；不发信、不提交表单、不修改用户数据 |
 | `critical-path` | 注册（邮箱验证码）→ 登录 → 创建旅行（真实页面）→ 快速打卡（含照片）→ 照片墙上传 → 修改设置 → 退出，并验证服务端数据与会话吊销 |
 | `auth-session` | 访问令牌只在内存、refresh 只在 HttpOnly Cookie；刷新页面、多标签页并发刷新、令牌过期重试、会话吊销、没有无限刷新、未登录拦截、跨标签页退出、CSRF |
 | `mobile-layout` | 14 个主要页面在 360 / 390 / 430 / 768 / 1440 下无横向溢出、底部内容不被底部导航遮挡；快速打卡底部弹层不超出屏幕 |
@@ -55,3 +57,11 @@ DELETE FROM users WHERE email LIKE 'tt-e2e-%@example.test' OR email LIKE 'tt-lan
 ```
 
 头像文件在本地存储的 `users/<id>/avatar/` 下，删除账号记录后可以一并删掉对应目录。
+
+推荐探索 V2 只读验收：在本地前后端启动后运行 node e2e/tools/check-explore-directory.mjs。覆盖六种屏宽、真实目录筛选、错误/权限/弱网/空目录、120 城市与封面回退；测试数据只注入浏览器，不写入业务库。截图与日志位于 backend/.tabitrace/。
+
+设置标签导航回归：node e2e/tools/check-settings-navigation.mjs；PROFILE_TEST_WEB 可指定线上地址。通过浏览器内虚拟账户验证36项点击/草稿/刷新/返回行为，不操作真实用户数据。
+
+打卡记录导出回归：`node e2e/tools/check-checkin-export.mjs`；`CHECKIN_EXPORT_WEB` 可指定测试前端（默认 `http://127.0.0.1:3000`），`CHECKIN_EXPORT_OUTPUT` 可指定结果目录。只需启动前端，账户及 API 响应均注入测试浏览器，不读取或写入真实用户数据。每种地图模式覆盖 37 项：四种文件格式、地图页与记录顺序、日期与坐标回退、可取消地图、无坐标状态、45 条完整记录、长笔记跨页、照片失败提示、归档及空旅行、桌面和手机对话框。默认禁用 WebGL 检查明确的示意图回退；设置 `CHECKIN_EXPORT_WEBGL=1` 使用软件 WebGL 检查真实底图导出（前端需配置可访问的地图服务）。样例、截图和报告默认保存到 `backend/.tabitrace/checkin-export-qa/`，PDF 样例使用 Poppler 渲染后检查地图署名、分页与中文。
+
+布局与样式回归：`node e2e/tools/check-layout-regressions.mjs`；`LAYOUT_TEST_WEB` 指定测试前端（默认 `http://127.0.0.1:3015`），`LAYOUT_TEST_OUTPUT` 指定报告目录（默认 `backend/.tabitrace/layout-regression`）。只需启动前端，并保证公开方案/目录 GET 接口可用；本地可配置 `NEXT_PUBLIC_API_BASE_URL=/api/v1` 和 `API_INTERNAL_URL` 使用已有 API。登录标记、账户、旅行、打卡和照片响应仅注入浏览器，不操作真实账号。覆盖 125 项：六种屏宽的普通/200 字符旅行标题、Free 旅行的长标题升级按钮、实际点击平板导航和遮罩、横屏搜索行布局及末项可达性、窄屏 1/4/5/7 张照片换行和计数、空数据及前端运行错误。输出包含截图与 `report.json`。

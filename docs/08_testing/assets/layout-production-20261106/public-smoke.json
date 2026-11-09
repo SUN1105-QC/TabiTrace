@@ -1,0 +1,596 @@
+[
+ {
+  "section": "HTTP",
+  "label": "/health 返回 200",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "/ 返回 200",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "/ 保留浏览器安全响应头",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "/ 不包含已下线的成就文案",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "/explore 返回 200",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "/explore 保留浏览器安全响应头",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "/explore 不包含已下线的成就文案",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "/explore/tokyo 返回 200",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "/explore/tokyo 保留浏览器安全响应头",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "/explore/tokyo 不包含已下线的成就文案",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "/pricing 返回 200",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "/pricing 保留浏览器安全响应头",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "/pricing 不包含已下线的成就文案",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "/login 返回 200",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "/login 保留浏览器安全响应头",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "/login 不包含已下线的成就文案",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "/register 返回 200",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "/register 保留浏览器安全响应头",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "/register 不包含已下线的成就文案",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "/forgot-password 返回 200",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "/forgot-password 保留浏览器安全响应头",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "/forgot-password 不包含已下线的成就文案",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "/credits 返回 200",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "/credits 保留浏览器安全响应头",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "/credits 不包含已下线的成就文案",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "旧成就链接永久跳转到对应旅行地图",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "/trips/1 永久跳转到地图并保留参数",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "/trips/1/summary 永久跳转到地图并保留参数",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "创建旅行不被旧总览跳转规则拦截",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "/users/me 未登录返回 401",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "/users/me/usage 未登录返回 401",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "/payments 未登录返回 401",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "公开方案包含有效的账号视频限额",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "HTTP",
+  "label": "公开方案明确是否可以付款",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "360px",
+  "label": "/ 正常显示页面标题",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "360px",
+  "label": "/ 无横向溢出",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "360px",
+  "label": "/ 无成就内容或入口",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "360px",
+  "label": "/ 无前端运行时错误",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "360px",
+  "label": "/explore 正常显示页面标题",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "360px",
+  "label": "/explore 无横向溢出",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "360px",
+  "label": "/explore 无成就内容或入口",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "360px",
+  "label": "/explore 无前端运行时错误",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "360px",
+  "label": "/explore/tokyo 正常显示页面标题",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "360px",
+  "label": "/explore/tokyo 无横向溢出",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "360px",
+  "label": "/explore/tokyo 无成就内容或入口",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "360px",
+  "label": "/explore/tokyo 无前端运行时错误",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "360px",
+  "label": "/pricing 正常显示页面标题",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "360px",
+  "label": "/pricing 无横向溢出",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "360px",
+  "label": "/pricing 无成就内容或入口",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "360px",
+  "label": "/pricing 无前端运行时错误",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "360px",
+  "label": "/login 正常显示页面标题",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "360px",
+  "label": "/login 无横向溢出",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "360px",
+  "label": "/login 无成就内容或入口",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "360px",
+  "label": "/login 无前端运行时错误",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "360px",
+  "label": "/register 正常显示页面标题",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "360px",
+  "label": "/register 无横向溢出",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "360px",
+  "label": "/register 无成就内容或入口",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "360px",
+  "label": "/register 无前端运行时错误",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "360px",
+  "label": "/forgot-password 正常显示页面标题",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "360px",
+  "label": "/forgot-password 无横向溢出",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "360px",
+  "label": "/forgot-password 无成就内容或入口",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "360px",
+  "label": "/forgot-password 无前端运行时错误",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "360px",
+  "label": "/credits 正常显示页面标题",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "360px",
+  "label": "/credits 无横向溢出",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "360px",
+  "label": "/credits 无成就内容或入口",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "360px",
+  "label": "/credits 无前端运行时错误",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "1440px",
+  "label": "/ 正常显示页面标题",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "1440px",
+  "label": "/ 无横向溢出",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "1440px",
+  "label": "/ 无成就内容或入口",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "1440px",
+  "label": "/ 无前端运行时错误",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "1440px",
+  "label": "/explore 正常显示页面标题",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "1440px",
+  "label": "/explore 无横向溢出",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "1440px",
+  "label": "/explore 无成就内容或入口",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "1440px",
+  "label": "/explore 无前端运行时错误",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "1440px",
+  "label": "/explore/tokyo 正常显示页面标题",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "1440px",
+  "label": "/explore/tokyo 无横向溢出",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "1440px",
+  "label": "/explore/tokyo 无成就内容或入口",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "1440px",
+  "label": "/explore/tokyo 无前端运行时错误",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "1440px",
+  "label": "/pricing 正常显示页面标题",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "1440px",
+  "label": "/pricing 无横向溢出",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "1440px",
+  "label": "/pricing 无成就内容或入口",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "1440px",
+  "label": "/pricing 无前端运行时错误",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "1440px",
+  "label": "/login 正常显示页面标题",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "1440px",
+  "label": "/login 无横向溢出",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "1440px",
+  "label": "/login 无成就内容或入口",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "1440px",
+  "label": "/login 无前端运行时错误",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "1440px",
+  "label": "/register 正常显示页面标题",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "1440px",
+  "label": "/register 无横向溢出",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "1440px",
+  "label": "/register 无成就内容或入口",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "1440px",
+  "label": "/register 无前端运行时错误",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "1440px",
+  "label": "/forgot-password 正常显示页面标题",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "1440px",
+  "label": "/forgot-password 无横向溢出",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "1440px",
+  "label": "/forgot-password 无成就内容或入口",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "1440px",
+  "label": "/forgot-password 无前端运行时错误",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "1440px",
+  "label": "/credits 正常显示页面标题",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "1440px",
+  "label": "/credits 无横向溢出",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "1440px",
+  "label": "/credits 无成就内容或入口",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "1440px",
+  "label": "/credits 无前端运行时错误",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "section": "只读边界",
+  "label": "浏览器未提交业务写请求",
+  "ok": true,
+  "detail": ""
+ }
+]

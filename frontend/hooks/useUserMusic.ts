@@ -73,5 +73,5 @@ export function useUserMusic(autoload = true) {
   return { ...s, reload, rename, remove, uploaded, playUrl }
 }
 
-/** 试听用的播放器代码：与旅迹音乐的代码区分开 */
+/** 用户上传音乐的试听播放器代码 */
 export const userMusicKey = (id: number) => `user:${id}`

@@ -6,6 +6,8 @@
  */
 
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
+import { userApi, type UserView } from '@/services/tabitrace-api'
 import { Check, Copy, Crown, Download, ExternalLink, Grid3x3, Link2, Loader2, Trash2 } from 'lucide-react'
 import type { ShareLinkView, TripView } from '@/services/tabitrace-api'
 import type { ShareTier } from '@/utils/plan'
@@ -60,6 +62,8 @@ export function ShareLinkCard({ links, creating, onCreate, onCopy, onRevoke }: {
   onCopy: (l: ShareLinkView) => void
   onRevoke: (l: ShareLinkView) => void
 }) {
+  const [prefs, setPrefs] = useState<UserView | null>(null)
+  useEffect(() => { let alive = true; userApi.me().then(user => { if (alive) setPrefs(user) }).catch(() => {}); return () => { alive = false } }, [])
   const active = links.filter(l => l.status === 'ACTIVE')
   const live = active.filter(l => !l.expiresAt || new Date(l.expiresAt).getTime() >= Date.now())
   return (
@@ -69,6 +73,7 @@ export function ShareLinkCard({ links, creating, onCreate, onCopy, onRevoke }: {
         <span className="ss-visibility">{live.length ? 'UNLISTED' : 'PRIVATE → UNLISTED'}</span>
       </header>
       <p className="ss-desc">创建后，持有链接的人可访问此分享页；旅行本身仍是私有的。有效期与位置精度可在<Link href="/profile?tab=privacy">隐私与分享</Link>中设置。</p>
+      <p className="ss-link-rules">新链接的当前规则：{prefs ? `${prefs.shareLinkExpiryDays ? `${prefs.shareLinkExpiryDays} 天后失效` : '长期有效'} · ${prefs.shareExactLocation ? '显示精确位置' : '隐藏精确位置'}` : '请在隐私与分享中确认有效期和位置精度'}。<Link href="/profile?tab=privacy">修改规则</Link></p>
       {active.map(l => {
         // 已过期的链接访问不到，只保留删除
         const expired = Boolean(l.expiresAt && new Date(l.expiresAt).getTime() < Date.now())

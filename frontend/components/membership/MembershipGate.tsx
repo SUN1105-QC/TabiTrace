@@ -20,7 +20,7 @@ export function MembershipGate({ feature, membership, children, readOnlyChildren
   children: ReactNode
   /** 会员到期后是否仍显示内容（只读） */
   readOnlyChildren?: boolean
-  /** 锁定卡片下方的补充内容（例如「继续使用旅迹免费音乐」） */
+  /** 锁定卡片下方的补充内容 */
   footer?: ReactNode
 }) {
   const state = gateState(membership, feature)

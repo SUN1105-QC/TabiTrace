@@ -2,9 +2,11 @@
 
 视觉基线是「Warm Workspace」：暖白 / 米杏背景、橙棕主色、墨色标题、柔和卡片与轻阴影、旅行实景照片。规范从现有代码整理（`tailwind.config.ts`、`app/globals.css`），**新界面沿用，不另起一套**。
 
+推荐探索 V2 在这一基线上使用暖色杂志式主视觉和 CSS Modules（`CountryExploreDirectory.module.css`），设计依据见 [推荐探索 V2 验收](../08_testing/04_推荐探索V2验收.md)。
+
 ## 1. 颜色
 
-⚠ 主题色目前有**两份定义，数值不一致**（技术债）：Tailwind 的 `warm` 是 `#E97A33`，CSS 变量 `--warm` 是 `#C56A3A`。新代码优先用 Tailwind 类，改主色前先统一两处。
+2026-11-08工作台改版：操作主色统一由 `app/usability.css` 的 `--action: #B54C1E`、悬停 `#943C16`提供，白字对比度约5.23:1。`warm-button`及地图、照片、创建、分享、设置、定价的操作变量使用该值；图片作品仍保留模板自身配色。Tailwind装饰色与旧全局变量仍有历史定义，新增操作优先复用按钮组件和`--action`，不要新增浅橙白字按钮。下表为历史色板，操作按钮以上述规则为准。
 
 | 用途 | Tailwind | CSS 变量 |
 |---|---|---|

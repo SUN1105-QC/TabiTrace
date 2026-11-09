@@ -27,7 +27,7 @@ export function MemoryFlashback({ flashback: f }: { flashback: Flashback }) {
         <p className="mm-flashback-trip">{f.title}</p>
         <p className="mm-date">{dateRange(f.startDate, f.endDate)}{f.photos ? ` · ${f.photos} 张照片` : ''}</p>
         <div className="mm-flashback-actions">
-          <Link href={`/trips/${f.tripId}/summary`} className="mm-btn is-primary">查看回忆 <ArrowRight size={14} /></Link>
+          <Link href={`/trips/${f.tripId}/map`} className="mm-btn is-primary">查看回忆 <ArrowRight size={14} /></Link>
           {f.photos > 0 && <Link href={`/trips/${f.tripId}/gallery`} className="mm-btn"><Images size={14} /> 重温照片</Link>}
         </div>
       </div>

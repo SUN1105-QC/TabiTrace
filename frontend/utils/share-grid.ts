@@ -1,5 +1,5 @@
 /**
- * 分享九宫格的数据整理：挑 6 张照片、给照片配上拍摄地点、照片不够时用打卡地点补位。
+ * 分享九宫格的数据整理：挑 9 张照片、给照片配上拍摄地点，照片不够时保留空位。
  * 与长图一样，只用真实数据，不编造内容。
  */
 
@@ -18,7 +18,7 @@ export function placeIndex(timeline: TimelineDay[]) {
 
 /**
  * 挑选九宫格照片：精选在前，并在不同打卡地点之间轮流取，
- * 避免 6 张都来自同一个地方，让画面有节奏。
+ * 避免照片都来自同一个地方，让画面有节奏。
  */
 export function pickGridPhotos(photos: PhotoView[], count: number) {
   const ordered = [...photos.filter(p => p.featured), ...photos.filter(p => !p.featured)]
@@ -27,6 +27,7 @@ export function pickGridPhotos(photos: PhotoView[], count: number) {
     const key = p.checkinId != null ? `c${p.checkinId}` : `p${p.id}`
     groups.set(key, [...(groups.get(key) ?? []), p])
   })
+  // 分组内保留精选优先的顺序，再在各组间轮流出图，避免一处打卡占满所有格子。
   const queues = Array.from(groups.values())
   const picked: PhotoView[] = []
   while (picked.length < count && queues.some(q => q.length > 0)) {
@@ -112,8 +113,8 @@ export function dailyFeaturedPhotos(photos: PhotoView[], timeline: TimelineDay[]
   return roundRobin([[...loose.filter(p => p.featured), ...loose.filter(p => !p.featured)]], count, picked)
 }
 
-/** 照片格数量：九宫格 9 格中，左上封面、正中数据、右下品牌收尾，其余 6 格放照片 */
-export const GRID_PHOTO_SLOTS = 6
+/** 标准九宫格的 9 格全部用于照片；不足时保留空位。 */
+export const GRID_PHOTO_SLOTS = 9
 
 /** 地点的次级地址：城市 + 区域（如「东京 浅草」）；区域与城市相同或缺失时只显示城市 */
 export function placeAddress(trip: Pick<TripView, 'city' | 'destinationName'>, checkin?: Pick<CheckinView, 'area'> | null) {
@@ -209,7 +210,7 @@ export function swapSlots(selected: number[], a: number, b: number) {
 }
 
 /**
- * 九宫格格式：classic 标准九宫格（3 个信息格 + 6 张照片）；scrapbook 旅行手帐（9 张错落的照片卡）。
+ * 九宫格格式：classic 标准九宫格（9 张照片）；scrapbook 旅行手帐（9 张错落的照片卡）。
  * 格式只改变排版，素材选择（day / photoIds）两种格式共用。
  */
 export type GridFormat = 'classic' | 'scrapbook'
@@ -228,10 +229,10 @@ export type GridOptions = { day?: string; photoIds: number[]; format?: GridForma
 export const DEFAULT_GRID_OPTIONS: GridOptions = { photoIds: [] }
 
 /**
- * 九宫格的 6 张照片：先放用户点选的（按点选顺序），没选满时自动补齐——
+ * 九宫格的 9 张照片：先放用户点选的（按点选顺序），没选满时自动补齐——
  * 整趟旅行用每天的精选，某一天则用当天照片（精选在前、不同地点轮流）。
  */
-export function gridPhotos(photos: PhotoView[], timeline: TimelineDay[], options: GridOptions, count = 6) {
+export function gridPhotos(photos: PhotoView[], timeline: TimelineDay[], options: GridOptions, count = GRID_PHOTO_SLOTS) {
   const scoped = scopePhotos(photos, timeline, options.day)
   const chosen = options.photoIds.map(id => scoped.find(p => p.id === id)).filter((p): p is PhotoView => !!p).slice(0, count)
   const auto = options.day ? pickGridPhotos(scoped, scoped.length) : dailyFeaturedPhotos(scoped, timeline, scoped.length)

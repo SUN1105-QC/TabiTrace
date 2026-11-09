@@ -26,7 +26,8 @@ public class ClientIp {
 
     static String resolve(String remote, String realIp, String forwardedFor, boolean trustForwardedFor) {
         if (trustForwardedFor && forwardedFor != null && !forwardedFor.isBlank()) {
-            String[] hops = forwardedFor.split(",");
+            // 保留空跳项，逗号等畸形代理头应回退连接 IP，不能因空数组导致请求异常。
+            String[] hops = forwardedFor.split(",", -1);
             String last = hops[hops.length - 1].trim();
             if (!last.isEmpty() && last.length() <= 64) return last;
         }

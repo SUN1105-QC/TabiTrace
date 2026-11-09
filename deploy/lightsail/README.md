@@ -2,6 +2,8 @@
 
 当前目标为 `https://tabi.sunows.com`，服务器 `175.41.217.207`。本方案补充 Lightsail 独立 Compose 部署；原 Railway 配置保留供参考。
 
+2026-11-08最新版本：Web和源码目录为 `usability-20261108-v3`，API/Worker继续运行 `security-20261107-2859ac69`。仅更新工作台操作体验，公网464项验收通过，未重启后端或迁移数据库。后续发布以 `shared/current-release.txt` 和[最新发布记录](../../docs/09_deployment/04_Lightsail发布记录.md)为准；下文旧版本为历史记录。
+
 ## 组成与目录
 
 | 服务 | 作用 | 主机监听 |
@@ -38,7 +40,7 @@ python3 deploy/lightsail/check-env.py /srv/sunows/apps/tabi/shared/.env
 bash deploy/lightsail/deploy.sh
 ```
 
-检查失败会停止发布并只列变量名，不会用 Mock 或开发密钥启动生产 API。`deploy.sh` 构建三个镜像；若现有 MySQL 正在运行，会先将一致性数据库快照保存到受限的 `shared/backups/`，压缩文件校验通过后才更新容器并等待健康检查。当前 MySQL 迁移为 V1–V22，由 API 执行。数据库更新后回滚旧代码不等于回滚数据库；禁止使用 `down -v`。备份包含业务数据，应保持目录 0700、文件 0600，不对外提供下载。
+检查失败会停止发布并只列变量名，不会用 Mock 或开发密钥启动生产 API。`deploy.sh` 构建三个镜像；若现有 MySQL 正在运行，会先将一致性数据库快照保存到受限的 `shared/backups/`，压缩文件校验通过后才更新容器并等待健康检查。当前 MySQL 迁移为 V1–V23，由 API 执行。数据库更新后回滚旧代码不等于回滚数据库；禁止使用 `down -v`。备份包含业务数据，应保持目录 0700、文件 0600，不对外提供下载。
 
 只构建镜像可以在外部服务尚未准备时执行，不启动应用：
 
@@ -73,3 +75,19 @@ curl --fail https://tabi.sunows.com/health
 除 web /health 和 API /actuator/health 外，发布验收必须包括真实邮箱验证码注册、登录、刷新会话、创建旅行、照片上传与访问、打卡、视频渲染、退出。未配置的服务如实列为未完成。
 
 现有 CI 已迁到仓库根目录 `.github/workflows/ci.yml`，检查 Java 21 后端与 Node 22 前端。GitHub 推送不自动触发服务器发布，避免缺少外部配置时启动失败。更新源码前检查 Git 状态并记录提交；部署时保留数据库，不执行卷清理。
+
+2026-10-31 更新：当前运行版本为 explore-20261031-689fd547，源码位于 releases/explore-20261031-689fd547，repository 保留旧版本以便回退。当前版本记录 shared/current-release.txt；后续发布必须以当前源码为基线，详情见最新发布记录。
+
+账户菜单热修复后的当前发布目录为 releases/profile-20261031-v1；Web 使用同名镜像，后端复用 explore-20261031-689fd547 内容，shared/current-release.txt 已同步。
+
+设置标签点击修复后的最新发布目录和 Web 标签为 profile-20261031-v2，当前指针已同步；后端仍复用探索页发布版本。
+
+2026-11-04：九宫格照片布局已发布，当前源码目录和 Web 标签为 `grid-20261104-v1`，当前指针已同步。基于 `profile-20261031-v2` 仅更新九宫格相关文件；API / Worker 仍运行探索页版本，数据库未变更。后续发布以该源码目录为基线。
+
+2026-11-04：打卡记录导出功能已发布，最新源码目录和 Web 标签为 `checkin-export-20261104-v1`，当前指针已同步。基于 `grid-20261104-v1` 更新导出组件、页面入口及 PDF 依赖，支持 PDF / PNG / JPG / CSV；API、Worker 和数据库未重启。后续发布以此源码目录为基线。
+
+2026-11-05：旅行地图联合导出已发布，最新源码目录及 Web 标签为 `map-export-20261105-v1`，当前指针已同步。PDF / PNG / JPG 默认附带旅行地图，可取消；基于上一版仅更新相关文件，API、Worker、MySQL 未重启，无数据库迁移。后续发布以此源码目录为基线。
+
+2026-11-06：布局修复已发布，最新源码目录及 Web 标签为 `layout-20261106-v1`，当前指针已同步。以 `map-export-20261105-v1` 为基线，仅替换 6 个前端文件并加入 2 个只读回归文件；修复平板侧栏、搜索列表与横屏弹窗、长标题及时间轴照片布局。公网布局 125 项、公开页面 99 项验收通过；API、Worker、MySQL 容器保持原实例，无迁移。旧版源码和镜像保留可回退，后续发布以此目录为基线。
+
+2026-11-07：最新源码目录及 Web/API/Worker 镜像标签为 security-20261107-2859ac69；TRUST_PROXY_HEADERS=true 已在受信Nginx、API回环拓扑下启用，其他秘密配置保留。数据库仍V23，399项公网回归通过。后续发布以此源码目录和 shared/current-release.txt 为准，详见最新发布记录。

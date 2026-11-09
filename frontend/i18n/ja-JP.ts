@@ -23,12 +23,12 @@ export const jaJP: Messages = {
   },
   mobileNav: { label: 'モバイルナビゲーション', home: 'ホーム', trips: '旅程', checkin: 'チェックイン', checkinLabel: 'クイックチェックイン', share: '共有', me: 'マイページ' },
   titles: {
-    home: 'ホーム', trips: 'マイ旅行', newTrip: '旅行を作成', map: '旅行マップとチェックイン', photos: '写真とお気に入り', summary: '旅のまとめ',
-    share: '共有する', story: 'Travel Story', exploreTokyo: '東京公式ガイド', explore: '公式都市ガイド', memories: '旅の思い出', pricing: 'Trip Pro',
+    home: 'ホーム', trips: 'マイ旅行', newTrip: '旅行を作成', map: '旅行マップとチェックイン', photos: '写真とお気に入り',
+    share: '共有する', story: 'Travel Story', exploreTokyo: '東京公式ガイド', explore: '国・都市を探索', memories: '旅の思い出', pricing: 'Trip Pro',
     settings: '個人設定', fallback: '旅迹 TabiTrace'
   },
   tripNav: {
-    label: '旅行ページ', overview: '概要', map: 'マップとチェックイン', mapShort: 'マップ', photos: '写真', summary: 'まとめ',
+    label: '旅行ページ', map: 'マップとチェックイン', mapShort: 'マップ', photos: '写真',
     share: '共有する', shareShort: '共有', video: 'Travel Story', videoShort: '動画'
   },
   publicNav: {

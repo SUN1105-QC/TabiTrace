@@ -23,7 +23,7 @@ export function TodayActions({ trip, summary }: { trip: TripView | null; summary
     <section className="side-panel">
       <div className="panel-head">
         <h3>今天可以做</h3>
-        <Link href={tripPath('/summary')} className="panel-link">查看全部 <ArrowRight size={12} /></Link>
+        <Link href={tripPath('/map')} className="panel-link">查看全部 <ArrowRight size={12} /></Link>
       </div>
       <ul className="today-list">
         {actions.map(a => (

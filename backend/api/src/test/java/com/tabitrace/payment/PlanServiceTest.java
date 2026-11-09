@@ -54,7 +54,8 @@ class PlanServiceTest {
         assertTrue(p.sharePro().scale() > p.shareFree().scale());
         assertTrue(p.sharePro().tileSize() > p.shareFree().tileSize());
         assertEquals(2, p.storyTemplates().size());   // 停用的模板不展示
-        assertEquals(2, p.storyMusic().size());       // 待审核（音频未导入）与已下架的曲目不展示
+        assertTrue(p.storyMusic().isEmpty());        // 自带音乐不再作为可选曲库或付费权益
+        verify(catalog, never()).music();
         assertTrue(p.videoUsageLimits().enforced());
         assertEquals(20,p.videoUsageLimits().dailyRenders());
         assertEquals(6000,p.videoUsageLimits().dailyOutputSeconds());

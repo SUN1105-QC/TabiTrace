@@ -14,7 +14,7 @@ import tools.jackson.databind.JsonNode;
 import java.time.*;
 import java.util.*;
 
-/** Short DB transactions only. Stripe network calls must remain outside this bean. */
+/** 仅执行短数据库事务；Stripe 网络请求在外层完成，避免持有账号/订单行锁等待外部接口。 */
 @Service
 public class PaymentTransactions {
     private final PaymentMapper mapper;
@@ -27,6 +27,7 @@ public class PaymentTransactions {
 
     @Transactional(isolation=Isolation.READ_COMMITTED)
     public PaymentEntity prepare(Long userId, Long tripId, String product, int amount, String provider) {
+        // 以账号行锁串行化待支付订单判断，与 checkoutKey 约束共同防止并发重复开单。
         if (mapper.lockUser(userId) == null) throw new BusinessException("USER_NOT_FOUND", "账号不存在", HttpStatus.NOT_FOUND);
         if (tripId != null && "PRO".equals(trips.requireOwned(userId, tripId).planType))
             throw new BusinessException("TRIP_ALREADY_PRO", "当前旅行已经是 Pro");
@@ -47,7 +48,7 @@ public class PaymentTransactions {
         return p;
     }
 
-    // Use the same materialized account flag as the rest of the application.
+    // 与应用其他入口共用账号物化权益标记，避免付款入口单独计算出不同的终身权益结果。
     private boolean tripsLifetime(Long userId) { return mapper.hasLifetime(userId) > 0; }
 
     public PaymentEntity owned(Long userId, Long paymentId) {
@@ -69,7 +70,7 @@ public class PaymentTransactions {
     @Transactional(isolation=Isolation.READ_COMMITTED)
     public void rejectCreation(Long id) {
         PaymentEntity p = locked(id);
-        // Only a definite channel rejection may release an order whose Session was never bound.
+        // 仅在首次创建且渠道明确拒绝时释放未绑定的订单；结果不确定的请求不能按失败重开。
         if ("PENDING".equals(p.status) && p.providerPaymentId == null && p.checkoutAttempts == 1) {
             p.status="FAILED"; p.checkoutKey=null; mapper.update(p);
         }
@@ -96,6 +97,7 @@ public class PaymentTransactions {
     @Transactional(isolation=Isolation.READ_COMMITTED)
     public PaymentEntity apply(Long id, JsonNode session, JsonNode dispute, String eventId, String eventType) {
         PaymentEntity p = locked(id);
+        // 核对渠道、金额、币种和订单元数据；事件记录与状态/权益更新在同一事务中提交。
         validate(p, session);
         if (eventId != null && mapper.recordEvent(eventId, id, eventType) == 0) return p;
         p.providerPaymentId = session.path("id").asText();
@@ -118,7 +120,7 @@ public class PaymentTransactions {
         if (dispute != null && !dispute.isNull() && !dispute.isMissingNode()) {
             if (!Objects.equals(p.chargeId, reference(dispute.path("charge")))) throw mismatch();
             String state = dispute.path("status").asText();
-            // A delayed in-flight snapshot may never reopen a resolved dispute.
+            // 迟到的处理中快照不能把已结束的争议重新打开。
             if (p.disputeStatus == null || !Set.of("won", "lost", "warning_closed").contains(p.disputeStatus)) {
                 p.disputeId = dispute.path("id").asText(); p.disputeStatus = state;
             }
@@ -132,7 +134,7 @@ public class PaymentTransactions {
         else if ("expired".equals(session.path("status").asText())) p.status = "EXPIRED";
         else if (Set.of("canceled", "requires_payment_method").contains(intent.path("status").asText())
                 && "complete".equals(session.path("status").asText())) p.status = "FAILED";
-        // A returned cancel URL does not prove the Checkout session is closed.
+        // 用户访问取消返回地址并不代表渠道会话已经结束；只有确定终态才释放待支付占位。
         if (!"PENDING".equals(p.status)) p.checkoutKey = null;
         p.lastSyncedAt = LocalDateTime.now(ZoneOffset.UTC);
         p.lastCheckedAt = p.lastSyncedAt;

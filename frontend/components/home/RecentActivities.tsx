@@ -34,7 +34,7 @@ export function RecentActivities({ activities, tripId }: { activities: Activity[
                     <span className={`activity-icon ${item.kind}`}><Icon size={11} /></span>
                   </span>
                   <span className="activity-body">
-                    <b>{item.title}</b>
+                    <b title={item.title}>{item.title}</b>
                     <small>{item.detail}</small>
                   </span>
                   <span className="activity-meta">

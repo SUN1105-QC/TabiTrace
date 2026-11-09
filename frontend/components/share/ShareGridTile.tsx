@@ -6,7 +6,7 @@
 
 import type { ReactNode } from 'react'
 
-export type GridTileVariant = 'title' | 'image' | 'memo' | 'data' | 'footer'
+export type GridTileVariant = 'title' | 'image' | 'empty' | 'memo' | 'data' | 'footer'
 
 export type GridTileEdit = { active?: boolean; label?: string; onSelect?: () => void }
 

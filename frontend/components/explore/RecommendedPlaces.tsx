@@ -10,14 +10,14 @@ import type { ExplorePlace } from '@/utils/explore'
 import { ExplorePlaceCard, PlaceCardSkeleton } from './ExplorePlaceCard'
 import type { ExploreActions } from './PlaceActions'
 
-export function RecommendedPlaces({ places, loading, actions, onViewAll }: { places: ExplorePlace[]; loading: boolean; actions: ExploreActions; onViewAll: () => void }) {
+export function RecommendedPlaces({ cityName = '东京', places, loading, actions, onViewAll }: { cityName?: string; places: ExplorePlace[]; loading: boolean; actions: ExploreActions; onViewAll: () => void }) {
   if (!loading && !places.length) return null
   return (
     <section className="xp-section" id="xp-recommend" aria-labelledby="xp-recommend-title">
       <header className="xp-section-head">
         <div>
           <h2 id="xp-recommend-title">为你推荐</h2>
-          <p>第一次来到东京，可以从这些地方开始。</p>
+          <p>第一次来到{cityName}，可以从这些地方开始。</p>
         </div>
         <button type="button" className="xp-link" onClick={onViewAll}>查看全部 <ArrowRight size={13} /></button>
       </header>

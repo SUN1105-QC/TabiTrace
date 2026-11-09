@@ -12,8 +12,10 @@ import { PlaceImage } from '@/components/common/PlaceImage'
 import { hdImage } from '@/utils/place-images'
 import { ExploreSearch } from './ExploreSearch'
 import { ExploreCategoryFilter } from './ExploreCategoryFilter'
+import type { ExploreCityConfig } from '@/constants/explore-cities'
 
-export function ExploreHero({ query, category, stats, resultCount, signedIn, target, allJoined, onQuery, onCategory, onStart, onShowResults, onChangeTrip }: {
+export function ExploreHero({ city, query, category, stats, resultCount, signedIn, target, allJoined, onQuery, onCategory, onStart, onShowResults, onChangeTrip }: {
+  city: ExploreCityConfig
   query: string
   category: string
   /** 只显示已经加载到的真实数字 */
@@ -38,8 +40,8 @@ export function ExploreHero({ query, category, stats, resultCount, signedIn, tar
   return (
     <section className="xp-hero" aria-labelledby="xp-hero-title">
       <div className="xp-hero-text">
-        <p className="xp-eyebrow">EXPLORE TOKYO</p>
-        <h1 id="xp-hero-title">从东京开始，<br />探索一座城市的另一种方式。</h1>
+        <p className="xp-eyebrow">EXPLORE {city.englishName}</p>
+        <h1 id="xp-hero-title">从{city.name}开始，<br />探索一座城市的另一种方式。</h1>
         <p className="xp-hero-lead">发现值得去的地方，<br />把喜欢的地点加入下一段旅程。</p>
         <div className="xp-hero-cta">
           <button type="button" className="xp-btn is-primary" onClick={onStart}><Compass size={16} /> 开始探索</button>
@@ -48,8 +50,8 @@ export function ExploreHero({ query, category, stats, resultCount, signedIn, tar
       </div>
 
       <figure className="xp-hero-media">
-        <PlaceImage src={hdImage('07-tokyo-station')} alt="东京站丸之内站舍" sizes="(max-width: 1023px) 100vw, 560px" eager />
-        <figcaption>TOKYO · 东京站丸之内站舍</figcaption>
+        <PlaceImage src={hdImage(city.heroImage)} alt={city.heroCaption} sizes="(max-width: 1023px) 100vw, 560px" eager />
+        <figcaption>{city.englishName} · {city.heroCaption}</figcaption>
       </figure>
 
       <div className="xp-hero-tools">
@@ -62,8 +64,8 @@ export function ExploreHero({ query, category, stats, resultCount, signedIn, tar
           ) : signedIn ? (
             <p className="xp-trip-line">
               {target ? (allJoined
-                ? <>「<Link href={`/trips/${target.id}`}>{target.title}</Link>」已加入东京官方探索，全部地点都在这段旅行里</>
-                : <>地点会加入：<Link href={`/trips/${target.id}`}>{target.title}</Link></>) : '加入地点时可以选择旅行'}
+                ? <>「<Link href={`/trips/${target.id}/map`}>{target.title}</Link>」已加入{city.name}官方探索，全部地点都在这段旅行里</>
+                : <>地点会加入：<Link href={`/trips/${target.id}/map`}>{target.title}</Link></>) : '加入地点时可以选择旅行'}
               <button type="button" className="xp-link" onClick={onChangeTrip}>{target ? '更换' : '选择旅行'}</button>
             </p>
           ) : null}

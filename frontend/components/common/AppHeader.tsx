@@ -77,11 +77,11 @@ export function AppHeader({
             <div className="popover popover-sm" role="menu">
               <div className="popover-head"><b>{name}</b><span>{user?.email || ''}</span></div>
               <div className="popover-list">
-                <Link href="/profile" role="menuitem" onClick={() => setMenuOpen(false)}>
-                  <span className="popover-icon"><UserRound size={15} /></span><span className="flex-1"><b>{t('header.profile')}</b></span>
+                <Link href="/profile?tab=profile" role="menuitem" onClick={() => setMenuOpen(false)}>
+                  <span className="popover-icon"><UserRound size={15} /></span><span className="flex-1"><b>{t('settings.tabs.profile')}</b></span>
                 </Link>
-                <Link href="/profile" role="menuitem" onClick={() => setMenuOpen(false)}>
-                  <span className="popover-icon"><Settings size={15} /></span><span className="flex-1"><b>{t('header.accountSettings')}</b></span>
+                <Link href="/profile?tab=security" role="menuitem" onClick={() => setMenuOpen(false)}>
+                  <span className="popover-icon"><Settings size={15} /></span><span className="flex-1"><b>{t('settings.tabs.security')}</b></span>
                 </Link>
                 <button role="menuitem" onClick={logout}>
                   <span className="popover-icon warn"><LogOut size={15} /></span><span className="flex-1 text-left"><b>{t('header.logout')}</b></span>

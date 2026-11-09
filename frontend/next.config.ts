@@ -44,7 +44,11 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   async redirects() {
-    return [{ source: '/trips/:id/achievements', destination: '/trips/:id', permanent: true }]
+    return [
+      { source: '/trips/:id(\\d+)', destination: '/trips/:id/map', permanent: true },
+      { source: '/trips/:id/summary', destination: '/trips/:id/map', permanent: true },
+      { source: '/trips/:id/achievements', destination: '/trips/:id/map', permanent: true }
+    ]
   },
   async rewrites() {
     return apiInternalUrl ? [{ source: '/api/v1/:path*', destination: `${apiInternalUrl}/api/v1/:path*` }] : []

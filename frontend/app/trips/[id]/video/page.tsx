@@ -22,7 +22,7 @@ import { MaterialPicker } from '@/components/video/studio/MaterialPicker'
 import { ShotTimeline } from '@/components/video/studio/ShotTimeline'
 import { timeOfDay } from '@/lib/time'
 import { ContentStyle } from '@/components/video/studio/ContentStyle'
-import { MusicSelector, type MusicLoadState } from '@/components/video/music/MusicSelector'
+import { MusicSelector } from '@/components/video/music/MusicSelector'
 import { BottomSheet, MusicCard } from '@/components/video/studio/MusicCard'
 import { VideoSpecs } from '@/components/video/studio/VideoSpecs'
 import { GeneratePanel } from '@/components/video/studio/GeneratePanel'
@@ -35,12 +35,12 @@ import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { ApiError } from '@/services/api'
 import { planApi, tripApi, type CheckinView, type PhotoView, type TripView } from '@/services/tabitrace-api'
 import { videoApi } from '@/services/video'
-import type { Plan, StorySettings, Storyboard, VideoDraft, VideoMusic, VideoProject, VideoTemplate } from '@/types/video'
+import type { Plan, StorySettings, Storyboard, VideoDraft, VideoProject, VideoTemplate } from '@/types/video'
 import type { StoryTier } from '@/utils/plan'
 import { PLAN_LIMITS, isPlayable, isRunning, utcDate } from '@/utils/video-status'
 import { autoSelectPhotos } from '@/utils/video-autoselect'
-import { photoHours, placeCount, styleOf, suggestion, type Suggestion } from '@/utils/video-studio'
-import { DEFAULT_MUSIC_VOLUME, defaultMusicFor, draftMusic, selectionLabel, selectionOf, selectionProblem, type MusicContext } from '@/utils/video-music'
+import { placeCount, styleOf, suggestion, type Suggestion } from '@/utils/video-studio'
+import { DEFAULT_MUSIC_VOLUME, draftMusic, selectionLabel, selectionOf, selectionProblem } from '@/utils/video-music'
 import { useUserMusic } from '@/hooks/useUserMusic'
 import { photoMedium, photoThumb } from '@/utils/photo-variants'
 import type { PhotoView as VariantPhoto } from '@/services/tabitrace-api'
@@ -93,12 +93,8 @@ export default function TravelStoryPage() {
   const [checkins, setCheckins] = useState<CheckinView[]>([])
   const [projects, setProjects] = useState<VideoProject[]>([])
   const [templates, setTemplates] = useState<VideoTemplate[]>([])
-  const [music, setMusic] = useState<VideoMusic[]>([])
-  const [musicStatus, setMusicStatus] = useState<MusicLoadState>('loading')
   // 「我的音乐」（会员上传）：与音乐选择器共用同一份数据，用于摘要与生成前检查
   const mine = useUserMusic()
-  // 用户是否亲自选过音乐（或打开的是已保存的项目）：没选过时，切换模板会跟着换成新模板的推荐音乐
-  const [musicTouched, setMusicTouched] = useState(false)
   // Free / Pro 的照片数、时长、清晰度、水印：以后端方案配置为准，接口失败时才用本地兜底
   const [tiers, setTiers] = useState<Tiers>(PLAN_LIMITS)
   const [loading, setLoading] = useState(true)
@@ -171,14 +167,13 @@ export default function TravelStoryPage() {
     setLoading(true)
     setLoadError('')
     try {
-      const [t, ps, cs, vs, tpls, ms, tripPro] = await Promise.all([
+      const [t, ps, cs, vs, tpls, tripPro] = await Promise.all([
         tripApi.get(tripId), tripApi.photos(tripId), tripApi.checkins(tripId),
-        videoApi.list(tripId), videoApi.templates(), videoApi.music().catch(() => null),
+        videoApi.list(tripId), videoApi.templates(),
         planApi.tripPro().catch(() => null)
       ])
       const tierMap: Tiers = tripPro ? { FREE: tripPro.storyFree, PRO: tripPro.storyPro } : PLAN_LIMITS
-      setTrip(t); setPhotos(ps); setCheckins(cs); setProjects(vs); setTemplates(tpls); setMusic(ms ?? []); setTiers(tierMap)
-      setMusicStatus(ms ? 'ready' : 'error')
+      setTrip(t); setPhotos(ps); setCheckins(cs); setProjects(vs); setTemplates(tpls); setTiers(tierMap)
       setFocusedId(vs[0]?.id ?? null)
       const p: Plan = t.planType === 'PRO' ? 'PRO' : 'FREE'
       const tier = tierMap[p]
@@ -189,12 +184,7 @@ export default function TravelStoryPage() {
         aspectRatio: '9:16',
         duration,
         quality: tier.quality,
-        // 默认音乐：模板在后台配置的推荐曲 → 规则推荐里当前方案能用的第一首；曲库读不到时先不加音乐
-        ...draftMusic((code => (code ? { source: 'SYSTEM' as const, code } : null))(defaultMusicFor(ms ?? [], {
-          templateCode: 'JOURNAL', destination: `${t.destinationName ?? ''} ${t.city ?? ''}`, duration,
-          photoHours: photoHours(pickedIds, ps), photoCount: pickedIds.length, plan: p,
-          templateDefault: tpls.find(x => x.code === 'JOURNAL')?.recommendedMusic ?? null
-        }))),
+        ...draftMusic(null),
         coverPhotoId: null,
         photoIds: pickedIds,
         settings: defaultSettings()
@@ -209,12 +199,6 @@ export default function TravelStoryPage() {
   }, [tripId, refreshPreview])
 
   useEffect(() => { void load() }, [load])
-
-  /** 只重新读取曲库（音乐区的「重新加载」） */
-  const retryMusic = useCallback(async () => {
-    setMusicStatus('loading')
-    try { setMusic(await videoApi.music()); setMusicStatus('ready') } catch { setMusicStatus('error') }
-  }, [])
 
   // 有任务在排队 / 生成时轮询后端真实状态
   useEffect(() => {
@@ -360,15 +344,16 @@ export default function TravelStoryPage() {
         settings: { ...defaultSettings(), ...p.settings, segments: p.settings?.segments ?? [], visualStyle: p.settings?.visualStyle ?? 'NATURAL' }
       }
       setDraft(next)
-      setMusicTouched(true)
       const isDraft = p.status === 'DRAFT'
       setEditingId(isDraft ? p.id : null)
-      setSavedKey(isDraft ? JSON.stringify(next) : '')
+      const retiredMusic = p.musicSource === 'SYSTEM' || (p.musicSource == null && !!p.musicCode && p.musicCode !== 'NONE')
+      setSavedKey(isDraft && !retiredMusic ? JSON.stringify(next) : '')
       setSavedAt(isDraft ? utcDate(p.updatedAt ?? p.createdAt) : null)
       setTouched([1, 2, 3, 4])
       setDemoTemplate(null)
       void refreshPreview(next)
       setToast(isDraft ? `已载入草稿「${p.name}」，生成时会更新这个草稿` : `已载入「${p.name}」的设置，生成时会创建新版本`)
+      if (retiredMusic) setToast('已载入设置，自带音乐已移除；可上传自己的音乐或选择无音乐')
       if (mobile) { setActiveStep('vs-step-1'); scrollTo('vs-preview') } else scrollTo('vs-step-1')
     },
     onDelete: p => {
@@ -411,7 +396,7 @@ export default function TravelStoryPage() {
     plan === 'FREE' && template?.plan === 'PRO' ? `「${template.name}」是 Trip Pro 模板，请换成「旅行日记」` :
     !limits.durations.includes(draft.duration) ? `当前方案不支持 ${draft.duration} 秒视频，请在「导出」里重新选择时长` :
     qualityRank(draft.quality) > qualityRank(limits.quality) ? `当前方案最高导出 ${limits.quality.toUpperCase()}，请在「导出」里重新选择清晰度` :
-    selectionProblem(selectionOf(draft), { music, musicReady: musicStatus === 'ready', plan, mine: mine.library }) ||
+    selectionProblem(selectionOf(draft), mine.library) ||
     (storyboard && !dirty && !scenesNow.some(s => s.type === 'PLACE' && s.enabled) ? '分镜里至少要保留一个照片段落' : '')
 
   const tip = useMemo(() => (draft ? suggestion(draft.photoIds, photosById, checkinsById, draft.duration, photos.length) : null), [draft, photosById, checkinsById, photos.length])
@@ -447,13 +432,8 @@ export default function TravelStoryPage() {
   }
 
   const musicSel = selectionOf(draft)
-  const musicName = selectionLabel(musicSel, music, mine.library?.items ?? null)
+  const musicName = selectionLabel(musicSel, mine.library?.items ?? null)
   const musicVolume = draft.settings.musicVolume ?? DEFAULT_MUSIC_VOLUME
-  const musicContext: MusicContext = {
-    templateCode: draft.templateCode, destination: `${trip.destinationName ?? ''} ${trip.city ?? ''}`, duration: draft.duration,
-    photoHours: photoHours(draft.photoIds, photos), photoCount: draft.photoIds.length, plan,
-    templateDefault: templates.find(x => x.code === draft.templateCode)?.recommendedMusic ?? null
-  }
   const style = styleOf(draft.settings.visualStyle)
   const coverPhoto = photosById.get(draft.coverPhotoId ?? draft.photoIds[0])
   const coverUrl = (coverPhoto ? photoMedium(coverPhoto) : undefined) ?? trip.coverImage ?? undefined
@@ -484,10 +464,9 @@ export default function TravelStoryPage() {
   )
   const musicPicker = (
     <MusicSelector
-      music={music} status={musicStatus} onRetry={() => void retryMusic()} selection={musicSel} plan={plan}
-      context={musicContext} volume={musicVolume}
+      selection={musicSel} volume={musicVolume}
       onVolume={v => patchSettings({ ...draft.settings, musicVolume: v })}
-      onChange={sel => { setMusicTouched(true); patch(draftMusic(sel), 3) }} />
+      onChange={sel => patch(draftMusic(sel), 3)} />
   )
 
   return (
@@ -529,14 +508,9 @@ export default function TravelStoryPage() {
                 cover={coverUrl}
                 onChange={code => {
                   if (code === draft.templateCode) return
-                  // 用户还没亲自选过音乐时，切换模板一起换成新模板的推荐音乐；自己选过的音乐保持不变。照片从不因切换模板而改变
                   const nextTpl = templates.find(x => x.code === code)
-                  const nextRec = musicTouched ? null : defaultMusicFor(music, { ...musicContext, templateCode: code, templateDefault: nextTpl?.recommendedMusic ?? null })
-                  const follow = nextRec != null && nextRec !== draft.musicCode
-                  patch(follow ? { templateCode: code, ...draftMusic({ source: 'SYSTEM', code: nextRec }) } : { templateCode: code }, 1)
-                  setToast(follow
-                    ? `已切换到「${nextTpl?.name ?? code}」，背景音乐换成了推荐的「${music.find(m => m.code === nextRec)?.name}」，已选照片不变`
-                    : `已切换到「${nextTpl?.name ?? code}」，已选照片和背景音乐保持不变`)
+                  patch({ templateCode: code }, 1)
+                  setToast(`已切换到「${nextTpl?.name ?? code}」，已选照片和背景音乐保持不变`)
                 }}
                 onPreview={async code => {
                   if (!storyboard) await refreshPreview()
@@ -578,7 +552,7 @@ export default function TravelStoryPage() {
                     ))}
                   </div>
                   {contentTab === 'music'
-                    ? <MusicCard music={music} selection={musicSel} volume={musicVolume}
+                    ? <MusicCard selection={musicSel} volume={musicVolume}
                         onVolume={v => patchSettings({ ...draft.settings, musicVolume: v })} onOpen={() => setMusicSheet(true)} />
                     : <ContentStyle section={contentTab} value={draft.settings} tripTitle={trip.title} cover={coverUrl} onChange={s => patchSettings(s)} />}
                 </>

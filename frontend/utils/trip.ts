@@ -33,7 +33,7 @@ export function getTripPrimaryAction(trip: Pick<TripView, 'id' | 'status'>): { p
       return { primary: { key: 'share', label: '生成旅行成果', kind: 'link', href: `${base}/share` }, secondary: [timeline, { key: 'story', label: 'Travel Story', kind: 'link', href: `${base}/video` }] }
     case 'ARCHIVED':
       // 已归档的旅行不能再打卡或修改（后端 requireWritable），只提供回看
-      return { primary: { key: 'review', label: '回看旅程', kind: 'link', href: `${base}/summary` }, secondary: [timeline] }
+      return { primary: { key: 'review', label: '回看旅程', kind: 'link', href: `${base}/map` }, secondary: [timeline] }
     default:
       return { primary: checkin, secondary: [record, photos] }
   }

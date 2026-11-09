@@ -29,7 +29,7 @@ export function MemoryTimeline({ entries }: { entries: TimelineEntry[] }) {
                   <ul>
                     {m.trips.map(t => (
                       <li key={t.id}>
-                        <Link href={`/trips/${t.id}/summary`}>
+                        <Link href={`/trips/${t.id}/map`}>
                           <MemoryCover src={t.cover} city={t.city} title={t.title} className="is-thumb" />
                           <span className="mm-tl-text">
                             <b>{t.title}</b>

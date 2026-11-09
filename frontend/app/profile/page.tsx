@@ -8,8 +8,8 @@
  */
 
 import { PageContainer } from '@/components/common/PageContainer'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { RefreshCcw, TriangleAlert } from 'lucide-react'
 import { SiteHeader } from '@/components/common/SiteHeader'
 import { AccountSummaryCard, AccountSummarySkeleton } from '@/components/settings/AccountSummaryCard'
@@ -32,13 +32,20 @@ import {
 type Pending = { kind: 'tab'; tab: SettingsTab } | { kind: 'href'; href: string }
 
 export default function PersonalSettingsPage() {
+  return <Suspense fallback={<main><SiteHeader /><SettingsSkeleton /></main>}><PersonalSettingsContent /></Suspense>
+}
+
+function PersonalSettingsContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  // 当前栏目直接取自路由参数，菜单跳转、标签点击和浏览器返回共用同一份状态。
+  const requestedTab = searchParams.get('tab')
+  const tab: SettingsTab = isSettingsTab(requestedTab) ? requestedTab : 'profile'
   const t = useT()
   const [user, setUser] = useState<UserView | null>(null)
   const [overview, setOverview] = useState<AccountOverview | null>(null)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
-  const [tab, setTab] = useState<SettingsTab>('profile')
   const [initial, setInitial] = useState<SettingsDraft | null>(null)
   const [draft, setDraft] = useState<SettingsDraft | null>(null)
   const [errors, setErrors] = useState<FieldErrors>({})
@@ -71,8 +78,6 @@ export default function PersonalSettingsPage() {
   }, [])
 
   useEffect(() => {
-    const q = new URLSearchParams(window.location.search).get('tab')
-    if (isSettingsTab(q)) setTab(q)
     void load()
   }, [load])
 
@@ -90,8 +95,11 @@ export default function PersonalSettingsPage() {
   const dirty = dirtyKeys.length > 0
 
   const goTab = useCallback((next: SettingsTab) => {
-    setTab(next)
-    window.history.replaceState(null, '', `${window.location.pathname}?tab=${next}`)
+    const url = new URL(window.location.href)
+    url.searchParams.set('tab', next)
+    // Next.js 会自行保留内部历史状态。不能传回带 __NA 的 history.state，
+    // 否则框架会跳过 useSearchParams 通知，出现地址已变但栏目不切换的问题。
+    window.history.replaceState(null, '', url.pathname + url.search + url.hash)
   }, [])
 
   const selectTab = (next: SettingsTab) => {

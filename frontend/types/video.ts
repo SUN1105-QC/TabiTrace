@@ -1,7 +1,7 @@
 /** Travel Story 前后端共用的数据结构（与 backend VideoDtos 一一对应）。 */
 
 export type Plan = 'FREE' | 'PRO'
-/** 音乐来源：SYSTEM = 旅迹音乐（系统曲库），USER = 我的音乐（会员上传） */
+/** USER = 用户上传的音乐；SYSTEM 仅兼容读取历史视频，新项目不再使用。 */
 export type MusicSource = 'SYSTEM' | 'USER'
 /** 成片调色：自然纪实 / 日系清新 / 电影胶片 / 城市质感 */
 export type VisualStyle = 'NATURAL' | 'FRESH' | 'FILM' | 'URBAN'
@@ -21,38 +21,6 @@ export type VideoTemplate = {
   transitionSeconds: number
   plan: Plan
   recommendedMusic?: string | null
-}
-
-/** 旅行氛围分类（后台可调整曲目所属分类，前端只认这 5 个） */
-export type MusicCategory = 'WARM' | 'CITY_NIGHT' | 'MORNING' | 'LOFI' | 'CINEMATIC'
-export type MusicEnergy = 'LOW' | 'MEDIUM' | 'HIGH'
-
-/** 选择器里的曲目：只有 45 秒试听片段地址（previewUrl），原曲存储路径不会下发到浏览器 */
-export type VideoMusic = {
-  code: string
-  name: string
-  category: MusicCategory
-  mood: string
-  durationSeconds?: number | null
-  plan: Plan
-  /** 推荐模板（JOURNAL / MINIMAL / CITY） */
-  recommendedTemplates: string[]
-  artist?: string | null
-  moods: string[]
-  instruments: string[]
-  bpm?: number | null
-  energy?: MusicEnergy | null
-  essential: boolean
-  previewUrl?: string | null
-  attributionRequired: boolean
-  attributionText?: string | null
-  /** 授权协议，例如 CC BY 4.0 / CC0 1.0 */
-  license?: string | null
-  licenseUrl?: string | null
-  source?: string | null
-  sourceUrl?: string | null
-  commercialUse: boolean
-  derivativesAllowed: boolean
 }
 
 export type SegmentOverride = { key: string; enabled?: boolean; title?: string | null }
@@ -123,7 +91,7 @@ export type VideoProject = {
   watermark: boolean
   /** 系统曲库音乐（musicSource = SYSTEM）；null / 缺省 = 无音乐 */
   musicCode?: string | null
-  /** 音乐来源：SYSTEM 旅迹音乐 / USER 我的音乐 / null 无音乐 */
+  /** USER 我的音乐 / null 无音乐；SYSTEM 仅用于历史视频 */
   musicSource?: MusicSource | null
   /** 「我的音乐」的 id（musicSource = USER） */
   userMusicId?: number | null
@@ -154,9 +122,9 @@ export type VideoDraft = {
   aspectRatio: string
   duration: number
   quality: string
-  /** 旅迹音乐代码（musicSource = SYSTEM）；null = 无音乐 */
+  /** 旧协议保留字段；新草稿始终为 null */
   musicCode: string | null
-  /** 音乐来源：SYSTEM / USER / null（无音乐）。只保存来源 + id，不保存音乐地址 */
+  /** 音乐来源：USER / null（无音乐）。只保存来源 + id，不保存音乐地址 */
   musicSource: MusicSource | null
   /** 「我的音乐」的 id（musicSource = USER） */
   userMusicId: number | null

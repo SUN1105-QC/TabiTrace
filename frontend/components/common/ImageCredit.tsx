@@ -14,6 +14,7 @@ export function ImageCredit({ url, label = '图片' }: { url?: string | null; la
       {label}：<a href={c.sourcePage} target="_blank" rel="noopener noreferrer">{c.author ?? 'Wikimedia Commons 贡献者'}</a>
       {' · '}{c.licenseUrl ? <a href={c.licenseUrl} target="_blank" rel="noopener noreferrer license">{c.license}</a> : c.license}
       {' · Wikimedia Commons'}
+      {c.attribution && c.attribution !== c.author ? ` · ${c.attribution}` : ''}
     </p>
   )
 }

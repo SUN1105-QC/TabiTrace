@@ -27,7 +27,7 @@ export const CATEGORIES: CategoryDef[] = [
   { key: 'FOOD', label: '美食', match: hasTag('FOOD') },
   { key: 'NIGHT', label: '夜景', match: hasTag('NIGHT') },
   { key: 'MUST', label: '必去地标', match: hasTag('MUST'), hidden: true },
-  { key: 'FIRST', label: '第一次来东京', match: hasTag('FIRST'), hidden: true },
+  { key: 'FIRST', label: '初访推荐', match: hasTag('FIRST'), hidden: true },
   { key: 'PHOTO', label: '拍照出片', match: hasTag('PHOTO'), hidden: true },
   { key: 'WALK', label: '城市漫步', match: hasTag('WALK'), hidden: true },
   { key: 'NATURE', label: '自然', match: hasTag('NATURE'), hidden: true },
@@ -40,7 +40,7 @@ export const categoryOf = (key: string) => CATEGORIES.find(c => c.key === key) ?
 /** 标签的中文名（卡片最多显示 2 个；MUST / FIRST 这类编辑标签在推荐卡上也有意义） */
 export const TAG_LABELS: Record<string, string> = {
   CULTURE: '传统文化', PHOTO: '摄影', NIGHT: '夜景', WALK: '散步', FOOD: '美食', SHOP: '购物',
-  NATURE: '自然', FREE: '免费', RAIN: '雨天可去', FIRST: '第一次东京', MUST: '必去'
+  NATURE: '自然', FREE: '免费', RAIN: '雨天可去', FIRST: '初访推荐', MUST: '必去'
 }
 /** 卡片上展示的标签：去掉「必去 / 免费 / 雨天」这类不描述地点本身的标签 */
 const DESCRIPTIVE = ['CULTURE', 'PHOTO', 'NIGHT', 'WALK', 'FOOD', 'SHOP', 'NATURE']
@@ -67,7 +67,7 @@ export type ExplorePlace = {
 
 export function toExplorePlace(p: PlaceView, s: PlaceStatus): ExplorePlace {
   return {
-    id: p.id, name: p.name, area: p.area ?? '东京', category: p.category ?? '地点',
+    id: p.id, name: p.name, area: p.area ?? p.city ?? '街区', category: p.category ?? '地点',
     summary: p.tagline ?? p.description ?? '', imageUrl: p.coverImage, tags: placeTags(p),
     joined: s.joined.has(p.id), checkedIn: s.checkedIn.has(p.id), favorite: s.favorites.has(p.id), source: p
   }
@@ -163,7 +163,7 @@ export function selectAreas(places: PlaceView[]): AreaView[] {
       const top = ['TRADITION', 'NATURE', 'SHOPPING', 'CITY'].sort((a, b) => kinds.filter(k => k === b).length - kinds.filter(k => k === a).length)[0]
       const night = list.filter(p => p.tags?.includes('NIGHT')).length * 2 > list.length
       const tone: AreaView['tone'] = night ? 'dusk' : top === 'TRADITION' ? 'sand' : top === 'NATURE' ? 'green' : 'peach'
-      return { name, note: AREA_NOTES[name] ?? list[0].category ?? '东京街区', tags, count: list.length, tone, first: Math.min(...list.map(p => p.editorRank ?? 99)) }
+      return { name, note: AREA_NOTES[name] ?? list[0].category ?? '城市街区', tags, count: list.length, tone, first: Math.min(...list.map(p => p.editorRank ?? 99)) }
     })
     // 地点多的区域在前；数量相同时按区域里最靠前的编辑精选排序
     .sort((a, b) => b.count - a.count || a.first - b.first)

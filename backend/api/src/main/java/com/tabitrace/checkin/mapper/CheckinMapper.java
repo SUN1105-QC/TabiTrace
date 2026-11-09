@@ -21,6 +21,7 @@ public interface CheckinMapper {
     @Select("SELECT * FROM checkins WHERE trip_id=#{tripId} ORDER BY checkin_time DESC,id DESC LIMIT #{limit}") List<CheckinEntity> recentByTrip(@Param("tripId") Long tripId,@Param("limit") int limit);
     @Select("SELECT COUNT(DISTINCT area_snapshot) FROM checkins WHERE trip_id=#{tripId} AND area_snapshot IS NOT NULL AND area_snapshot<>''") int countDistinctAreas(Long tripId);
     @Select("SELECT COUNT(DISTINCT c.place_id) FROM checkins c JOIN places p ON p.id=c.place_id WHERE c.trip_id=#{tripId} AND p.source_type='OFFICIAL'") int countOfficial(Long tripId);
+    @Select("SELECT COUNT(DISTINCT c.place_id) FROM checkins c JOIN places p ON p.id=c.place_id WHERE c.trip_id=#{tripId} AND p.source_type='OFFICIAL' AND p.city=#{city}") int countOfficialByCity(@Param("tripId") Long tripId,@Param("city") String city);
     @Select("SELECT COUNT(DISTINCT p.city) FROM checkins c JOIN places p ON p.id=c.place_id WHERE c.trip_id=#{tripId} AND p.city IS NOT NULL") int countDistinctCities(Long tripId);
     @Select("SELECT COUNT(*) FROM checkins WHERE itinerary_item_id=#{itemId}") int countByItinerary(Long itemId);
 }

@@ -25,6 +25,10 @@ type ImageData = {
   license: string
   licenseUrl: string | null
   sourcePage: string
+  attribution?: string | null
+  credit?: string
+  originalTitle?: string
+  createdAt?: string
 }
 const DATA = generated as Record<string, ImageData>
 
@@ -69,17 +73,17 @@ export function imageFocus(url?: string | null) {
   return (h && FOCUS[h.slug]) || '50% 50%'
 }
 
-export type ImageCredit = { slug: string; subject: string; author: string | null; license: string; licenseUrl: string | null; sourcePage: string }
+export type ImageCredit = { slug: string; subject: string; author: string | null; license: string; licenseUrl: string | null; sourcePage: string; attribution?: string | null; credit?: string; originalTitle?: string; createdAt?: string }
 
 /** 图片的来源与许可证（CC BY / CC BY-SA 需要署名；CC0 不强制，但同样注明来源） */
 export function imageCredit(url?: string | null): ImageCredit | null {
   const h = parse(url)
   const d = h ? DATA[h.slug] : undefined
-  return h && d ? { slug: h.slug, subject: d.subject, author: d.author, license: d.license, licenseUrl: d.licenseUrl, sourcePage: d.sourcePage } : null
+  return h && d ? { slug: h.slug, subject: d.subject, author: d.author, license: d.license, licenseUrl: d.licenseUrl, sourcePage: d.sourcePage, attribution:d.attribution,credit:d.credit,originalTitle:d.originalTitle,createdAt:d.createdAt } : null
 }
 
 export const ALL_IMAGE_CREDITS: ImageCredit[] = Object.entries(DATA).map(([slug, d]) => ({
-  slug, subject: d.subject, author: d.author, license: d.license, licenseUrl: d.licenseUrl, sourcePage: d.sourcePage
+  slug, subject: d.subject, author: d.author, license: d.license, licenseUrl: d.licenseUrl, sourcePage: d.sourcePage, attribution:d.attribution,credit:d.credit,originalTitle:d.originalTitle,createdAt:d.createdAt
 }))
 
 /**

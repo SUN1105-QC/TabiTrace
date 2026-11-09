@@ -17,6 +17,7 @@ import type { ExploreActions } from './PlaceActions'
 export const PLACE_PAGE_SIZE = 12
 
 export function AllPlaces(props: {
+  cityName?: string
   places: ExplorePlace[]
   loading: boolean
   error: string
@@ -52,7 +53,7 @@ export function AllPlaces(props: {
           <h2 id="xp-all-title">全部地点</h2>
           {query ? (
             <p className="xp-query">搜索「{query}」<button type="button" className="xp-link" onClick={props.onClearQuery} aria-label="清除搜索关键词"><X size={13} /> 清除</button></p>
-          ) : <p>官方精选的东京地点，按分类、区域慢慢挑。</p>}
+          ) : <p>官方精选的{props.cityName ?? '东京'}地点，按分类、区域慢慢挑。</p>}
         </div>
         {!loading && !error && <span className="xp-count">{places.length} 个</span>}
       </header>

@@ -50,7 +50,7 @@ export function TripStatusCard({ s }: { s: TripProState }) {
 
       <div className="pr-trip-info">
         <p className="pr-eyebrow">当前旅行</p>
-        <h2 id="pr-trip-title">{trip.title}</h2>
+        <h2 id="pr-trip-title" title={trip.title}>{trip.title}</h2>
         <ul className="pr-trip-meta">
           {city && <li><MapPin size={13} aria-hidden="true" />{city}</li>}
           <li><CalendarDays size={13} aria-hidden="true" />{dot(trip.startDate)} — {dot(trip.endDate)}</li>

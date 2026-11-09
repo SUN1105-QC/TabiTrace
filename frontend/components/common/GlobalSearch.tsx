@@ -1,5 +1,7 @@
 'use client'
 
+import { officialExploreHref } from '@/constants/explore-cities'
+
 /** 全局搜索：Ctrl/⌘K 唤起，搜索真实的旅行 / 地点 / 打卡 / 照片，并可直接跳转。 */
 
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -14,7 +16,8 @@ type Result = { group: Group; label: string; hint: string; href: string; icon: a
 const FEATURES: Result[] = [
   { group: '功能', label: '我的旅行', hint: '查看全部旅行', href: '/trips', icon: Route },
   { group: '功能', label: '创建旅行', hint: '开始一段新旅程', href: '/trips/new', icon: Route },
-  { group: '功能', label: '东京官方探索', hint: '官方精选地点', href: '/explore/tokyo', icon: MapPin },
+  { group: '功能', label: '推荐探索', hint: '按国家与城市发现目的地', href: '/explore', icon: MapPin },
+  { group: '功能', label: '东京官方探索', hint: '日本 · 东京精选地点', href: '/explore/tokyo', icon: MapPin },
   { group: '功能', label: '旅行回忆', hint: '已完成的旅行作品', href: '/memories', icon: Camera },
   { group: '功能', label: 'Trip Pro', hint: '单次旅行升级', href: '/pricing', icon: Route }
 ]
@@ -73,11 +76,11 @@ export function GlobalSearch({ activeTripId, onClose }: { activeTripId: number |
     const match = (s?: string | null) => !q || (s || '').toLowerCase().includes(q)
     const list: Result[] = []
     trips.filter(t => match(t.title) || match(t.destinationName) || match(t.city)).slice(0, 5)
-      .forEach(t => list.push({ group: '旅行', label: t.title, hint: `${t.destinationName} · ${t.startDate} — ${t.endDate}`, href: `/trips/${t.id}`, icon: Route }))
+      .forEach(t => list.push({ group: '旅行', label: t.title, hint: `${t.destinationName} · ${t.startDate} — ${t.endDate}`, href: `/trips/${t.id}/map`, icon: Route }))
     places.filter(p => match(p.name) || match(p.area) || match(p.category)).slice(0, 5)
       .forEach(p => list.push({ group: '地点', label: p.name, hint: [p.area, p.city, p.sourceType === 'OFFICIAL' ? '官方地点' : '自定义地点'].filter(Boolean).join(' · '), href: `/trips/${tripIdFor()}/map`, icon: MapPin }))
     official.filter(p => !places.some(x => x.id === p.id)).slice(0, 4)
-      .forEach(p => list.push({ group: '地点', label: p.name, hint: `官方地点 · ${[p.area, p.city].filter(Boolean).join(' · ')}`, href: `/explore/tokyo#place-${p.id}`, icon: MapPin }))
+      .forEach(p => list.push({ group: '地点', label: p.name, hint: `官方地点 · ${[p.area, p.city].filter(Boolean).join(' · ')}`, href: `${officialExploreHref(p.city)}#place-${p.id}`, icon: MapPin }))
     checkins.filter(c => match(c.placeName) || match(c.area) || match(c.note)).slice(0, 5)
       .forEach(c => list.push({ group: '打卡', label: c.placeName, hint: `${dateKeyOf(c.checkinTime) || ''}${c.area ? ' · ' + c.area : ''}`, href: `/trips/${c.tripId}/map`, icon: MapPin }))
     photos.filter(() => Boolean(q)).slice(0, 4)
@@ -120,12 +123,12 @@ export function GlobalSearch({ activeTripId, onClose }: { activeTripId: number |
               <div key={group}>
                 <p className="command-group">{group}</p>
                 {items.map((r, i) => (
-                  <button key={`${group}-${r.label}-${i}`} onClick={() => go(r.href)}>
-                    <span className="flex items-center gap-3">
+                  <button className="command-result" key={`${group}-${r.label}-${i}`} onClick={() => go(r.href)}>
+                    <span className="command-result-content">
                       <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-orangeSoft text-warm"><r.icon size={15} /></span>
-                      <span><b>{r.label}</b><small>{r.hint}</small></span>
+                      <span className="command-result-copy"><b>{r.label}</b><small>{r.hint}</small></span>
                     </span>
-                    <span>→</span>
+                    <span className="command-result-arrow" aria-hidden="true">→</span>
                   </button>
                 ))}
               </div>

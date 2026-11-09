@@ -36,9 +36,10 @@ describe('Trip Pro 方案内容', () => {
     expect(rows.find(r => r.label === '分享图水印')).toMatchObject({ free: '带「旅迹」水印', pro: '无水印' })
     expect(rows.find(r => r.label === '视频模板')).toMatchObject({ free: '旅行日记', pro: '全部 3 款' })
   })
-  it('没有买断方案时，不提上传自己的音乐', () => {
+  it('不再承诺自带曲库，上传音乐按账号会员权限判断', () => {
     const noLifetime = { ...plan, lifetime: undefined }
-    expect(planComparison(noLifetime).find(r => r.label === '背景音乐')?.pro).toBe('全部 2 首')
+    expect(planComparison(noLifetime).find(r => r.label === '背景音乐')?.pro).toBe('无音乐；上传自己的音乐需账号会员')
+    expect(JSON.stringify([planComparison(plan), planBenefits(plan), planFaq(plan)])).not.toMatch(/内置背景音乐|首基础音乐|首音乐|全部.*首/)
     expect(planFaq(noLifetime).some(f => /上传/.test(f.q))).toBe(false)
   })
   it('4 项权益的具体数字来自方案配置', () => {

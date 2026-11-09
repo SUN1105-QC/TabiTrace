@@ -9,15 +9,7 @@ import { Capabilities, FinalCta, JourneyFlow, MemoriesBanner, Outcomes, ProductP
 import { PlanSection, TokyoSection, TravelStorySection, useLandingPlan } from '@/components/landing/LandingLive'
 import { SiteHeader } from '@/components/common/SiteHeader'
 import { SiteFooter } from '@/components/common/SiteFooter'
-import { HeroJourneyCard } from '@/components/home/HeroJourneyCard'
-import { TravelCalendar } from '@/components/home/TravelCalendar'
-import { TravelStats } from '@/components/home/TravelStats'
-import { CurrentTripCard } from '@/components/home/CurrentTripCard'
-import { RecentActivities } from '@/components/home/RecentActivities'
-import { TodayActions } from '@/components/home/TodayActions'
-import { ExploreBanner, TravelMemoryBanner } from '@/components/home/HomeBanners'
-import { MobileHero } from '@/components/mobile/MobileHero'
-import { ExploreRecommendations } from '@/components/mobile/ExploreRecommendations'
+import { HomeWorkspace } from '@/components/home/HomeWorkspace'
 import { HomeSkeleton } from '@/components/home/HomeSkeleton'
 import { useHomeData } from '@/hooks/useHomeData'
 import { hasSession } from '@/services/api'
@@ -50,38 +42,7 @@ function Dashboard() {
         ) : loading ? (
           <HomeSkeleton />
         ) : (
-          <div className="home-grid">
-            <div className="home-main">
-              {/* Hero：桌面端与移动端两套排版，共用同一份数据 */}
-              <div className="only-desktop"><HeroJourneyCard user={data.user} trip={data.activeTrip} /></div>
-              <div className="only-mobile"><MobileHero user={data.user} trip={data.activeTrip} /></div>
-
-              <TravelStats stats={{ ...data.stats, activeTripId: data.activeTrip?.id ?? null }} />
-
-              <div className="home-columns">
-                <CurrentTripCard
-                  trip={data.activeTrip}
-                  summary={data.activeSummary}
-                  itinerary={data.itinerary}
-                  note={[...data.checkins].reverse().find(c => c.note?.trim())?.note}
-                />
-                <div className="only-desktop">
-                  <RecentActivities activities={data.activities} tripId={data.activeTrip?.id ?? null} />
-                </div>
-              </div>
-
-              {/* 推荐探索：移动端首页的最后一个模块 */}
-              <div className="only-mobile">
-                <ExploreRecommendations places={data.recommended} />
-              </div>
-            </div>
-            <aside className="home-side only-desktop">
-              <TravelCalendar trip={data.activeTrip} itinerary={data.itinerary} checkins={data.checkins} />
-              <TodayActions trip={data.activeTrip} summary={data.activeSummary} />
-              <TravelMemoryBanner trips={data.trips} />
-              <ExploreBanner />
-            </aside>
-          </div>
+          <HomeWorkspace data={data} onSwitch={reload} />
         )}
       </PageContainer>
     </main>

@@ -381,7 +381,7 @@
     },
     "author": "Dylan McGannon",
     "license": "CC0",
-    "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
     "sourcePage": "https://commons.wikimedia.org/wiki/File:Takeshita_Street_in_Harajuku.jpg"
   },
   "12-omotesando": {
@@ -801,7 +801,7 @@
     },
     "author": "Drivephotographer",
     "license": "CC0",
-    "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
     "sourcePage": "https://commons.wikimedia.org/wiki/File:Tokyo_National_Museum.jpg"
   },
   "24-rainbow-bridge": {
@@ -836,7 +836,7 @@
     },
     "author": "Tokumeigakarinoaoshima",
     "license": "CC0",
-    "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
     "sourcePage": "https://commons.wikimedia.org/wiki/File:Rainbow_Bridge,Tokyo.JPG"
   },
   "25-odaiba-seaside-park": {
@@ -908,5 +908,3515 @@
     "license": "CC BY-SA 4.0",
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "sourcePage": "https://commons.wikimedia.org/wiki/File:Tsukiji_Outer_Market.jpg"
+  },
+  "seoul-01-gyeongbokgung": {
+    "subject": "景福宫",
+    "original": {
+      "file": "seoul-01-gyeongbokgung.jpeg",
+      "width": 6512,
+      "height": 4341,
+      "bytes": 8874395
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 426,
+        "bytes": 50322
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 182838
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 399172
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1707,
+        "bytes": 716328
+      }
+    },
+    "author": "서울관광 아카이브",
+    "attribution": null,
+    "credit": "https://archive.visitseoul.net/html/searchView.jsp?contentsId=10032",
+    "originalTitle": "광화문 월대",
+    "createdAt": "2023-10-16",
+    "license": "KOGL Type 1",
+    "licenseUrl": "https://www.kogl.or.kr/info/licenseType1.do",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:%EA%B4%91%ED%99%94%EB%AC%B8_%EC%9B%94%EB%8C%80.jpg"
+  },
+  "seoul-02-changdeokgung": {
+    "subject": "昌德宫",
+    "original": {
+      "file": "seoul-02-changdeokgung.jpeg",
+      "width": 4000,
+      "height": 2283,
+      "bytes": 6754538
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 365,
+        "bytes": 56076
+      },
+      "1280": {
+        "width": 1280,
+        "height": 730,
+        "bytes": 203556
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1096,
+        "bytes": 461050
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1461,
+        "bytes": 787730
+      }
+    },
+    "author": "문화재청",
+    "attribution": "문화재청",
+    "credit": "문화재청",
+    "originalTitle": "창덕궁 전경 (2012)",
+    "createdAt": "2012-11-16 08:45:24",
+    "license": "KOGL Type 1",
+    "licenseUrl": "https://www.kogl.or.kr/info/licenseType1.do",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:%EC%B0%BD%EB%8D%95%EA%B6%81_%EC%A0%84%EA%B2%BD_(2012).jpg"
+  },
+  "seoul-03-changgyeonggung": {
+    "subject": "昌庆宫",
+    "original": {
+      "file": "seoul-03-changgyeonggung.jpeg",
+      "width": 1600,
+      "height": 1000,
+      "bytes": 387133
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 400,
+        "bytes": 36764
+      },
+      "1280": {
+        "width": 1280,
+        "height": 800,
+        "bytes": 128744
+      },
+      "1920": {
+        "width": 1600,
+        "height": 1000,
+        "bytes": 201574
+      },
+      "2560": {
+        "width": 1600,
+        "height": 1000,
+        "bytes": 201574
+      }
+    },
+    "author": "서울시",
+    "attribution": null,
+    "credit": "서울연구데이터베이스",
+    "originalTitle": "창경궁 정면 전경1 (2014)",
+    "createdAt": "2014-10-03 15:18:30",
+    "license": "CC BY 2.0 kr",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/kr/deed.en",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:%EC%B0%BD%EA%B2%BD%EA%B6%81_%EC%A0%95%EB%A9%B4_%EC%A0%84%EA%B2%BD1_(2014).jpg"
+  },
+  "seoul-04-deoksugung": {
+    "subject": "德寿宫",
+    "original": {
+      "file": "seoul-04-deoksugung.jpeg",
+      "width": 4000,
+      "height": 1906,
+      "bytes": 7097419
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 305,
+        "bytes": 52478
+      },
+      "1280": {
+        "width": 1280,
+        "height": 610,
+        "bytes": 200228
+      },
+      "1920": {
+        "width": 1920,
+        "height": 915,
+        "bytes": 459388
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1220,
+        "bytes": 805402
+      }
+    },
+    "author": "문화재청",
+    "attribution": "문화재청",
+    "credit": "문화재청",
+    "originalTitle": "덕수궁 전경 (2013)",
+    "createdAt": "2013-05-01 15:09:12",
+    "license": "KOGL Type 1",
+    "licenseUrl": "https://www.kogl.or.kr/info/licenseType1.do",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:%EB%8D%95%EC%88%98%EA%B6%81_%EC%A0%84%EA%B2%BD_(2013).jpg"
+  },
+  "seoul-05-bukchon": {
+    "subject": "北村韩屋村",
+    "original": {
+      "file": "seoul-05-bukchon.jpeg",
+      "width": 4898,
+      "height": 3265,
+      "bytes": 5942242
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 64402
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 219252
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 452932
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1706,
+        "bytes": 699714
+      }
+    },
+    "author": "Bgag",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Bukchon Hanok Village 01",
+    "createdAt": "2022-09-27",
+    "license": "CC0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Bukchon_Hanok_Village_01.jpg"
+  },
+  "seoul-06-insadong": {
+    "subject": "仁寺洞",
+    "original": {
+      "file": "seoul-06-insadong.jpeg",
+      "width": 6000,
+      "height": 4000,
+      "bytes": 5495175
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 65168
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 206172
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 370424
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1707,
+        "bytes": 581498
+      }
+    },
+    "author": "S h y numis",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Insa-dong 인사동 October 1 2020 20",
+    "createdAt": "2020-10-01 13:46:36",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Insa-dong_%EC%9D%B8%EC%82%AC%EB%8F%99_October_1_2020_20.jpg"
+  },
+  "seoul-07-ikseondong": {
+    "subject": "益善洞",
+    "original": {
+      "file": "seoul-07-ikseondong.jpeg",
+      "width": 4608,
+      "height": 3456,
+      "bytes": 3899873
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 480,
+        "bytes": 63350
+      },
+      "1280": {
+        "width": 1280,
+        "height": 960,
+        "bytes": 218132
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1440,
+        "bytes": 433544
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1920,
+        "bytes": 662018
+      }
+    },
+    "author": "오모군",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "View of Ikseon-dong from National Tax Service Jongno District Office",
+    "createdAt": "2021-01-07 11:06:48",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:View_of_Ikseon-dong_from_National_Tax_Service_Jongno_District_Office.jpg"
+  },
+  "seoul-08-jogyesa": {
+    "subject": "曹溪寺",
+    "original": {
+      "file": "seoul-08-jogyesa.jpeg",
+      "width": 2048,
+      "height": 1536,
+      "bytes": 754689
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 480,
+        "bytes": 87614
+      },
+      "1280": {
+        "width": 1280,
+        "height": 960,
+        "bytes": 288838
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1440,
+        "bytes": 547672
+      },
+      "2560": {
+        "width": 2048,
+        "height": 1536,
+        "bytes": 596516
+      }
+    },
+    "author": "Francisco Anzola",
+    "attribution": null,
+    "credit": "Jogyesa Temple",
+    "originalTitle": "Jogyesa Temple (1509839597)",
+    "createdAt": "2007-08-29 00:59",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Jogyesa_Temple_(1509839597).jpg"
+  },
+  "seoul-09-jongmyo": {
+    "subject": "宗庙",
+    "original": {
+      "file": "seoul-09-jongmyo.jpeg",
+      "width": 4000,
+      "height": 2155,
+      "bytes": 6615246
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 344,
+        "bytes": 37342
+      },
+      "1280": {
+        "width": 1280,
+        "height": 689,
+        "bytes": 149638
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1034,
+        "bytes": 345764
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1379,
+        "bytes": 606178
+      }
+    },
+    "author": "문화재청",
+    "attribution": "문화재청",
+    "credit": "문화재청",
+    "originalTitle": "Jeongjeon, Jongmyo (Autumn, 2012)",
+    "createdAt": "2012-11-16 15:32:04",
+    "license": "KOGL Type 1",
+    "licenseUrl": "https://www.kogl.or.kr/info/licenseType1.do",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Jeongjeon,_Jongmyo_(Autumn,_2012).jpg"
+  },
+  "seoul-10-gwanghwamun": {
+    "subject": "光化门广场",
+    "original": {
+      "file": "seoul-10-gwanghwamun.jpeg",
+      "width": 4193,
+      "height": 6119,
+      "bytes": 10881532
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 934,
+        "bytes": 133892
+      },
+      "1280": {
+        "width": 1280,
+        "height": 1868,
+        "bytes": 420792
+      },
+      "1920": {
+        "width": 1920,
+        "height": 2802,
+        "bytes": 993898
+      },
+      "2560": {
+        "width": 2560,
+        "height": 3736,
+        "bytes": 2117752
+      }
+    },
+    "author": "Seoul Tourism Organization",
+    "attribution": "서울관광아카이브",
+    "credit": "Seoul Tourism Archive 10341",
+    "originalTitle": "Nightview of the Gwanghwamun Square 2024",
+    "createdAt": "2024-12-11",
+    "license": "KOGL Type 1",
+    "licenseUrl": "https://www.kogl.or.kr/info/licenseType1.do",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Nightview_of_the_Gwanghwamun_Square_2024.jpg"
+  },
+  "seoul-11-cheonggyecheon": {
+    "subject": "清溪川",
+    "original": {
+      "file": "seoul-11-cheonggyecheon.jpeg",
+      "width": 6555,
+      "height": 4370,
+      "bytes": 13455707
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 52990
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 187698
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 416344
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1707,
+        "bytes": 748532
+      }
+    },
+    "author": "Basile Morin",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Cheonggyecheon stream at sunrise with trees in Seoul",
+    "createdAt": "2024-06-07 05:28:01",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Cheonggyecheon_stream_at_sunrise_with_trees_in_Seoul.jpg"
+  },
+  "seoul-12-n-seoul-tower": {
+    "subject": "南山首尔塔",
+    "original": {
+      "file": "seoul-12-n-seoul-tower.jpeg",
+      "width": 4600,
+      "height": 2500,
+      "bytes": 9644262
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 348,
+        "bytes": 54648
+      },
+      "1280": {
+        "width": 1280,
+        "height": 696,
+        "bytes": 194314
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1043,
+        "bytes": 404334
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1391,
+        "bytes": 643126
+      }
+    },
+    "author": "kallerna",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "N Seoul Tower view 2",
+    "createdAt": "2022-11-30 12:19",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:N_Seoul_Tower_view_2.jpg"
+  },
+  "seoul-13-namsan": {
+    "subject": "南山公园",
+    "original": {
+      "file": "seoul-13-namsan.jpeg",
+      "width": 3000,
+      "height": 2000,
+      "bytes": 4170928
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 31648
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 107856
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 214302
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1707,
+        "bytes": 355058
+      }
+    },
+    "author": "서울관광 아카이브",
+    "attribution": null,
+    "credit": "https://archive.visitseoul.net/html/searchView.jsp?contentsId=5813&page=3&c1=&c3=all&c4=&c5=search&keyword=%25EB%2582%25A8%25EC%2582%25B0&page=3&mode=&pageLimit=39&totalCnt=",
+    "originalTitle": "Namsan and Namsan Tour at Dusk",
+    "createdAt": "Unknown date",
+    "license": "KOGL Type 1",
+    "licenseUrl": "https://www.kogl.or.kr/info/licenseType1.do",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Namsan_and_Namsan_Tour_at_Dusk.jpg"
+  },
+  "seoul-14-myeongdong": {
+    "subject": "明洞",
+    "original": {
+      "file": "seoul-14-myeongdong.jpeg",
+      "width": 1600,
+      "height": 1067,
+      "bytes": 895534
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 77354
+      },
+      "1280": {
+        "width": 1280,
+        "height": 854,
+        "bytes": 261380
+      },
+      "1920": {
+        "width": 1600,
+        "height": 1067,
+        "bytes": 384896
+      },
+      "2560": {
+        "width": 1600,
+        "height": 1067,
+        "bytes": 384896
+      }
+    },
+    "author": "서울연구데이터서비스",
+    "attribution": null,
+    "credit": "사진으로 본 서울",
+    "originalTitle": "명동8길 거리 (2020.03)",
+    "createdAt": "2020-03-01 16:07:40",
+    "license": "KOGL Type 1",
+    "licenseUrl": "https://www.kogl.or.kr/info/licenseType1.do",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:%EB%AA%85%EB%8F%998%EA%B8%B8_%EA%B1%B0%EB%A6%AC_(2020.03).jpg"
+  },
+  "seoul-15-myeongdong-cathedral": {
+    "subject": "明洞圣堂",
+    "original": {
+      "file": "seoul-15-myeongdong-cathedral.jpeg",
+      "width": 3577,
+      "height": 2686,
+      "bytes": 4620470
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 480,
+        "bytes": 76872
+      },
+      "1280": {
+        "width": 1280,
+        "height": 961,
+        "bytes": 264030
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1442,
+        "bytes": 493378
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1922,
+        "bytes": 714902
+      }
+    },
+    "author": "Asacyan",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Myeongdong Cathedral 01 (cropped)",
+    "createdAt": "2015-09-23 16:26:30",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Myeongdong_Cathedral_01_(cropped).jpg"
+  },
+  "seoul-16-namdaemun-market": {
+    "subject": "南大门市场",
+    "original": {
+      "file": "seoul-16-namdaemun-market.jpeg",
+      "width": 4032,
+      "height": 3024,
+      "bytes": 2921904
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 480,
+        "bytes": 68424
+      },
+      "1280": {
+        "width": 1280,
+        "height": 960,
+        "bytes": 212704
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1440,
+        "bytes": 402178
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1920,
+        "bytes": 616998
+      }
+    },
+    "author": "Sgroey",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Namdaemun shopping street 2",
+    "createdAt": "2024-08-22 15:11:47",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Namdaemun_shopping_street_2.jpg"
+  },
+  "seoul-17-gwangjang-market": {
+    "subject": "广藏市场",
+    "original": {
+      "file": "seoul-17-gwangjang-market.jpeg",
+      "width": 5184,
+      "height": 3456,
+      "bytes": 5651901
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 56844
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 177956
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 337410
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1707,
+        "bytes": 505374
+      }
+    },
+    "author": "Bgag",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Gwangjang Market, Seoul 01",
+    "createdAt": "2022-09-26",
+    "license": "CC0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Gwangjang_Market,_Seoul_01.jpg"
+  },
+  "seoul-18-ddp": {
+    "subject": "东大门设计广场",
+    "original": {
+      "file": "seoul-18-ddp.jpeg",
+      "width": 3600,
+      "height": 1200,
+      "bytes": 3218657
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 213,
+        "bytes": 24486
+      },
+      "1280": {
+        "width": 1280,
+        "height": 427,
+        "bytes": 84864
+      },
+      "1920": {
+        "width": 1920,
+        "height": 640,
+        "bytes": 173978
+      },
+      "2560": {
+        "width": 2560,
+        "height": 853,
+        "bytes": 283730
+      }
+    },
+    "author": "Eugene Lim",
+    "attribution": null,
+    "credit": "https://www.flickr.com/photos/eugenelimphotography/13983519595/in/photolist-niFccr-9KXMZb-pEsfbc-JhhaZ-9KYcWs-qbrZV3-oYPhNY-c5L5ZE-a2Dgye-BGMzxc-7W14nW-7n9UEj-6z5uKE-4y4hKE-sieoNK-BQ5gaZ-oq4dqf-dpZ9LK-mcN4f4-rRjMkL-o5N2R7-A9k1uy-jaiYmt-mtnuhS-qHEMZG-pofG6p-Cbbow6-9KZaUL-9KWnoi-9KZa7W-B4kbph-qoYiLj-4iVokE-4xYZZe-A9rsxH-ngMqfb-6z5wZd-c5LT8y-c5KN3L-rsz2wd-s7D8P5-oDvLiL-okQm2g-vM9PJ-pu39df-pwbXxu-mtkQvT-mtmvDR-oBYbaK-mREenf",
+    "originalTitle": "Dongdaemun Design Plaza at night, Seoul, Korea",
+    "createdAt": "2014-04-17 18:05:54",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Dongdaemun_Design_Plaza_at_night,_Seoul,_Korea.jpg"
+  },
+  "seoul-19-heunginjimun": {
+    "subject": "兴仁之门",
+    "original": {
+      "file": "seoul-19-heunginjimun.jpeg",
+      "width": 4000,
+      "height": 2670,
+      "bytes": 7244846
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 65874
+      },
+      "1280": {
+        "width": 1280,
+        "height": 854,
+        "bytes": 232774
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1282,
+        "bytes": 495974
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1709,
+        "bytes": 813478
+      }
+    },
+    "author": "문화재청 (공공누리 제1유형)",
+    "attribution": null,
+    "credit": "http://www.heritage.go.kr/heri/cul/imgHeritage.do?ccimId=6307836&ccbaKdcd=12&ccbaAsno=00010000&ccbaCtcd=11",
+    "originalTitle": "서울 흥인지문 야경",
+    "createdAt": "2015-06-10 20:19:33",
+    "license": "KOGL Type 1",
+    "licenseUrl": "https://www.kogl.or.kr/info/licenseType1.do",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:%EC%84%9C%EC%9A%B8_%ED%9D%A5%EC%9D%B8%EC%A7%80%EB%AC%B8_%EC%95%BC%EA%B2%BD.jpg"
+  },
+  "seoul-20-hongdae": {
+    "subject": "弘大街区",
+    "original": {
+      "file": "seoul-20-hongdae.jpeg",
+      "width": 3024,
+      "height": 3229,
+      "bytes": 2509359
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 683,
+        "bytes": 95448
+      },
+      "1280": {
+        "width": 1280,
+        "height": 1367,
+        "bytes": 316236
+      },
+      "1920": {
+        "width": 1920,
+        "height": 2050,
+        "bytes": 619050
+      },
+      "2560": {
+        "width": 2560,
+        "height": 2734,
+        "bytes": 971820
+      }
+    },
+    "author": "U0894629",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Street hongdae Seoul",
+    "createdAt": "2022-08-02",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Street_hongdae_Seoul.jpg"
+  },
+  "seoul-21-gyeongui-forest": {
+    "subject": "京义线林荫道",
+    "original": {
+      "file": "seoul-21-gyeongui-forest.jpeg",
+      "width": 4160,
+      "height": 2340,
+      "bytes": 5185430
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 360,
+        "bytes": 63900
+      },
+      "1280": {
+        "width": 1280,
+        "height": 720,
+        "bytes": 230800
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1080,
+        "bytes": 483614
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1440,
+        "bytes": 746222
+      }
+    },
+    "author": "Christian Bolz (크리스티안 볼츠)",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Gyeonguiseon Forest Trail Park and Ttaeng-ttaeng Street in Seoul (near Hongdae, 1)",
+    "createdAt": "Taken on 6 October 2017, 11:17:45",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Gyeonguiseon_Forest_Trail_Park_and_Ttaeng-ttaeng_Street_in_Seoul_(near_Hongdae,_1).jpg"
+  },
+  "seoul-22-seoul-forest": {
+    "subject": "首尔林",
+    "original": {
+      "file": "seoul-22-seoul-forest.jpeg",
+      "width": 2992,
+      "height": 2992,
+      "bytes": 4096187
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 640,
+        "bytes": 127064
+      },
+      "1280": {
+        "width": 1280,
+        "height": 1280,
+        "bytes": 504330
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1920,
+        "bytes": 1004716
+      },
+      "2560": {
+        "width": 2560,
+        "height": 2560,
+        "bytes": 1540554
+      }
+    },
+    "author": "CHO woohyuck",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Seoul Forest in May 2022 (1)",
+    "createdAt": "2022-05-21 16:47:02",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Seoul_Forest_in_May_2022_(1).jpg"
+  },
+  "seoul-23-seongsu": {
+    "subject": "圣水洞",
+    "original": {
+      "file": "seoul-23-seongsu.jpeg",
+      "width": 3797,
+      "height": 5696,
+      "bytes": 2622529
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 960,
+        "bytes": 154666
+      },
+      "1280": {
+        "width": 1280,
+        "height": 1920,
+        "bytes": 478094
+      },
+      "1920": {
+        "width": 1920,
+        "height": 2880,
+        "bytes": 892712
+      },
+      "2560": {
+        "width": 2560,
+        "height": 3840,
+        "bytes": 1359492
+      }
+    },
+    "author": "Dr. Thomas Liptak",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Seoul, Seongdong District, Seongsu (Yeonmujang-gil)",
+    "createdAt": "2026-09-30 11:44:04",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Seoul,_Seongdong_District,_Seongsu_(Yeonmujang-gil).jpg"
+  },
+  "seoul-24-yeouido-park": {
+    "subject": "汝矣岛公园",
+    "original": {
+      "file": "seoul-24-yeouido-park.jpeg",
+      "width": 2112,
+      "height": 1408,
+      "bytes": 2569165
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 73596
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 286132
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 605284
+      },
+      "2560": {
+        "width": 2112,
+        "height": 1408,
+        "bytes": 750074
+      }
+    },
+    "author": "Wpcpey",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Yeouido Park Pond 201604",
+    "createdAt": "2016-04-15",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Yeouido_Park_Pond_201604.jpg"
+  },
+  "seoul-25-banpo-bridge": {
+    "subject": "盘浦大桥",
+    "original": {
+      "file": "seoul-25-banpo-bridge.jpeg",
+      "width": 4102,
+      "height": 2784,
+      "bytes": 2569467
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 435,
+        "bytes": 39500
+      },
+      "1280": {
+        "width": 1280,
+        "height": 869,
+        "bytes": 117224
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1303,
+        "bytes": 233138
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1737,
+        "bytes": 396910
+      }
+    },
+    "author": "서울특별시 소방재난본부 (Seoul Metropolitan Fire & Disaster Headquarters)",
+    "attribution": null,
+    "credit": "서울특별시 소방재난본부 (Seoul Metropolitan Fire & Disaster Headquarters)",
+    "originalTitle": "2011년 11월 대한민국 서울특별시 명소 (Seoul best attractions) 달빛무지개분수1",
+    "createdAt": "2008-10-09 20:36:06",
+    "license": "Public domain",
+    "licenseUrl": "https://commons.wikimedia.org/wiki/File:2011%EB%85%84_11%EC%9B%94_%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD_%EC%84%9C%EC%9A%B8%ED%8A%B9%EB%B3%84%EC%8B%9C_%EB%AA%85%EC%86%8C_(Seoul_best_attractions)_%EB%8B%AC%EB%B9%9B%EB%AC%B4%EC%A7%80%EA%B0%9C%EB%B6%84%EC%88%981.jpg#Licensing",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:2011%EB%85%84_11%EC%9B%94_%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD_%EC%84%9C%EC%9A%B8%ED%8A%B9%EB%B3%84%EC%8B%9C_%EB%AA%85%EC%86%8C_(Seoul_best_attractions)_%EB%8B%AC%EB%B9%9B%EB%AC%B4%EC%A7%80%EA%B0%9C%EB%B6%84%EC%88%981.jpg"
+  },
+  "seoul-26-national-museum": {
+    "subject": "国立中央博物馆",
+    "original": {
+      "file": "seoul-26-national-museum.jpeg",
+      "width": 6000,
+      "height": 4000,
+      "bytes": 12692549
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 31362
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 112824
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 211148
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1707,
+        "bytes": 325368
+      }
+    },
+    "author": "Richard Mortel from Riyadh, Saudi Arabia",
+    "attribution": null,
+    "credit": "National Museum of Korea, Seoul (2)",
+    "originalTitle": "National Museum of Korea, Seoul (2) (40236586235)",
+    "createdAt": "Taken on 19 March 2018, 11:38",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:National_Museum_of_Korea,_Seoul_(2)_(40236586235).jpg"
+  },
+  "seoul-27-war-memorial": {
+    "subject": "战争纪念馆",
+    "original": {
+      "file": "seoul-27-war-memorial.jpeg",
+      "width": 3973,
+      "height": 2235,
+      "bytes": 2479746
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 360,
+        "bytes": 27056
+      },
+      "1280": {
+        "width": 1280,
+        "height": 720,
+        "bytes": 89432
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1080,
+        "bytes": 186028
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1440,
+        "bytes": 293574
+      }
+    },
+    "author": "*Youngjin",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "The War Memorial Of Korea 240615 02",
+    "createdAt": "2024-06-15",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:The_War_Memorial_Of_Korea_240615_02.jpg"
+  },
+  "seoul-28-bongeunsa": {
+    "subject": "奉恩寺",
+    "original": {
+      "file": "seoul-28-bongeunsa.jpeg",
+      "width": 5240,
+      "height": 3500,
+      "bytes": 6363480
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 46590
+      },
+      "1280": {
+        "width": 1280,
+        "height": 855,
+        "bytes": 162786
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1282,
+        "bytes": 344278
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1710,
+        "bytes": 569486
+      }
+    },
+    "author": "kallerna",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Bongeunsa Seoul 9",
+    "createdAt": "2022-12-06 10:30",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Bongeunsa_Seoul_9.jpg"
+  },
+  "seoul-29-coex": {
+    "subject": "COEX商场",
+    "original": {
+      "file": "seoul-29-coex.jpeg",
+      "width": 5676,
+      "height": 3784,
+      "bytes": 16759910
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 97822
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 360790
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 736688
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1707,
+        "bytes": 1169352
+      }
+    },
+    "author": "Republic of Korea",
+    "attribution": null,
+    "credit": "https://www.flickr.com/photos/koreanet/54951484140/",
+    "originalTitle": "Starfield Library",
+    "createdAt": "2025-11-26 15:45:49",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Starfield_Library.jpg"
+  },
+  "seoul-30-lotte-tower": {
+    "subject": "乐天世界塔",
+    "original": {
+      "file": "seoul-30-lotte-tower.jpeg",
+      "width": 4032,
+      "height": 1960,
+      "bytes": 1330842
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 311,
+        "bytes": 14722
+      },
+      "1280": {
+        "width": 1280,
+        "height": 622,
+        "bytes": 56088
+      },
+      "1920": {
+        "width": 1920,
+        "height": 933,
+        "bytes": 101924
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1244,
+        "bytes": 147810
+      }
+    },
+    "author": "Ox1997cow",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Lotte World Tower near Cheongdam Bridge",
+    "createdAt": "2019-04-11 16:09:09",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Lotte_World_Tower_near_Cheongdam_Bridge.jpg"
+  },
+  "hong-kong-01-victoria-peak": {
+    "subject": "太平山顶",
+    "original": {
+      "file": "hong-kong-01-victoria-peak.jpeg",
+      "width": 3600,
+      "height": 2700,
+      "bytes": 7765156
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 480,
+        "bytes": 67554
+      },
+      "1280": {
+        "width": 1280,
+        "height": 960,
+        "bytes": 259822
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1440,
+        "bytes": 512298
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1920,
+        "bytes": 777598
+      }
+    },
+    "author": "Daniel Case",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "High West and Victoria Peak from Victoria Gap (crop1)",
+    "createdAt": "2013-08-05",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:High_West_and_Victoria_Peak_from_Victoria_Gap_(crop1).jpg"
+  },
+  "hong-kong-02-peak-tram": {
+    "subject": "山顶缆车",
+    "original": {
+      "file": "hong-kong-02-peak-tram.jpeg",
+      "width": 2000,
+      "height": 1333,
+      "bytes": 1925018
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 426,
+        "bytes": 76890
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 255738
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 456358
+      },
+      "2560": {
+        "width": 2000,
+        "height": 1333,
+        "bytes": 496732
+      }
+    },
+    "author": "Samson Ng . D201@EAL",
+    "attribution": null,
+    "credit": "https://www.flickr.com/photos/64314473@N08/52380931409/",
+    "originalTitle": "CWA 6th Generation Peak Tram",
+    "createdAt": "2022-09-07 15:08:29",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:CWA_6th_Generation_Peak_Tram.jpg"
+  },
+  "hong-kong-03-star-ferry": {
+    "subject": "天星小轮（尖沙咀码头）",
+    "original": {
+      "file": "hong-kong-03-star-ferry.jpeg",
+      "width": 2048,
+      "height": 1536,
+      "bytes": 867796
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 480,
+        "bytes": 46164
+      },
+      "1280": {
+        "width": 1280,
+        "height": 960,
+        "bytes": 166582
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1440,
+        "bytes": 327116
+      },
+      "2560": {
+        "width": 2048,
+        "height": 1536,
+        "bytes": 379012
+      }
+    },
+    "author": "Baycrest",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Tsim Sha Tsui Ferry Pier",
+    "createdAt": "2008-08",
+    "license": "CC BY-SA 2.5",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.5",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Tsim_Sha_Tsui_Ferry_Pier.jpg"
+  },
+  "hong-kong-04-victoria-harbour": {
+    "subject": "维多利亚港",
+    "original": {
+      "file": "hong-kong-04-victoria-harbour.jpeg",
+      "width": 10439,
+      "height": 4936,
+      "bytes": 12162479
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 303,
+        "bytes": 55608
+      },
+      "1280": {
+        "width": 1280,
+        "height": 605,
+        "bytes": 200010
+      },
+      "1920": {
+        "width": 1920,
+        "height": 908,
+        "bytes": 399990
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1211,
+        "bytes": 670300
+      }
+    },
+    "author": "Benh LIEU SONG ( Flickr )",
+    "attribution": null,
+    "credit": "Hong Kong Harbour Night 2019",
+    "originalTitle": "Hong Kong Harbour Night 2019-06-11",
+    "createdAt": "2019-06-11 20:48",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Hong_Kong_Harbour_Night_2019-06-11.jpg"
+  },
+  "hong-kong-05-avenue-of-stars": {
+    "subject": "星光大道",
+    "original": {
+      "file": "hong-kong-05-avenue-of-stars.jpeg",
+      "width": 2736,
+      "height": 1824,
+      "bytes": 3292395
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 45786
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 143900
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 278744
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1707,
+        "bytes": 434792
+      }
+    },
+    "author": "Wpcpey",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Avenue of Stars 201901",
+    "createdAt": "2019-01",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Avenue_of_Stars_201901.jpg"
+  },
+  "hong-kong-06-clock-tower": {
+    "subject": "尖沙咀钟楼",
+    "original": {
+      "file": "hong-kong-06-clock-tower.jpeg",
+      "width": 4816,
+      "height": 3211,
+      "bytes": 6261850
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 426,
+        "bytes": 76240
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 290842
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 636112
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1707,
+        "bytes": 1071498
+      }
+    },
+    "author": "Mk2010",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Former Kowloon-Canton Railway Clock Tower, Tsim Sha Tsui (Hong Kong)",
+    "createdAt": "2015-05-30 09:36:20",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Former_Kowloon-Canton_Railway_Clock_Tower,_Tsim_Sha_Tsui_(Hong_Kong).jpg"
+  },
+  "hong-kong-07-tst-promenade": {
+    "subject": "尖沙咀海滨花园",
+    "original": {
+      "file": "hong-kong-07-tst-promenade.jpeg",
+      "width": 3264,
+      "height": 2448,
+      "bytes": 1617673
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 480,
+        "bytes": 47512
+      },
+      "1280": {
+        "width": 1280,
+        "height": 960,
+        "bytes": 181760
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1440,
+        "bytes": 389464
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1920,
+        "bytes": 636388
+      }
+    },
+    "author": "Ceeseven",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Tsim Sha Tsui Promenade at East Tsim Sha Tsui",
+    "createdAt": "2012-03-22",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Tsim_Sha_Tsui_Promenade_at_East_Tsim_Sha_Tsui.jpg"
+  },
+  "hong-kong-08-museum-of-art": {
+    "subject": "香港艺术馆",
+    "original": {
+      "file": "hong-kong-08-museum-of-art.jpeg",
+      "width": 2736,
+      "height": 1824,
+      "bytes": 3088771
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 51524
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 168224
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 313852
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1707,
+        "bytes": 472262
+      }
+    },
+    "author": "Wpcpey",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Hong Kong Museum of Art renovation site 201908",
+    "createdAt": "2019-08",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Hong_Kong_Museum_of_Art_renovation_site_201908.jpg"
+  },
+  "hong-kong-09-space-museum": {
+    "subject": "香港太空馆",
+    "original": {
+      "file": "hong-kong-09-space-museum.jpeg",
+      "width": 6000,
+      "height": 4000,
+      "bytes": 16012690
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 31850
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 127704
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 271108
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1707,
+        "bytes": 478648
+      }
+    },
+    "author": "Prosperity Horizons",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Hong Kong Space Museum",
+    "createdAt": "2017-08-14 17:42:55",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Hong_Kong_Space_Museum.jpg"
+  },
+  "hong-kong-10-west-kowloon": {
+    "subject": "西九文化区",
+    "original": {
+      "file": "hong-kong-10-west-kowloon.jpeg",
+      "width": 5139,
+      "height": 3640,
+      "bytes": 1993862
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 454,
+        "bytes": 44994
+      },
+      "1280": {
+        "width": 1280,
+        "height": 907,
+        "bytes": 162586
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1360,
+        "bytes": 358438
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1813,
+        "bytes": 600006
+      }
+    },
+    "author": "Noshoelaces 99",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "M+, West Kowloon, Hong Kong",
+    "createdAt": "2021-11-02",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:M%2B,_West_Kowloon,_Hong_Kong.jpg"
+  },
+  "hong-kong-11-palace-museum": {
+    "subject": "香港故宫文化博物馆",
+    "original": {
+      "file": "hong-kong-11-palace-museum.jpeg",
+      "width": 3000,
+      "height": 1965,
+      "bytes": 1626528
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 419,
+        "bytes": 39390
+      },
+      "1280": {
+        "width": 1280,
+        "height": 838,
+        "bytes": 142836
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1258,
+        "bytes": 292482
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1677,
+        "bytes": 493676
+      }
+    },
+    "author": "xiquinhosilva",
+    "attribution": null,
+    "credit": "Hong-Kong-10076",
+    "originalTitle": "Hong Kong Palace Museum 2022",
+    "createdAt": "2022-07-17 14:14",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Hong_Kong_Palace_Museum_2022.jpg"
+  },
+  "hong-kong-12-mplus": {
+    "subject": "M+博物馆",
+    "original": {
+      "file": "hong-kong-12-mplus.jpeg",
+      "width": 2681,
+      "height": 2145,
+      "bytes": 2559700
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 512,
+        "bytes": 72480
+      },
+      "1280": {
+        "width": 1280,
+        "height": 1024,
+        "bytes": 256508
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1536,
+        "bytes": 483742
+      },
+      "2560": {
+        "width": 2560,
+        "height": 2048,
+        "bytes": 764576
+      }
+    },
+    "author": "Lord Jaraxxus",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "WKCD M+, 2021.11",
+    "createdAt": "2021-11-25",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:WKCD_M%2B,_2021.11.jpg"
+  },
+  "hong-kong-13-central-market": {
+    "subject": "中环街市",
+    "original": {
+      "file": "hong-kong-13-central-market.jpeg",
+      "width": 2112,
+      "height": 1408,
+      "bytes": 2290315
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 50106
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 166748
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 328004
+      },
+      "2560": {
+        "width": 2112,
+        "height": 1408,
+        "bytes": 407994
+      }
+    },
+    "author": "Wing1990hk",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Central Market 201506",
+    "createdAt": "2015-06-29",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Central_Market_201506.jpg"
+  },
+  "hong-kong-14-tai-kwun": {
+    "subject": "大馆",
+    "original": {
+      "file": "hong-kong-14-tai-kwun.jpeg",
+      "width": 2130,
+      "height": 1704,
+      "bytes": 1333218
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 512,
+        "bytes": 59124
+      },
+      "1280": {
+        "width": 1280,
+        "height": 1024,
+        "bytes": 178066
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1536,
+        "bytes": 308626
+      },
+      "2560": {
+        "width": 2130,
+        "height": 1704,
+        "bytes": 355262
+      }
+    },
+    "author": "Wpcpey",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Tai Kwun Police Headquarters Block 201806",
+    "createdAt": "2018-06-11",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Tai_Kwun_Police_Headquarters_Block_201806.jpg"
+  },
+  "hong-kong-15-pmq": {
+    "subject": "PMQ (元创方)",
+    "original": {
+      "file": "hong-kong-15-pmq.jpeg",
+      "width": 2112,
+      "height": 1408,
+      "bytes": 2568331
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 71202
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 261852
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 538732
+      },
+      "2560": {
+        "width": 2112,
+        "height": 1408,
+        "bytes": 657592
+      }
+    },
+    "author": "Wpcpey",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "PMQ Overview 201510",
+    "createdAt": "2015-10-21",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:PMQ_Overview_201510.jpg"
+  },
+  "hong-kong-16-man-mo-temple": {
+    "subject": "文武庙",
+    "original": {
+      "file": "hong-kong-16-man-mo-temple.jpeg",
+      "width": 6000,
+      "height": 4000,
+      "bytes": 13454804
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 44748
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 163664
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 304252
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1707,
+        "bytes": 484974
+      }
+    },
+    "author": "Richard Mortel from Riyadh, Saudi Arabia",
+    "attribution": null,
+    "credit": "Man Mo Temple, 1847-62, Sheung Wan, Hong Kong (17)",
+    "originalTitle": "Man Mo Temple, 1847-62, Sheung Wan, Hong Kong (17) (32748033042)",
+    "createdAt": "Taken on 1 February 2017, 11:43",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Man_Mo_Temple,_1847-62,_Sheung_Wan,_Hong_Kong_(17)_(32748033042).jpg"
+  },
+  "hong-kong-17-mid-levels": {
+    "subject": "中环至半山自动扶梯",
+    "original": {
+      "file": "hong-kong-17-mid-levels.jpeg",
+      "width": 2112,
+      "height": 1408,
+      "bytes": 2805792
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 73570
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 260890
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 515436
+      },
+      "2560": {
+        "width": 2112,
+        "height": 1408,
+        "bytes": 617854
+      }
+    },
+    "author": "Wpcpey",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Central-Mid-Levels Escalator and Walkway System 2017",
+    "createdAt": "2017-05-28",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Central-Mid-Levels_Escalator_and_Walkway_System_2017.jpg"
+  },
+  "hong-kong-18-graham-street": {
+    "subject": "嘉咸街",
+    "original": {
+      "file": "hong-kong-18-graham-street.jpeg",
+      "width": 1280,
+      "height": 960,
+      "bytes": 762312
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 480,
+        "bytes": 81512
+      },
+      "1280": {
+        "width": 1280,
+        "height": 960,
+        "bytes": 250320
+      },
+      "1920": {
+        "width": 1280,
+        "height": 960,
+        "bytes": 250320
+      },
+      "2560": {
+        "width": 1280,
+        "height": 960,
+        "bytes": 250320
+      }
+    },
+    "author": "No machine-readable author provided. TangHon~commonswiki assumed (based on copyright claims).",
+    "attribution": null,
+    "credit": "No machine-readable source provided. Own work assumed (based on copyright claims).",
+    "originalTitle": "HK Graham Street 3",
+    "createdAt": "14 June 2006 (according to Exif data)",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:HK_Graham_Street_3.jpg"
+  },
+  "hong-kong-19-hong-kong-park": {
+    "subject": "香港公园",
+    "original": {
+      "file": "hong-kong-19-hong-kong-park.jpeg",
+      "width": 1600,
+      "height": 1200,
+      "bytes": 2163807
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 480,
+        "bytes": 109020
+      },
+      "1280": {
+        "width": 1280,
+        "height": 960,
+        "bytes": 352840
+      },
+      "1920": {
+        "width": 1600,
+        "height": 1200,
+        "bytes": 511142
+      },
+      "2560": {
+        "width": 1600,
+        "height": 1200,
+        "bytes": 511142
+      }
+    },
+    "author": "WiNG",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Hong Kong Park Overview 2009",
+    "createdAt": "2009-06-25",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Hong_Kong_Park_Overview_2009.jpg"
+  },
+  "hong-kong-20-bank-of-china": {
+    "subject": "中银大厦",
+    "original": {
+      "file": "hong-kong-20-bank-of-china.jpeg",
+      "width": 5184,
+      "height": 3456,
+      "bytes": 6098193
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 960,
+        "bytes": 101632
+      },
+      "1280": {
+        "width": 1280,
+        "height": 1920,
+        "bytes": 333002
+      },
+      "1920": {
+        "width": 1920,
+        "height": 2880,
+        "bytes": 558140
+      },
+      "2560": {
+        "width": 2560,
+        "height": 3840,
+        "bytes": 783340
+      }
+    },
+    "author": "Suicasmo",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Bank of China Tower (Hong Kong) 20170808",
+    "createdAt": "2017-08-08 16:57:23",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Bank_of_China_Tower_(Hong_Kong)_20170808.jpg"
+  },
+  "hong-kong-21-golden-bauhinia": {
+    "subject": "金紫荆广场",
+    "original": {
+      "file": "hong-kong-21-golden-bauhinia.jpeg",
+      "width": 4032,
+      "height": 3024,
+      "bytes": 1862075
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 480,
+        "bytes": 26608
+      },
+      "1280": {
+        "width": 1280,
+        "height": 960,
+        "bytes": 83426
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1440,
+        "bytes": 157110
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1920,
+        "bytes": 245580
+      }
+    },
+    "author": "LN9267",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Golden Bauhinia Square 05-05-2021",
+    "createdAt": "2021-05-05 17:48:27",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Golden_Bauhinia_Square_05-05-2021.jpg"
+  },
+  "hong-kong-22-victoria-park": {
+    "subject": "维多利亚公园",
+    "original": {
+      "file": "hong-kong-22-victoria-park.jpeg",
+      "width": 4032,
+      "height": 3024,
+      "bytes": 4318646
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 480,
+        "bytes": 66166
+      },
+      "1280": {
+        "width": 1280,
+        "height": 960,
+        "bytes": 233610
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1440,
+        "bytes": 474424
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1920,
+        "bytes": 725966
+      }
+    },
+    "author": "LN9267",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Victoria Park(Hong Kong) 22-11-2023",
+    "createdAt": "2023-11-22 17:57:16",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Victoria_Park(Hong_Kong)_22-11-2023.jpg"
+  },
+  "hong-kong-23-chi-lin": {
+    "subject": "志莲净苑",
+    "original": {
+      "file": "hong-kong-23-chi-lin.jpeg",
+      "width": 3008,
+      "height": 2000,
+      "bytes": 4027977
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 426,
+        "bytes": 54028
+      },
+      "1280": {
+        "width": 1280,
+        "height": 851,
+        "bytes": 183856
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1277,
+        "bytes": 343604
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1702,
+        "bytes": 518566
+      }
+    },
+    "author": "Rob Young from United Kingdom",
+    "attribution": null,
+    "credit": "Chi Lin Nunnery",
+    "originalTitle": "Chi Lin Nunnery (2037672635)",
+    "createdAt": "2007-11-15 04:40",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Chi_Lin_Nunnery_(2037672635).jpg"
+  },
+  "hong-kong-24-nan-lian": {
+    "subject": "南莲园池",
+    "original": {
+      "file": "hong-kong-24-nan-lian.jpeg",
+      "width": 1600,
+      "height": 1200,
+      "bytes": 2528414
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 480,
+        "bytes": 131012
+      },
+      "1280": {
+        "width": 1280,
+        "height": 960,
+        "bytes": 492442
+      },
+      "1920": {
+        "width": 1600,
+        "height": 1200,
+        "bytes": 732310
+      },
+      "2560": {
+        "width": 1600,
+        "height": 1200,
+        "bytes": 732310
+      }
+    },
+    "author": "Wpcpey",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Nan Lian Garden Overview 201807",
+    "createdAt": "2018-07-31",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Nan_Lian_Garden_Overview_201807.jpg"
+  },
+  "hong-kong-25-wong-tai-sin": {
+    "subject": "黄大仙祠",
+    "original": {
+      "file": "hong-kong-25-wong-tai-sin.jpeg",
+      "width": 1388,
+      "height": 1031,
+      "bytes": 282236
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 475,
+        "bytes": 62640
+      },
+      "1280": {
+        "width": 1280,
+        "height": 951,
+        "bytes": 197960
+      },
+      "1920": {
+        "width": 1388,
+        "height": 1031,
+        "bytes": 233986
+      },
+      "2560": {
+        "width": 1388,
+        "height": 1031,
+        "bytes": 233986
+      }
+    },
+    "author": "Chong Fat",
+    "attribution": null,
+    "credit": "Self-photographed",
+    "originalTitle": "HK WongTaiSinTemple",
+    "createdAt": "2007-10-07",
+    "license": "Public domain",
+    "licenseUrl": "https://commons.wikimedia.org/wiki/File:HK_WongTaiSinTemple.JPG#Licensing",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:HK_WongTaiSinTemple.JPG"
+  },
+  "hong-kong-26-ladies-market": {
+    "subject": "女人街",
+    "original": {
+      "file": "hong-kong-26-ladies-market.jpeg",
+      "width": 2112,
+      "height": 1408,
+      "bytes": 2810470
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 77650
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 274202
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 524112
+      },
+      "2560": {
+        "width": 2112,
+        "height": 1408,
+        "bytes": 623928
+      }
+    },
+    "author": "Wpcpey",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Tung Choi Street 201705",
+    "createdAt": "2017-05-18",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Tung_Choi_Street_201705.JPG"
+  },
+  "hong-kong-27-temple-street": {
+    "subject": "庙街",
+    "original": {
+      "file": "hong-kong-27-temple-street.jpeg",
+      "width": 4821,
+      "height": 3214,
+      "bytes": 7477262
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 426,
+        "bytes": 63944
+      },
+      "1280": {
+        "width": 1280,
+        "height": 854,
+        "bytes": 197756
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 389232
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1707,
+        "bytes": 613394
+      }
+    },
+    "author": "Diego Delso",
+    "attribution": "Diego Delso",
+    "credit": "Own work",
+    "originalTitle": "Mercado en Temple St., Hong Kong, 2013-08-11, DD 01",
+    "createdAt": "2013-08-11 21:12:19",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Mercado_en_Temple_St.,_Hong_Kong,_2013-08-11,_DD_01.JPG"
+  },
+  "hong-kong-28-tian-tan-buddha": {
+    "subject": "天坛大佛",
+    "original": {
+      "file": "hong-kong-28-tian-tan-buddha.jpeg",
+      "width": 4032,
+      "height": 2268,
+      "bytes": 6292399
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 360,
+        "bytes": 50160
+      },
+      "1280": {
+        "width": 1280,
+        "height": 720,
+        "bytes": 185324
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1080,
+        "bytes": 391518
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1440,
+        "bytes": 605468
+      }
+    },
+    "author": "Huangdan2060",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Tian Tan Buddha 2023081302",
+    "createdAt": "2023-08-13 15:21:35",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Tian_Tan_Buddha_2023081302.jpg"
+  },
+  "hong-kong-29-po-lin": {
+    "subject": "宝莲禅寺",
+    "original": {
+      "file": "hong-kong-29-po-lin.jpeg",
+      "width": 1600,
+      "height": 1200,
+      "bytes": 496611
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 480,
+        "bytes": 74996
+      },
+      "1280": {
+        "width": 1280,
+        "height": 960,
+        "bytes": 230356
+      },
+      "1920": {
+        "width": 1600,
+        "height": 1200,
+        "bytes": 313848
+      },
+      "2560": {
+        "width": 1600,
+        "height": 1200,
+        "bytes": 313848
+      }
+    },
+    "author": "No machine-readable author provided. Enochlau assumed (based on copyright claims).",
+    "attribution": null,
+    "credit": "No machine-readable source provided. Own work assumed (based on copyright claims).",
+    "originalTitle": "Po Lin Monastery 2",
+    "createdAt": "19 January 2006 (original upload date)",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Po_Lin_Monastery_2.jpg"
+  },
+  "hong-kong-30-tai-o": {
+    "subject": "大澳",
+    "original": {
+      "file": "hong-kong-30-tai-o.jpeg",
+      "width": 7360,
+      "height": 4912,
+      "bytes": 31627162
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 93312
+      },
+      "1280": {
+        "width": 1280,
+        "height": 854,
+        "bytes": 356868
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1281,
+        "bytes": 769452
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1709,
+        "bytes": 1325266
+      }
+    },
+    "author": "chensiyuan",
+    "attribution": null,
+    "credit": "chensiyuan",
+    "originalTitle": "1 tai o hong kong 2013",
+    "createdAt": "",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:1_tai_o_hong_kong_2013.jpg"
+  },
+  "taipei-01-taipei-101": {
+    "subject": "台北101",
+    "original": {
+      "file": "taipei-01-taipei-101.jpeg",
+      "width": 4233,
+      "height": 2822,
+      "bytes": 1054020
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 426,
+        "bytes": 39268
+      },
+      "1280": {
+        "width": 1280,
+        "height": 854,
+        "bytes": 121160
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 225542
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1707,
+        "bytes": 344360
+      }
+    },
+    "author": "Andrew Van Ova",
+    "attribution": null,
+    "credit": "originally posted to Flickr as [1]",
+    "originalTitle": "Taipei skyline 2014",
+    "createdAt": "2014-05-14 15:12:08",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Taipei_skyline_2014.jpg"
+  },
+  "taipei-02-elephant-mountain": {
+    "subject": "象山",
+    "original": {
+      "file": "taipei-02-elephant-mountain.jpeg",
+      "width": 4272,
+      "height": 2848,
+      "bytes": 5909053
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 67696
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 226988
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 439960
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1707,
+        "bytes": 659046
+      }
+    },
+    "author": "Lord Koxinga",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "2010 07 22230 6939 Xinyi District, Taipei, Buildings, Taipei 101, Observation, Streets in Taipei, Taiwan",
+    "createdAt": "2010-07-21 17:03",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:2010_07_22230_6939_Xinyi_District,_Taipei,_Buildings,_Taipei_101,_Observation,_Streets_in_Taipei,_Taiwan.JPG"
+  },
+  "taipei-03-memorial-hall": {
+    "subject": "中正纪念堂",
+    "original": {
+      "file": "taipei-03-memorial-hall.jpeg",
+      "width": 2900,
+      "height": 1933,
+      "bytes": 3591236
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 426,
+        "bytes": 40216
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 141234
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 268140
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1706,
+        "bytes": 400078
+      }
+    },
+    "author": "AngMoKio",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Chiang Kai-shek memorial amk",
+    "createdAt": "2008-10-16 09:56",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Chiang_Kai-shek_memorial_amk.jpg"
+  },
+  "taipei-04-liberty-square": {
+    "subject": "自由广场",
+    "original": {
+      "file": "taipei-04-liberty-square.jpeg",
+      "width": 3628,
+      "height": 2425,
+      "bytes": 1251963
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 428,
+        "bytes": 25022
+      },
+      "1280": {
+        "width": 1280,
+        "height": 856,
+        "bytes": 76222
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1283,
+        "bytes": 135476
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1711,
+        "bytes": 215184
+      }
+    },
+    "author": "tomscoffin",
+    "attribution": null,
+    "credit": "https://www.flickr.com/photos/57200171@N03/36359540320/",
+    "originalTitle": "National Theater, Liberty Square and National Concert Hall 20100623",
+    "createdAt": "2010-06-23 12:20:52",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:National_Theater,_Liberty_Square_and_National_Concert_Hall_20100623.jpg"
+  },
+  "taipei-05-national-theater": {
+    "subject": "两厅院",
+    "original": {
+      "file": "taipei-05-national-theater.jpeg",
+      "width": 11263,
+      "height": 2888,
+      "bytes": 5589306
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 164,
+        "bytes": 16094
+      },
+      "1280": {
+        "width": 1280,
+        "height": 328,
+        "bytes": 48348
+      },
+      "1920": {
+        "width": 1920,
+        "height": 492,
+        "bytes": 91918
+      },
+      "2560": {
+        "width": 2560,
+        "height": 656,
+        "bytes": 146966
+      }
+    },
+    "author": "contri from Yonezawa-Shi, Yamagata, Japan",
+    "attribution": null,
+    "credit": "DSCN7120P",
+    "originalTitle": "DSCN7120P (8149622548)",
+    "createdAt": "2012-11-03 13:13",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:DSCN7120P_(8149622548).jpg"
+  },
+  "taipei-06-longshan": {
+    "subject": "艋舺龙山寺",
+    "original": {
+      "file": "taipei-06-longshan.jpeg",
+      "width": 6208,
+      "height": 4139,
+      "bytes": 19811176
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 426,
+        "bytes": 64150
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 253406
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 555236
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1707,
+        "bytes": 1029824
+      }
+    },
+    "author": "This Photo was taken by Supanut Arunoprayote . Feel free to use any of my images, but please mention me as the author and may send me a message. (สามารถใช้ภาพได้อิสระ แต่กรุณาใส่เครดิตผู้ถ่ายและอาจส่ง ข้อความบอกกล่าวด้วย ) Please do not upload an updated image here without consultation with the Author. The author would like to make corrections only at his own source. This ensures that the changes are preserved. Please if you think that any changes should be required, please inform the author. Otherwise you can upload a new image with a new name. Please use one of the templates derivative or extract .",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Bangka Lungshan Temple 07.23",
+    "createdAt": "2023-07-29 08:10:19",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Bangka_Lungshan_Temple_07.23.jpg"
+  },
+  "taipei-07-bopiliao": {
+    "subject": "剥皮寮历史街区",
+    "original": {
+      "file": "taipei-07-bopiliao.jpeg",
+      "width": 3682,
+      "height": 2265,
+      "bytes": 1188062
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 394,
+        "bytes": 44728
+      },
+      "1280": {
+        "width": 1280,
+        "height": 787,
+        "bytes": 163274
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1181,
+        "bytes": 300416
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1575,
+        "bytes": 436868
+      }
+    },
+    "author": "Yu tptw",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "剝皮寮歷史街區20220617",
+    "createdAt": "2022-06-17 17:07:15",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:%E5%89%9D%E7%9A%AE%E5%AF%AE%E6%AD%B7%E5%8F%B2%E8%A1%97%E5%8D%8020220617.jpg"
+  },
+  "taipei-08-ximending": {
+    "subject": "西门町",
+    "original": {
+      "file": "taipei-08-ximending.jpeg",
+      "width": 3264,
+      "height": 2079,
+      "bytes": 4560794
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 407,
+        "bytes": 63870
+      },
+      "1280": {
+        "width": 1280,
+        "height": 815,
+        "bytes": 223946
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1223,
+        "bytes": 420044
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1631,
+        "bytes": 606618
+      }
+    },
+    "author": "Mrmarkertw",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "從屈臣氏西門門市到錢櫃台北中華新館 20211204",
+    "createdAt": "2021-12-04 06:02:16",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:%E5%BE%9E%E5%B1%88%E8%87%A3%E6%B0%8F%E8%A5%BF%E9%96%80%E9%96%80%E5%B8%82%E5%88%B0%E9%8C%A2%E6%AB%83%E5%8F%B0%E5%8C%97%E4%B8%AD%E8%8F%AF%E6%96%B0%E9%A4%A8_20211204.jpg"
+  },
+  "taipei-09-red-house": {
+    "subject": "西门红楼",
+    "original": {
+      "file": "taipei-09-red-house.jpeg",
+      "width": 3023,
+      "height": 2267,
+      "bytes": 1869326
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 480,
+        "bytes": 80022
+      },
+      "1280": {
+        "width": 1280,
+        "height": 960,
+        "bytes": 254572
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1440,
+        "bytes": 429388
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1920,
+        "bytes": 587060
+      }
+    },
+    "author": "Chainwit.",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Bangkah Taipei - Red House Theater - facade (2025) - img 07",
+    "createdAt": "2025-04-17 16:44:36",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Bangkah_Taipei_-_Red_House_Theater_-_facade_(2025)_-_img_07.jpg"
+  },
+  "taipei-10-dihua-street": {
+    "subject": "迪化街",
+    "original": {
+      "file": "taipei-10-dihua-street.jpeg",
+      "width": 6098,
+      "height": 4356,
+      "bytes": 35947911
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 457,
+        "bytes": 53314
+      },
+      "1280": {
+        "width": 1280,
+        "height": 914,
+        "bytes": 177920
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1372,
+        "bytes": 350764
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1829,
+        "bytes": 652270
+      }
+    },
+    "author": "This Photo was taken by Supanut Arunoprayote . Feel free to use any of my images, but please mention me as the author and may send me a message. (สามารถใช้ภาพได้อิสระ แต่กรุณาใส่เครดิตผู้ถ่ายและอาจส่ง ข้อความบอกกล่าวด้วย ) Please do not upload an updated image here without consultation with the Author. The author would like to make corrections only at his own source. This ensures that the changes are preserved. Please if you think that any changes should be required, please inform the author. Otherwise you can upload a new image with a new name. Please use one of the templates derivative or extract .",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Buildings along Dihua Street 07.23 (6)",
+    "createdAt": "2023-07-29 16:19:38",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Buildings_along_Dihua_Street_07.23_(6).jpg"
+  },
+  "taipei-11-dadaocheng-wharf": {
+    "subject": "大稻埕码头",
+    "original": {
+      "file": "taipei-11-dadaocheng-wharf.jpeg",
+      "width": 5760,
+      "height": 3240,
+      "bytes": 10649507
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 360,
+        "bytes": 33516
+      },
+      "1280": {
+        "width": 1280,
+        "height": 720,
+        "bytes": 115644
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1080,
+        "bytes": 242004
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1440,
+        "bytes": 440308
+      }
+    },
+    "author": "CEphoto, Uwe Aranas",
+    "attribution": "Photo by CEphoto, Uwe Aranas or alternatively © CEphoto, Uwe Aranas",
+    "credit": "Own work",
+    "originalTitle": "Taipei Taiwan Flood-Gate-01",
+    "createdAt": "2015-12-23",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Taipei_Taiwan_Flood-Gate-01.jpg"
+  },
+  "taipei-12-ningxia-market": {
+    "subject": "宁夏夜市",
+    "original": {
+      "file": "taipei-12-ningxia-market.jpeg",
+      "width": 6209,
+      "height": 4141,
+      "bytes": 10454530
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 426,
+        "bytes": 37430
+      },
+      "1280": {
+        "width": 1280,
+        "height": 854,
+        "bytes": 115160
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 211840
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1707,
+        "bytes": 331516
+      }
+    },
+    "author": "迷惘的人生",
+    "attribution": null,
+    "credit": "https://www.flickr.com/photos/27689876@N03/54547054507/",
+    "originalTitle": "Ningxia Night Market 20250520",
+    "createdAt": "2025-05-20 18:52:49",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Ningxia_Night_Market_20250520.jpg"
+  },
+  "taipei-13-huashan": {
+    "subject": "华山1914文化创意产业园区",
+    "original": {
+      "file": "taipei-13-huashan.jpeg",
+      "width": 2112,
+      "height": 1408,
+      "bytes": 2445888
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 50764
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 218188
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 478022
+      },
+      "2560": {
+        "width": 2112,
+        "height": 1408,
+        "bytes": 601636
+      }
+    },
+    "author": "Wpcpey",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Huashan 1914, Syntrend and Jinshan e01 20150701",
+    "createdAt": "2015-07-01 10:51",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Huashan_1914,_Syntrend_and_Jinshan_e01_20150701.jpg"
+  },
+  "taipei-14-songshan-creative": {
+    "subject": "松山文创园区",
+    "original": {
+      "file": "taipei-14-songshan-creative.jpeg",
+      "width": 4896,
+      "height": 3264,
+      "bytes": 1698234
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 44416
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 140908
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 276776
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1707,
+        "bytes": 440452
+      }
+    },
+    "author": "玄史生",
+    "attribution": null,
+    "credit": "https://www.flickr.com/photos/137596559@N07/48097521973/",
+    "originalTitle": "Songshan Tobacco Factory Warehouses & Taipei New Horizon 20190616",
+    "createdAt": "2019-06-16 10:20:24",
+    "license": "CC0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Songshan_Tobacco_Factory_Warehouses_%26_Taipei_New_Horizon_20190616.jpg"
+  },
+  "taipei-15-raohe-market": {
+    "subject": "饶河街观光夜市",
+    "original": {
+      "file": "taipei-15-raohe-market.jpeg",
+      "width": 2048,
+      "height": 1536,
+      "bytes": 636143
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 480,
+        "bytes": 58974
+      },
+      "1280": {
+        "width": 1280,
+        "height": 960,
+        "bytes": 184456
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1440,
+        "bytes": 348254
+      },
+      "2560": {
+        "width": 2048,
+        "height": 1536,
+        "bytes": 405362
+      }
+    },
+    "author": "Fauzty",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "East Entrance of Raohe Street Night Market 20060118 night",
+    "createdAt": "2006-01-18 23:50",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:East_Entrance_of_Raohe_Street_Night_Market_20060118_night.jpg"
+  },
+  "taipei-16-ciyou-temple": {
+    "subject": "松山慈祐宫",
+    "original": {
+      "file": "taipei-16-ciyou-temple.jpeg",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 262137
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 60078
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 188232
+      },
+      "1920": {
+        "width": 1536,
+        "height": 1024,
+        "bytes": 246014
+      },
+      "2560": {
+        "width": 1536,
+        "height": 1024,
+        "bytes": 246014
+      }
+    },
+    "author": "Cmglee",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Taipei Ciyou Temple facade",
+    "createdAt": "2011-04-13 05:43",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Taipei_Ciyou_Temple_facade.jpg"
+  },
+  "taipei-17-palace-museum": {
+    "subject": "台北故宫博物院",
+    "original": {
+      "file": "taipei-17-palace-museum.jpeg",
+      "width": 1504,
+      "height": 1000,
+      "bytes": 368308
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 426,
+        "bytes": 63466
+      },
+      "1280": {
+        "width": 1280,
+        "height": 851,
+        "bytes": 237660
+      },
+      "1920": {
+        "width": 1504,
+        "height": 1000,
+        "bytes": 321568
+      },
+      "2560": {
+        "width": 1504,
+        "height": 1000,
+        "bytes": 321568
+      }
+    },
+    "author": "Peellden",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "NationalPalace MuseumFrontView",
+    "createdAt": "2007-12-16",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:NationalPalace_MuseumFrontView.jpg"
+  },
+  "taipei-18-shilin-market": {
+    "subject": "士林夜市",
+    "original": {
+      "file": "taipei-18-shilin-market.jpeg",
+      "width": 1536,
+      "height": 2048,
+      "bytes": 1133679
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 853,
+        "bytes": 84010
+      },
+      "1280": {
+        "width": 1280,
+        "height": 1707,
+        "bytes": 257362
+      },
+      "1920": {
+        "width": 1536,
+        "height": 2048,
+        "bytes": 335992
+      },
+      "2560": {
+        "width": 1536,
+        "height": 2048,
+        "bytes": 335992
+      }
+    },
+    "author": "Changlc (Wikimedia Commons)",
+    "attribution": null,
+    "credit": "",
+    "originalTitle": "Shilin night market alley 2",
+    "createdAt": "2004-12-29",
+    "license": "Public domain",
+    "licenseUrl": "https://commons.wikimedia.org/wiki/File:Shilin_night_market_alley_2.jpg#Licensing",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Shilin_night_market_alley_2.jpg"
+  },
+  "taipei-19-shilin-residence": {
+    "subject": "士林官邸",
+    "original": {
+      "file": "taipei-19-shilin-residence.jpeg",
+      "width": 3888,
+      "height": 2194,
+      "bytes": 2449168
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 361,
+        "bytes": 65506
+      },
+      "1280": {
+        "width": 1280,
+        "height": 722,
+        "bytes": 239900
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1083,
+        "bytes": 467666
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1445,
+        "bytes": 668524
+      }
+    },
+    "author": "阿道",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Shilin Official Residence 02 20250723",
+    "createdAt": "2025-07-23 15:38:09",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Shilin_Official_Residence_02_20250723.jpg"
+  },
+  "taipei-20-fine-arts-museum": {
+    "subject": "台北市立美术馆",
+    "original": {
+      "file": "taipei-20-fine-arts-museum.jpeg",
+      "width": 6000,
+      "height": 4000,
+      "bytes": 15742624
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 25514
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 94982
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 214454
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1707,
+        "bytes": 502026
+      }
+    },
+    "author": "翁維德 (Wei-Te Wong)",
+    "attribution": null,
+    "credit": "https://www.flickr.com/photos/wongwt/21902728486",
+    "originalTitle": "Taipei Fine Arts Museum 20150919",
+    "createdAt": "2015-09-19 10:17:27",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Taipei_Fine_Arts_Museum_20150919.jpg"
+  },
+  "taipei-21-baoan-temple": {
+    "subject": "大龙峒保安宫",
+    "original": {
+      "file": "taipei-21-baoan-temple.jpeg",
+      "width": 4323,
+      "height": 3112,
+      "bytes": 4577175
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 461,
+        "bytes": 55390
+      },
+      "1280": {
+        "width": 1280,
+        "height": 922,
+        "bytes": 189666
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1382,
+        "bytes": 374394
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1843,
+        "bytes": 567892
+      }
+    },
+    "author": "Zairon",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Taipeh Dalongdong Baoan Temple Hof",
+    "createdAt": "2016-11-08 06:01:02",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Taipeh_Dalongdong_Baoan_Temple_Hof.jpg"
+  },
+  "taipei-22-confucius-temple": {
+    "subject": "台北孔庙",
+    "original": {
+      "file": "taipei-22-confucius-temple.jpeg",
+      "width": 4027,
+      "height": 2576,
+      "bytes": 2486174
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 410,
+        "bytes": 58360
+      },
+      "1280": {
+        "width": 1280,
+        "height": 819,
+        "bytes": 206030
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1228,
+        "bytes": 424508
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1638,
+        "bytes": 675712
+      }
+    },
+    "author": "Dudva",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Taipei Confucius Temple 1",
+    "createdAt": "2017-11-08 11:51:00",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Taipei_Confucius_Temple_1.jpg"
+  },
+  "taipei-23-daan-park": {
+    "subject": "大安森林公园",
+    "original": {
+      "file": "taipei-23-daan-park.jpeg",
+      "width": 1920,
+      "height": 1280,
+      "bytes": 1771813
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 107876
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 435952
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 919956
+      },
+      "2560": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 919956
+      }
+    },
+    "author": "​臺北市政府觀光傳播局",
+    "attribution": "臺北旅遊網",
+    "credit": "https://www.travel.taipei/zh-tw/attraction/details/190",
+    "originalTitle": "Daan Park 20210817",
+    "createdAt": "2021-08-17 16:42:57",
+    "license": "Attribution",
+    "licenseUrl": "https://commons.wikimedia.org/wiki/File:Daan_Park_20210817.jpg#Licensing",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Daan_Park_20210817.jpg"
+  },
+  "taipei-24-botanical-garden": {
+    "subject": "台北植物园",
+    "original": {
+      "file": "taipei-24-botanical-garden.jpeg",
+      "width": 1280,
+      "height": 853,
+      "bytes": 236871
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 58004
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 202022
+      },
+      "1920": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 202022
+      },
+      "2560": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 202022
+      }
+    },
+    "author": "Meiguoren",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Taipei Botanical Garden Greenhouse",
+    "createdAt": "10/5/2008",
+    "license": "CC0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Taipei_Botanical_Garden_Greenhouse.jpg"
+  },
+  "taipei-25-beitou-museum": {
+    "subject": "北投温泉博物馆",
+    "original": {
+      "file": "taipei-25-beitou-museum.jpeg",
+      "width": 2112,
+      "height": 1408,
+      "bytes": 2561643
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 56232
+      },
+      "1280": {
+        "width": 1280,
+        "height": 853,
+        "bytes": 222136
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1280,
+        "bytes": 485606
+      },
+      "2560": {
+        "width": 2112,
+        "height": 1408,
+        "bytes": 617874
+      }
+    },
+    "author": "Wing1990hk",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Beitou Hotspring Museum 2015",
+    "createdAt": "2015-07-02 15:11",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Beitou_Hotspring_Museum_2015.jpg"
+  },
+  "taipei-26-beitou-library": {
+    "subject": "台北市立图书馆北投分馆",
+    "original": {
+      "file": "taipei-26-beitou-library.jpeg",
+      "width": 1920,
+      "height": 1281,
+      "bytes": 1455872
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 427,
+        "bytes": 91842
+      },
+      "1280": {
+        "width": 1280,
+        "height": 854,
+        "bytes": 338158
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1281,
+        "bytes": 682862
+      },
+      "2560": {
+        "width": 1920,
+        "height": 1281,
+        "bytes": 682862
+      }
+    },
+    "author": "臺北旅遊網",
+    "attribution": "台北旅遊網",
+    "credit": "臺北市立圖書館北投分館 . 臺北旅遊網 . 臺北市政府觀光傳播局. Archived from the original on 2021-11-27 .",
+    "originalTitle": "Beitou Library front",
+    "createdAt": "2021-08-18",
+    "license": "Attribution",
+    "licenseUrl": "https://commons.wikimedia.org/wiki/File:Beitou_Library_front.jpg#Licensing",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Beitou_Library_front.jpg"
+  },
+  "taipei-27-thermal-valley": {
+    "subject": "北投地热谷",
+    "original": {
+      "file": "taipei-27-thermal-valley.jpeg",
+      "width": 2441,
+      "height": 1542,
+      "bytes": 763430
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 404,
+        "bytes": 43736
+      },
+      "1280": {
+        "width": 1280,
+        "height": 809,
+        "bytes": 150142
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1213,
+        "bytes": 279408
+      },
+      "2560": {
+        "width": 2441,
+        "height": 1542,
+        "bytes": 393390
+      }
+    },
+    "author": "lienyuan lee",
+    "attribution": "lienyuan lee",
+    "credit": "https://web.archive.org/web/20161021152950/http://www.panoramio.com/photo/64439687",
+    "originalTitle": "北投地獄谷 Beitou Thermal Valley - panoramio",
+    "createdAt": "5 January 2012 (original upload date)",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:%E5%8C%97%E6%8A%95%E5%9C%B0%E7%8D%84%E8%B0%B7_Beitou_Thermal_Valley_-_panoramio.jpg"
+  },
+  "taipei-28-guandu-temple": {
+    "subject": "关渡宫",
+    "original": {
+      "file": "taipei-28-guandu-temple.jpeg",
+      "width": 4504,
+      "height": 3203,
+      "bytes": 5192384
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 455,
+        "bytes": 74912
+      },
+      "1280": {
+        "width": 1280,
+        "height": 910,
+        "bytes": 221010
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1365,
+        "bytes": 395254
+      },
+      "2560": {
+        "width": 2560,
+        "height": 1821,
+        "bytes": 552986
+      }
+    },
+    "author": "Zairon",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Taipeh Guandu Temple Dachlandschaft 02",
+    "createdAt": "2016-11-08 08:47:39",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Taipeh_Guandu_Temple_Dachlandschaft_02.jpg"
+  },
+  "taipei-29-maokong": {
+    "subject": "猫空",
+    "original": {
+      "file": "taipei-29-maokong.jpeg",
+      "width": 2816,
+      "height": 2112,
+      "bytes": 2294708
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 853,
+        "bytes": 120052
+      },
+      "1280": {
+        "width": 1280,
+        "height": 1707,
+        "bytes": 440964
+      },
+      "1920": {
+        "width": 1920,
+        "height": 2560,
+        "bytes": 822044
+      },
+      "2560": {
+        "width": 2112,
+        "height": 2816,
+        "bytes": 967418
+      }
+    },
+    "author": "eazytraveler",
+    "attribution": null,
+    "credit": "https://www.flickr.com/photos/eazy360/4389555352/",
+    "originalTitle": "2010-02-14 Maokong Tea Plantations",
+    "createdAt": "2010-02-14 17:16:07",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:2010-02-14_Maokong_Tea_Plantations.jpg"
+  },
+  "taipei-30-taipei-zoo": {
+    "subject": "台北市立动物园",
+    "original": {
+      "file": "taipei-30-taipei-zoo.jpeg",
+      "width": 2207,
+      "height": 1349,
+      "bytes": 725350
+    },
+    "variants": {
+      "640": {
+        "width": 640,
+        "height": 391,
+        "bytes": 53256
+      },
+      "1280": {
+        "width": 1280,
+        "height": 782,
+        "bytes": 199952
+      },
+      "1920": {
+        "width": 1920,
+        "height": 1174,
+        "bytes": 379062
+      },
+      "2560": {
+        "width": 2207,
+        "height": 1349,
+        "bytes": 475332
+      }
+    },
+    "author": "Yu tptw",
+    "attribution": null,
+    "credit": "Own work",
+    "originalTitle": "Taipei Zoo Entrance",
+    "createdAt": "2022-10-24",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Taipei_Zoo_Entrance.jpg"
   }
 }

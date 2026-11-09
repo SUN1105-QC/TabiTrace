@@ -298,13 +298,14 @@ export default function GalleryPage() {
 
             <div className="gl-toolbar">
               <div className="gl-filters" role="tablist" aria-label="筛选照片">
-                {FILTERS.map(([k, l]) => (
+                {FILTERS.slice(0, 2).map(([k, l]) => (
                   <button key={k} type="button" role="tab" aria-selected={filter === k} className={filter === k ? 'is-active' : ''} onClick={() => setFilter(k)}>
                     {l}<small>{filterCount[k]}</small>
                   </button>
                 ))}
               </div>
-              <div className="gl-toolbar-right">
+              <details className="gl-filter-details"><summary>筛选与排序{filter === 'LINKED' ? ' · 已关联' : filter === 'UNLINKED' ? ' · 未关联' : ''}</summary><div className="gl-toolbar-right">
+                <label>关联状态<select className="gl-input" aria-label="关联状态筛选" value={filter} onChange={e => setFilter(e.target.value as GalleryFilter)}>{FILTERS.map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></label>
                 <div className="gl-seg" role="radiogroup" aria-label="查看方式">
                   <button type="button" role="radio" aria-checked={view === 'day'} className={view === 'day' ? 'is-active' : ''} onClick={() => setView('day')}>按天</button>
                   <button type="button" role="radio" aria-checked={view === 'grid'} className={view === 'grid' ? 'is-active' : ''} onClick={() => setView('grid')}>网格</button>
@@ -314,7 +315,7 @@ export default function GalleryPage() {
                   <option value="OLDEST">最早在前</option>
                   <option value="NEWEST">最新在前</option>
                 </select>
-              </div>
+              </div></details>
             </div>
 
             {list.length === 0 ? (

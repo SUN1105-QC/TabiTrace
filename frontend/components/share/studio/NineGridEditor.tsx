@@ -2,11 +2,11 @@
 
 /**
  * 九宫格素材编辑（手机优先）：
- * - 已选条：6 个照片格的小图，顺序与成品一致；点一格选中它，再从素材里挑照片放进去；先后点两个已选格交换顺序；× 移出
+ * - 已选条：9 个照片格的小图，顺序与成品一致；点一格选中它，再从素材里挑照片放进去；先后点两个已选格交换顺序；× 移出
  * - 日期：整趟旅行（每天精选）/ DAY 01 / DAY 02 …，横向滑动
  * - 素材列表：左图右文——地点、DAY · 时间、城市 · 区域、精选星标、加入 / 替换 / 移出
  * 没选满时其余格子自动补齐（每天的精选）；选满后再点素材进入「替换」：选择要替换的格子即可。
- * 标准九宫格 6 个照片格，旅行手帐 9 张照片卡（同一套素材选择）；手帐另有「设为主图」与排版方式。
+ * 标准九宫格 9 个照片格，旅行手帐 9 张照片卡（同一套素材选择）；手帐另有「设为主图」与排版方式。
  * 选中格、待替换照片由页面持有（预览里的方格也能点选），这里只负责展示与回调。
  */
 
@@ -48,7 +48,7 @@ export function NineGridEditor({ trip, timeline, photos, value, onDay, state, on
   const groups = gridMaterialGroups(photos, timeline, trip, value.day)
   const full = chosen.length >= SLOTS
   const autoCount = Math.max(0, picked.length - chosen.length)
-  const memoCount = scrapbook ? 0 : SLOTS - picked.length
+  const emptyCount = scrapbook ? 0 : SLOTS - picked.length
   const pendingPhoto = state.pending != null ? photos.find(p => p.id === state.pending) : undefined
 
   const status = state.pending != null
@@ -63,11 +63,12 @@ export function NineGridEditor({ trip, timeline, photos, value, onDay, state, on
     <section className="ss-card ss-editor" id="ss-grid-editor" aria-labelledby="ss-editor-title">
       <header className="ss-card-head">
         <h2 id="ss-editor-title">九宫格素材</h2>
-        <span className="ss-count" aria-live="polite"><b>{chosen.length}</b> / {SLOTS} 已选</span>
+        <span className="ss-count" aria-live="polite">已填 <b>{picked.length}</b> / {SLOTS} 格</span>
         {chosen.length > 0 && <button type="button" className="ss-text-btn" onClick={onReset}><RotateCcw size={12} /> 恢复自动</button>}
       </header>
+      <p className="ss-desc">自动 {autoCount} 张 · 手动 {chosen.length} 张{emptyCount > 0 ? ` · 保留 ${emptyCount} 个空位` : ''}</p>
 
-      {/* 当前已选：顺序与成品的 6 个照片格一致 */}
+      {/* 当前已选：顺序与成品的 9 个照片格一致 */}
       <ol className={`ss-strip${SLOTS > 6 ? ' is-wide' : ''}${state.pending != null ? ' is-choosing' : ''}`} aria-label="当前已选的照片格">
         {Array.from({ length: SLOTS }, (_, i) => {
           const photo = picked[i]
@@ -77,8 +78,8 @@ export function NineGridEditor({ trip, timeline, photos, value, onDay, state, on
           return (
             <li key={i} className={`ss-slot${isChosen ? ' is-chosen' : photo ? ' is-auto' : ' is-empty'}${active ? ' is-active' : ''}`}>
               <button type="button" onClick={() => onSlot(i)} aria-pressed={active}
-                aria-label={`第 ${i + 1} 格：${m ? (m.placeName ?? '照片') : scrapbook ? '空位' : '地点便签'}${isChosen ? '（已选）' : photo ? '（自动补齐）' : ''}`}>
-                {photo ? <img src={photoThumb(photo)} alt="" loading="lazy" decoding="async" /> : <span className="ss-slot-memo">{scrapbook ? '空位' : '便签'}</span>}
+                aria-label={`第 ${i + 1} 格：${m ? (m.placeName ?? '照片') : '空位'}${isChosen ? '（已选）' : photo ? '（自动补齐）' : ''}`}>
+                {photo ? <img src={photoThumb(photo)} alt="" loading="lazy" decoding="async" /> : <span className="ss-slot-memo">空位</span>}
                 {photo && photo === cover && <span className="ss-slot-cover" aria-label="主图"><Crown size={10} aria-hidden="true" />主图</span>}
                 <em>{i + 1}</em>
                 {!isChosen && photo && <small>自动</small>}
@@ -122,18 +123,18 @@ export function NineGridEditor({ trip, timeline, photos, value, onDay, state, on
       </div>
 
       {scrapbook && picked.length > 0 && picked.length < SLOTS && <p className="ss-note">{scoped.length < SLOTS ? `这个范围只有 ${scoped.length} 张照片，手帐已按 ${picked.length} 张重新排版。` : `当前 ${picked.length} 张，手帐已按 ${picked.length} 张排版；还可以再选 ${SLOTS - picked.length} 张。`}</p>}
-      {memoCount > 0 && scoped.length > 0 && <p className="ss-note">这个范围只有 {scoped.length} 张照片，{memoCount} 格会用去过的地点做成便签。</p>}
+      {emptyCount > 0 && scoped.length > 0 && <p className="ss-note">这个范围只有 {scoped.length} 张照片，{emptyCount} 格保留空位，上传照片后自动补齐。</p>}
       {autoCount > 0 && chosen.length > 0 && <p className="ss-note">{autoCount} 格正在自动补齐（标记「自动」），点那一格即可换成指定照片。</p>}
 
       {photos.length === 0 ? (
         <div className="ss-empty">
           <ImageOff size={22} aria-hidden="true" />
           <p>暂无可用照片</p>
-          <small>{scrapbook ? '旅行手帐需要旅行照片，请先上传照片。' : '请先上传或精选旅行照片；没有照片时，照片格会用去过的地点做成便签。'}</small>
+          <small>{scrapbook ? '旅行手帐需要旅行照片，请先上传照片。' : '请先上传旅行照片；九宫格会保留空位，上传后自动补齐。'}</small>
           <Link href={`/trips/${trip.id}/gallery`} className="ss-btn is-ghost">去上传照片</Link>
         </div>
       ) : groups.length === 0 ? (
-        <div className="ss-empty"><p>这一天没有照片</p><small>{scrapbook ? '换一天，或切换到整趟旅行。' : '照片格会改为写着地点的便签，或切换到整趟旅行。'}</small></div>
+        <div className="ss-empty"><p>这一天没有照片</p><small>{scrapbook ? '换一天，或切换到整趟旅行。' : '照片格保留空位；请上传并关联当天打卡，或切换到整趟旅行。'}</small></div>
       ) : (
         <div className="ss-materials">
           {groups.map(g => (

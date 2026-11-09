@@ -8,6 +8,9 @@ import java.util.Map;
 
 @Mapper
 public interface UserMusicMapper {
+    /** Serialize per-account upload reservations before membership and quota reads. */
+    @Select("SELECT id FROM users WHERE id=#{userId} FOR UPDATE") Long lockUploadAccount(Long userId);
+
     @Insert("""
       INSERT INTO user_music(user_id,title,original_filename,storage_key,mime_type,file_size,status,copyright_confirmed,copyright_confirmed_at,created_at,updated_at)
       VALUES(#{userId},#{title},#{originalFilename},#{storageKey},#{mimeType},#{fileSize},#{status},#{copyrightConfirmed},#{copyrightConfirmedAt},UTC_TIMESTAMP(6),UTC_TIMESTAMP(6))

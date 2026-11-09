@@ -49,7 +49,7 @@ export function PhotoCard({ item, index, selecting, selected, isCover, readOnly,
         <img src={photoThumb(photo)} srcSet={photoSrcSet(photo)} sizes={GRID_SIZES} alt="" loading="lazy" decoding="async" />
       </button>
 
-      {photo.featured && !selecting && <span className="gl-star-badge" aria-hidden="true"><Star size={11} /></span>}
+      {photo.featured && !selecting && readOnly && <span className="gl-star-badge" aria-hidden="true"><Star size={11} /></span>}
       {isCover && !selecting && <span className="gl-cover-badge" aria-hidden="true">封面</span>}
       {selecting && <span className={`gl-check${selected ? ' is-on' : ''}`} aria-hidden="true">{selected && <Check size={14} />}</span>}
 

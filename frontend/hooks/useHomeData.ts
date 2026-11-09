@@ -56,7 +56,7 @@ export function useHomeData(enabled: boolean) {
       try {
         const [user, trips] = await Promise.all([userApi.me(), tripApi.list()])
         const stored = Number(localStorage.getItem('tabitrace-live-trip-id') || 0)
-        const activeTrip = trips.find(t => t.id === stored && t.status !== 'ARCHIVED')
+        const activeTrip = trips.find(t => t.id === stored)
           || trips.find(t => t.status !== 'ARCHIVED')
           || trips[0] || null
         if (activeTrip) localStorage.setItem('tabitrace-live-trip-id', String(activeTrip.id))

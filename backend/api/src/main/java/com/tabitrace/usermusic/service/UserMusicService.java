@@ -13,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -76,7 +78,12 @@ public class UserMusicService {
 
     // ───────────── 上传 ─────────────
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public UploadUrlResponse uploadUrl(Long userId, UploadUrlRequest r) {
+        // The account lock must precede membership/quota reads, so parallel uploads see committed reservations.
+        if (mapper.lockUploadAccount(userId) == null) {
+            throw new BusinessException("USER_NOT_FOUND", "账号不存在", HttpStatus.NOT_FOUND);
+        }
         memberships.require(userId, MembershipService.FEATURE_CUSTOM_MUSIC);
         if (!Boolean.TRUE.equals(r.copyrightConfirmed())) {
             throw new BusinessException("COPYRIGHT_CONFIRMATION_REQUIRED", "请先确认你拥有这首音乐用于视频创作的合法使用权");

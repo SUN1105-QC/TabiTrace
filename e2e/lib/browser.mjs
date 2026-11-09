@@ -19,10 +19,18 @@ export function browserPath() {
   return found
 }
 
-export async function openBrowser({ width = 1440, height = 900, mobile = false } = {}) {
-  const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'tabitrace-e2e-'))
+export async function openBrowser({ width = 1440, height = 900, mobile = false, softwareWebGL = false } = {}) {
+  const profileRoot = fs.realpathSync(os.tmpdir())
+  const profile = fs.mkdtempSync(path.join(profileRoot, 'tabitrace-e2e-'))
+  const removeProfile = () => {
+    const target = path.resolve(profile)
+    if (path.dirname(target) !== profileRoot || !path.basename(target).startsWith('tabitrace-e2e-')) throw new Error('Unexpected browser profile path')
+    if (fs.existsSync(target) && fs.realpathSync(target) !== target) throw new Error('Browser profile path was redirected')
+    fs.rmSync(target, { recursive: true, force: true })
+  }
   const port = 9300 + Math.floor(Math.random() * 600)
-  const proc = spawn(browserPath(), ['--headless=new', `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`, '--no-first-run', '--disable-extensions', '--disable-gpu', '--hide-scrollbars', '--mute-audio', 'about:blank'], { stdio: 'ignore' })
+  const graphics = softwareWebGL ? ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] : ['--disable-gpu']
+  const proc = spawn(browserPath(), ['--headless=new', `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`, '--no-first-run', '--disable-extensions', ...graphics, '--hide-scrollbars', '--mute-audio', 'about:blank'], { stdio: 'ignore', windowsHide: true })
   let target
   for (let i = 0; i < 60 && !target; i++) { await sleep(400); try { target = (await (await fetch(`http://127.0.0.1:${port}/json/list`)).json()).find(t => t.type === 'page') } catch {} }
   if (!target) throw new Error('浏览器启动失败')
@@ -87,7 +95,7 @@ export async function openBrowser({ width = 1440, height = 900, mobile = false }
     tabs.forEach(t => t.ws.close())
     proc.kill()
     await sleep(500)
-    try { fs.rmSync(profile, { recursive: true, force: true }) } catch {}
+    try { removeProfile() } catch {}
   }
   return { ...first, newTab, tabs, close }
 }

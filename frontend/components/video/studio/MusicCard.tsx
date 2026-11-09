@@ -2,21 +2,18 @@
 
 /**
  * 移动端背景音乐：一张「当前音乐」卡（试听 / 更换音乐 / 音量），更换时打开底部面板里的「音乐与氛围」（MusicSelector）。
- * 当前音乐可以是旅迹音乐，也可以是「我的音乐」（会员上传）。
+ * 当前音乐为用户上传的「我的音乐」。
  * - 与选择器共用同一个试听播放器（useMusicPlayer）：任何时候只有一首在响
  * - 淡入淡出由后端按曲目统一处理（片头淡入 1 秒、片尾淡出 1.8 秒），这里只做说明，不提供假的调节项
  */
 
 import { useEffect, type ReactNode } from 'react'
 import { Loader2, Music2, Pause, Play, Repeat2, TriangleAlert, Volume2, X } from 'lucide-react'
-import type { VideoMusic } from '@/types/video'
 import { useMusicPlayer } from '@/hooks/useMusicPlayer'
 import { useUserMusic, userMusicKey } from '@/hooks/useUserMusic'
-import { MUSIC_CATEGORY_LABEL, clock, licenseTag, type MusicSelection } from '@/utils/video-music'
-import { PlanBadge } from '../VideoProGate'
+import { clock, type MusicSelection } from '@/utils/video-music'
 
-export function MusicCard({ music, selection, volume, onVolume, onOpen }: {
-  music: VideoMusic[]
+export function MusicCard({ selection, volume, onVolume, onOpen }: {
   /** 当前选择；null = 无音乐 */
   selection: MusicSelection
   volume: number
@@ -25,23 +22,18 @@ export function MusicCard({ music, selection, volume, onVolume, onOpen }: {
 }) {
   const { state: player, toggle, stop, setVolume } = useMusicPlayer()
   const mine = useUserMusic()
-  const system = selection?.source === 'SYSTEM' ? music.find(m => m.code === selection.code) : undefined
   const own = selection?.source === 'USER' ? mine.library?.items.find(m => m.id === selection.id) : undefined
   useEffect(() => { setVolume(volume) }, [volume, setVolume])
 
-  // 旅迹音乐与我的音乐统一成一张卡：名称、副标题、播放器代码、总时长
-  const track = system
-    ? { key: system.code, name: system.name, plan: system.plan, seconds: system.durationSeconds,
-        sub: [system.artist, MUSIC_CATEGORY_LABEL[system.category]], tag: licenseTag(system), url: async () => system.previewUrl }
-    : own
-      ? { key: userMusicKey(own.id), name: own.title, plan: null, seconds: own.durationSeconds ?? null,
-          sub: ['我的音乐', own.format ?? ''], tag: null, url: async () => (own.status === 'READY' ? mine.playUrl(own.id) : null) }
-      : null
+  const track = own
+    ? { key: userMusicKey(own.id), name: own.title, seconds: own.durationSeconds ?? null,
+        sub: ['我的音乐', own.format ?? ''], url: async () => (own.status === 'READY' ? mine.playUrl(own.id) : null) }
+    : null
   const loaded = !!track && player.code === track.key
   const playing = loaded && player.playing
-  const missing = !track || (system ? !system.previewUrl : own?.status !== 'READY') || player.failed.includes(track.key)
-  const gone = selection != null && !track && (selection.source === 'SYSTEM' ? music.length > 0 : mine.status === 'ready')
-  const goneText = selection?.source === 'USER' ? '原音乐已被删除' : '原音乐已下架'
+  const missing = !track || own?.status !== 'READY' || player.failed.includes(track.key)
+  const gone = selection != null && !track && mine.status === 'ready'
+  const goneText = '原音乐已被删除'
   return (
     <div className="vs-music-card">
       <div className="vs-music-now">
@@ -49,10 +41,9 @@ export function MusicCard({ music, selection, volume, onVolume, onOpen }: {
         <span className="vs-music-now-text">
           <small>当前音乐</small>
           <b>{track ? track.name : gone ? goneText : selection ? '正在读取音乐…' : '无音乐'}</b>
-          <em>{track ? [...track.sub, loaded ? `${clock(player.current)} / ${clock(player.duration || track.seconds)}` : clock(track.seconds), track.tag].filter(Boolean).join(' · ')
+          <em>{track ? [...track.sub, loaded ? `${clock(player.current)} / ${clock(player.duration || track.seconds)}` : clock(track.seconds)].filter(Boolean).join(' · ')
             : gone ? '请点「更换音乐」重新选择' : selection ? '' : '成片只有画面与转场，没有背景音乐'}</em>
         </span>
-        {track?.plan && <PlanBadge plan={track.plan} />}
       </div>
       {loaded && <span className="vm-progress" aria-hidden="true"><i style={{ width: `${player.duration ? Math.min(100, (player.current / player.duration) * 100) : 0}%` }} /></span>}
       <div className="vs-music-card-actions">

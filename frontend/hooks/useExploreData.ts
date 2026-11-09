@@ -10,6 +10,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { hasSession } from '@/services/api'
 import { tripApi, userApi, type DistanceUnit, type OfficialRouteView, type PlaceView, type TripView } from '@/services/tabitrace-api'
+import { rememberActiveTrip } from '@/lib/active-trip'
+import { EXPLORE_CITIES, officialExploreHref } from '@/constants/explore-cities'
 
 const LIVE_TRIP_KEY = 'tabitrace-live-trip-id'
 const noSubscribe = () => () => {}
@@ -18,8 +20,9 @@ const errMsg = (e: unknown, fallback: string) => (e instanceof Error && e.messag
 const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` }
 
 /** 加入到哪段旅行：本机记住的旅行（未归档）→ 今天正在进行的唯一一段 → 只有一段可写的旅行；都不满足时让用户选 */
-function resolveTarget(trips: TripView[]) {
-  const open = trips.filter(t => t.status !== 'ARCHIVED')
+function resolveTarget(trips: TripView[], cityCode: string) {
+  const city=EXPLORE_CITIES.find(c=>c.code===cityCode)
+  const open = trips.filter(t => t.status !== 'ARCHIVED' && city && officialExploreHref(t.city || t.destinationName) === `/explore/${city.slug}`)
   const stored = Number(localStorage.getItem(LIVE_TRIP_KEY) || 0)
   const current = open.filter(t => t.startDate <= today() && today() <= t.endDate)
   return open.find(t => t.id === stored) ?? (current.length === 1 ? current[0] : null) ?? (open.length === 1 ? open[0] : null)
@@ -75,7 +78,7 @@ export function useExploreData(cityCode = 'TOKYO', onPlacesLoaded?: (places: Pla
       setTrips(list)
       setFavorites(new Set(favs))
       if (me) setUnit(me.distanceUnit === 'MI' ? 'MI' : 'KM')
-      const t = resolveTarget(list)
+      const t = resolveTarget(list, cityCode)
       setTarget(t)
       return fetchTripStatus(t)
     })
@@ -83,7 +86,7 @@ export function useExploreData(cityCode = 'TOKYO', onPlacesLoaded?: (places: Pla
 
   /** 用户在选择框里换了旅行：记住它（与其他页面共用当前旅行），并刷新加入 / 打卡状态 */
   const chooseTarget = useCallback(async (trip: TripView) => {
-    localStorage.setItem(LIVE_TRIP_KEY, String(trip.id))
+    rememberActiveTrip(trip.id)
     setTarget(trip)
     await fetchTripStatus(trip)
   }, [fetchTripStatus])

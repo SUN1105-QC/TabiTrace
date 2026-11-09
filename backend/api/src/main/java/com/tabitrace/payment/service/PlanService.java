@@ -58,7 +58,7 @@ public class PlanService {
                 new StoryTier(VideoService.PRO_MAX_PHOTOS, VideoService.PRO_DURATIONS, VideoService.PRO_QUALITY, false),
                 SHARE_FREE, SHARE_PRO,
                 catalog.templates().stream().filter(t -> Boolean.TRUE.equals(t.enabled)).map(t -> new CatalogItem(t.name, t.plan)).toList(),
-                catalog.music().stream().filter(com.tabitrace.video.entity.VideoMusicEntity::usable).map(m -> new CatalogItem(m.name, m.plan)).toList(),
+                List.of(),
                 new VideoUsageLimits(costs.isEnforce(),costs.getAccountDailyRenders(),costs.getAccountDailySeconds()));
     }
 }

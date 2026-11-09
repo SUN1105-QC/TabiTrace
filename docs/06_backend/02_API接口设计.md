@@ -1,6 +1,6 @@
 # API 接口设计
 
-2026-10-14 从全部 `@RestController` 整理（共 100 个接口，另加 Spring 的 `/actuator/health`；已用脚本逐条比对，无遗漏）。项目**没有 OpenAPI 文件**，本表就是接口清单；请求和响应字段以后端 `dto/XxxDtos.java` 和前端 `services/tabitrace-api.ts` 为准（两边同名）。
+2026-11-02 从全部 `@RestController` 整理（共 106 个接口，另加 Spring 的 `/actuator/health`；已用脚本逐条比对，无遗漏）。项目**没有 OpenAPI 文件**，本表就是接口清单；请求和响应字段以后端 `dto/XxxDtos.java` 和前端 `services/tabitrace-api.ts` 为准（两边同名）。
 
 ## 1. 约定
 
@@ -49,7 +49,7 @@
 | GET / POST | `/trips` | 列表 / 创建（FREE 名额、加入官方探索） |
 | GET / PUT / DELETE | `/trips/{id}` | 详情 / 修改（归档后不可）/ 删除 |
 | POST | `/trips/{id}/archive`、`/trips/{id}/unarchive` | 归档 / 取消归档 |
-| GET | `/trips/{id}/summary` | 总结与成果准备度 |
+| GET | `/trips/{id}/summary` | 统计与成果准备度（页面已下线，接口仍被我的旅行、分享页等使用） |
 | POST | `/trips/{id}/complete` | 标记完成 |
 
 成就 API 已于 2026-10-29 移除；不再开放 `GET /trips/{tripId}/achievements`。旧响应中的成就兼容字段固定为空 / 0，通知与视频开关固定为 false。
@@ -58,7 +58,8 @@
 | 方法 | 路径 | 权限 | 说明 |
 |---|---|---|---|
 | GET | `/destinations/search?q=&limit=` | 登录 | 创建旅行时的目的地搜索 |
-| GET | `/official-cities`、`/official-cities/{code}` | 公开 | 官方城市 |
+| GET | `/official-cities/directory` | 公开 | 探索目录：已发布的国家、城市（状态 OPEN / PREPARING / PLANNED）与统计；不含用户数据 |
+| GET | `/official-cities`、`/official-cities/{code}` | 公开 | 官方城市（只返回 ACTIVE） |
 | GET | `/official-cities/{code}/places`、`/official-cities/{code}/routes` | 公开 | 官方地点、专题路线 |
 | POST | `/trips/{tripId}/official-places/{placeId}` | 本人旅行 | 加入官方地点 |
 | GET | `/places/search?q=` | 公开 | 地点搜索 |
@@ -107,7 +108,7 @@
 ### Travel Story
 | 方法 | 路径 | 权限 | 说明 |
 |---|---|---|---|
-| GET | `/video-templates`、`/video-music` | 登录 | 模板与曲库（只返回可用曲目） |
+| GET | `/video-templates`、`/video-music` | 登录 | 模板；`/video-music` 只为兼容旧客户端保留，固定返回空列表 |
 | GET / POST | `/trips/{tripId}/video-projects` | 本人旅行 | 视频项目列表 / 新建草稿 |
 | POST | `/trips/{tripId}/video-storyboard` | 本人旅行 | 按当前设置生成分镜预览（不保存） |
 | GET / PUT / DELETE | `/video-projects/{id}` | 本人 | 详情 / 修改草稿 / 删除（生成中不可删） |
@@ -129,7 +130,7 @@
 ### 支付与方案
 | 方法 | 路径 | 权限 | 说明 |
 |---|---|---|---|
-| GET | `/plans/trip-pro` | 公开 | 方案配置：价格、FREE 限制、Story / 分享图规格、模板与曲库目录、能否付款；`videoUsageLimits` 返回实际生效的视频限额开关、每日次数和累计成片秒数，供购买前展示 |
+| GET | `/plans/trip-pro` | 公开 | 方案配置：价格、FREE 限制、Story / 分享图规格、模板目录（`storyMusic` 固定为空）、能否付款；`videoUsageLimits` 返回实际生效的视频限额开关、每日次数和累计成片秒数，供购买前展示 |
 | POST | `/trips/{tripId}/payments/checkout` | 本人旅行 | Trip Pro 付款（mock 时立即成功） |
 | GET | `/trips/{tripId}/payments/latest` | 本人旅行 | 最近一次支付 |
 | POST | `/payments/lifetime/checkout` | 登录 | 终身 Pro 付款 |

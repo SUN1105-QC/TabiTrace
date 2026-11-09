@@ -10,7 +10,7 @@ import Link from 'next/link'
 import { useRef, useState, type KeyboardEvent } from 'react'
 import { ArrowRight, Check, Clapperboard, Music, Play } from 'lucide-react'
 import { LANDING_IMAGES, PRODUCT_SHOTS, type ProductShot } from '@/components/landing/landingDemo'
-import { shareFreeOf, shareProOf, storyDiff, type TripProPlan } from '@/utils/plan'
+import { shareFreeOf, shareProOf, type TripProPlan } from '@/utils/plan'
 import type { TripView } from '@/services/tabitrace-api'
 
 type TabKey = 'poster' | 'nine' | 'long' | 'story'
@@ -22,7 +22,6 @@ function tabsOf(plan: TripProPlan): Tab[] {
   const sf = shareFreeOf(plan), sp = shareProOf(plan)
   const shareFree = `Free：${quality(sf.quality)}（海报宽 ${sf.posterWidth}px）${sf.watermark ? '，带「旅迹」水印' : ''}`
   const noMark = sp.watermark ? '带「旅迹」水印' : '无水印'
-  const { freeM } = storyDiff(plan)
   const story = plan.storyPro, storyFree = plan.storyFree
   return [
     {
@@ -42,8 +41,8 @@ function tabsOf(plan: TripProPlan): Tab[] {
     },
     {
       key: 'story', label: 'Travel Story', desc: '把地点、照片和旅行文字剪成一支竖屏短片，配上背景音乐，记下这一趟的节奏。',
-      points: [`${story.quality.toUpperCase()}${story.watermark ? '' : ' 无水印'}`, `最长 ${Math.max(...story.durations)} 秒 · 最多 ${story.maxPhotos} 张照片`, `全部 ${plan.storyTemplates.length} 款模板与 ${plan.storyMusic.length} 首背景音乐`, '竖屏 9:16，也可以选 4:5 或横屏'],
-      free: `Free：${storyFree.quality.toUpperCase()}${storyFree.watermark ? '，带水印' : ''} · 最长 ${Math.max(...storyFree.durations)} 秒 · ${freeM.length} 首基础音乐`,
+      points: [`${story.quality.toUpperCase()}${story.watermark ? '' : ' 无水印'}`, `最长 ${Math.max(...story.durations)} 秒 · 最多 ${story.maxPhotos} 张照片`, `全部 ${plan.storyTemplates.length} 款视频模板`, '竖屏 9:16，也可以选 4:5 或横屏'],
+      free: `Free：${storyFree.quality.toUpperCase()}${storyFree.watermark ? '，带水印' : ''} · 最长 ${Math.max(...storyFree.durations)} 秒`,
       cta: '制作 Travel Story', path: 'video', shot: LANDING_IMAGES.storyFrame
     }
   ]
@@ -98,7 +97,7 @@ export function TripProOutcomeShowcase({ plan, trip, loggedIn }: { plan: TripPro
               <span className="pr-phone-tags" aria-hidden="true">
                 <i><Clapperboard size={12} />{plan.storyPro.quality.toUpperCase()}</i>
                 <i>{Math.max(...plan.storyPro.durations)}s</i>
-                <i><Music size={12} />{plan.storyMusic.length}</i>
+                <i><Music size={12} />自选配乐</i>
               </span>
             </div>
           ) : (

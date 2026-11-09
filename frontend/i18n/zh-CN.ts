@@ -25,12 +25,12 @@ export const zhCN = {
   },
   mobileNav: { label: '移动端导航', home: '首页', trips: '旅程', checkin: '打卡', checkinLabel: '快速打卡', share: '分享', me: '我的' },
   titles: {
-    home: '首页', trips: '我的旅行', newTrip: '创建旅行', map: '旅行地图与打卡', photos: '照片与精选', summary: '旅行总结',
-    share: '分享成果', story: 'Travel Story', exploreTokyo: '东京官方探索', explore: '官方城市探索', memories: '旅行回忆', pricing: 'Trip Pro',
+    home: '首页', trips: '我的旅行', newTrip: '创建旅行', map: '旅行地图与打卡', photos: '照片与精选',
+    share: '分享成果', story: 'Travel Story', exploreTokyo: '东京官方探索', explore: '推荐探索', memories: '旅行回忆', pricing: 'Trip Pro',
     settings: '个人设置', fallback: '旅迹 TabiTrace'
   },
   tripNav: {
-    label: '旅行页面', overview: '总览', map: '地图与打卡', mapShort: '地图', photos: '照片', summary: '总结',
+    label: '旅行页面', map: '地图与打卡', mapShort: '地图', photos: '照片',
     share: '分享成果', shareShort: '分享', video: '旅行视频', videoShort: '视频'
   },
   publicNav: {

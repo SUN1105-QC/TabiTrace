@@ -1,0 +1,168 @@
+[
+  {
+    "name": "map-photo-overflow-before",
+    "data": {
+      "root": 369,
+      "viewport": 360,
+      "innerWidth": 369,
+      "photos": {
+        "width": 256,
+        "right": 319,
+        "scrollWidth": 273,
+        "children": [
+          {
+            "width": 72,
+            "right": 135
+          },
+          {
+            "width": 72,
+            "right": 213
+          },
+          {
+            "width": 72,
+            "right": 291
+          },
+          {
+            "width": 39.390625,
+            "right": 336.390625
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "map-photo-overflow-wrap-preview",
+    "data": {
+      "root": 360,
+      "innerWidth": 360,
+      "viewport": 360
+    }
+  },
+  {
+    "name": "search-results-before",
+    "data": {
+      "directMatches": 0,
+      "actualRows": 14,
+      "rows": [
+        {
+          "text": "东京三日散步\n东京 · 2026-10-30 — 2026-11-01\n→",
+          "display": "inline-block",
+          "width": 210.8125,
+          "x": 419,
+          "y": 194,
+          "padding": "0px",
+          "textAlign": "center"
+        },
+        {
+          "text": "京都春日漫游\n京都 · 2025-04-03 — 2025-04-06\n→",
+          "display": "inline-block",
+          "width": 210.8125,
+          "x": 629.8125,
+          "y": 194,
+          "padding": "0px",
+          "textAlign": "center"
+        },
+        {
+          "text": "浅草寺\n浅草 · 东京 · 官方地点\n→",
+          "display": "inline-block",
+          "width": 163.859375,
+          "x": 419,
+          "y": 287.5,
+          "padding": "0px",
+          "textAlign": "center"
+        },
+        {
+          "text": "东京站\n丸之内 · 东京 · 官方地点\n→",
+          "display": "inline-block",
+          "width": 174.859375,
+          "x": 582.859375,
+          "y": 287.5,
+          "padding": "0px",
+          "textAlign": "center"
+        },
+        {
+          "text": "东京塔\n港区 · 东京 · 官方地点\n→",
+          "display": "inline-block",
+          "width": 163.859375,
+          "x": 757.71875,
+          "y": 287.5,
+          "padding": "0px",
+          "textAlign": "center"
+        }
+      ]
+    }
+  },
+  {
+    "name": "search-results-selector-preview",
+    "data": {
+      "rows": [
+        {
+          "width": 602,
+          "x": 419,
+          "y": 194
+        },
+        {
+          "width": 602,
+          "x": 419,
+          "y": 258.5
+        },
+        {
+          "width": 602,
+          "x": 419,
+          "y": 352
+        }
+      ]
+    }
+  },
+  {
+    "name": "search-landscape-scrolled-end",
+    "data": {
+      "scrollTop": 35,
+      "scrollHeight": 455,
+      "clientHeight": 420,
+      "last": {
+        "text": "Trip Pro\n单次旅行升级\n→",
+        "top": 420,
+        "bottom": 484.5
+      },
+      "viewport": 390
+    }
+  },
+  {
+    "name": "photo-detail-scrolled-end",
+    "data": {
+      "dialog": {
+        "scrollTop": 187,
+        "clientHeight": 638,
+        "scrollHeight": 825
+      },
+      "side": {
+        "scrollTop": 0,
+        "clientHeight": 554,
+        "scrollHeight": 554
+      },
+      "buttons": [
+        {
+          "text": "取消精选",
+          "top": 444.4375,
+          "bottom": 480.4375
+        },
+        {
+          "text": "设为旅行封面",
+          "top": 444.4375,
+          "bottom": 480.4375
+        },
+        {
+          "text": "下载",
+          "top": 532.4375,
+          "bottom": 568.4375
+        },
+        {
+          "text": "删除",
+          "top": 532.4375,
+          "bottom": 568.4375
+        }
+      ]
+    }
+  }
+]

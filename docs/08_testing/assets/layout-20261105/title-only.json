@@ -1,0 +1,182 @@
+[
+  {
+    "name": "tablet-sidebar-navigation-blocked",
+    "data": {
+      "path": "/trips",
+      "drawerOpen": false
+    }
+  },
+  {
+    "name": "pricing-normal-1024",
+    "data": {
+      "root": 1024,
+      "alerts": [],
+      "unknown": []
+    }
+  },
+  {
+    "name": "title-only-390-home",
+    "data": {
+      "width": 390,
+      "root": 390,
+      "innerWidth": 390,
+      "route": "/",
+      "unknown": [],
+      "alerts": []
+    }
+  },
+  {
+    "name": "title-only-390-_trips",
+    "data": {
+      "width": 390,
+      "root": 390,
+      "innerWidth": 390,
+      "route": "/trips",
+      "unknown": [],
+      "alerts": []
+    }
+  },
+  {
+    "name": "title-only-390-_memories",
+    "data": {
+      "width": 390,
+      "root": 1597,
+      "innerWidth": 1560,
+      "route": "/memories",
+      "unknown": [],
+      "alerts": []
+    }
+  },
+  {
+    "name": "title-only-390-_pricing_tripId_900001",
+    "data": {
+      "width": 390,
+      "root": 1807,
+      "innerWidth": 1560,
+      "route": "/pricing",
+      "unknown": [],
+      "alerts": []
+    }
+  },
+  {
+    "name": "title-only-390-_trips_900001_share_mode_nine",
+    "data": {
+      "width": 390,
+      "root": 2628,
+      "innerWidth": 1560,
+      "route": "/trips/900001/share",
+      "unknown": [],
+      "alerts": []
+    }
+  },
+  {
+    "name": "title-only-768-home",
+    "data": {
+      "width": 768,
+      "root": 1388,
+      "innerWidth": 768,
+      "route": "/",
+      "unknown": [],
+      "alerts": []
+    }
+  },
+  {
+    "name": "title-only-768-_trips",
+    "data": {
+      "width": 768,
+      "root": 1855,
+      "innerWidth": 768,
+      "route": "/trips",
+      "unknown": [],
+      "alerts": []
+    }
+  },
+  {
+    "name": "title-only-768-_memories",
+    "data": {
+      "width": 768,
+      "root": 1729,
+      "innerWidth": 768,
+      "route": "/memories",
+      "unknown": [],
+      "alerts": []
+    }
+  },
+  {
+    "name": "title-only-768-_pricing_tripId_900001",
+    "data": {
+      "width": 768,
+      "root": 1653,
+      "innerWidth": 768,
+      "route": "/pricing",
+      "unknown": [],
+      "alerts": []
+    }
+  },
+  {
+    "name": "title-only-768-_trips_900001_share_mode_nine",
+    "data": {
+      "width": 768,
+      "root": 3649,
+      "innerWidth": 768,
+      "route": "/trips/900001/share",
+      "unknown": [],
+      "alerts": []
+    }
+  },
+  {
+    "name": "title-only-1440-home",
+    "data": {
+      "width": 1440,
+      "root": 2054,
+      "innerWidth": 1440,
+      "route": "/",
+      "unknown": [],
+      "alerts": []
+    }
+  },
+  {
+    "name": "title-only-1440-_trips",
+    "data": {
+      "width": 1440,
+      "root": 3693,
+      "innerWidth": 1440,
+      "route": "/trips",
+      "unknown": [],
+      "alerts": []
+    }
+  },
+  {
+    "name": "title-only-1440-_memories",
+    "data": {
+      "width": 1440,
+      "root": 1942,
+      "innerWidth": 1440,
+      "route": "/memories",
+      "unknown": [],
+      "alerts": []
+    }
+  },
+  {
+    "name": "title-only-1440-_pricing_tripId_900001",
+    "data": {
+      "width": 1440,
+      "root": 1958,
+      "innerWidth": 1440,
+      "route": "/pricing",
+      "unknown": [],
+      "alerts": []
+    }
+  },
+  {
+    "name": "title-only-1440-_trips_900001_share_mode_nine",
+    "data": {
+      "width": 1440,
+      "root": 3862,
+      "innerWidth": 1440,
+      "route": "/trips/900001/share",
+      "unknown": [],
+      "alerts": []
+    }
+  }
+]

@@ -16,7 +16,7 @@ export function PricingCardTripPro({ plan, cta }: { plan: TripProPlan; cta: Reac
       <ul>
         <li><Check size={14} aria-hidden="true" />打卡与照片不限数量</li>
         <li><Check size={14} aria-hidden="true" />Travel Story {plan.storyPro.quality.toUpperCase()}{plan.storyPro.watermark ? '' : ' 无水印'} · 最长 {Math.max(...plan.storyPro.durations)} 秒</li>
-        <li><Check size={14} aria-hidden="true" />全部视频模板与背景音乐</li>
+        <li><Check size={14} aria-hidden="true" />全部视频模板与画面风格</li>
         <li><Check size={14} aria-hidden="true" />每个视频最多 {plan.storyPro.maxPhotos} 张照片</li>
       </ul>
       <div className="pr-plan-cta">{cta}</div>

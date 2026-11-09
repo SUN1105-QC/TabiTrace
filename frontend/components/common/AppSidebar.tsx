@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import {
-  Compass, Crown, Film, Home, Images, MapPinned, Plus, Settings, Sparkles, X
+  Crown, Home, Images, MapPinned, Plus, Settings, Sparkles, X
 } from 'lucide-react'
 import { useT } from '@/components/common/PreferencesProvider'
 import { BrandLogo } from '@/components/common/Brand'
@@ -14,20 +14,15 @@ export type SidebarBadges = { explore?: boolean; memories?: boolean }
 
 type Item = { href: string; label: MessageKey; icon: any; badge?: 'explore' | 'memories' }
 
-export function sidebarItems(activeTripId: number | null): { main: Item[]; secondary: Item[] } {
-  const trip = (suffix: string) => (activeTripId ? `/trips/${activeTripId}${suffix}` : '/trips')
+export function sidebarItems(_activeTripId: number | null): { main: Item[]; secondary: Item[] } {
   return {
     main: [
       { href: '/', label: 'nav.home', icon: Home },
       { href: '/trips', label: 'nav.myTrips', icon: MapPinned },
-      { href: '/trips/new', label: 'nav.createTrip', icon: Plus },
-      { href: trip('/map'), label: 'nav.mapCheckin', icon: Compass },
-      { href: trip('/gallery'), label: 'nav.photos', icon: Images },
-      { href: trip('/video'), label: 'nav.travelStory', icon: Film },
-      { href: '/explore/tokyo', label: 'nav.explore', icon: Sparkles, badge: 'explore' }
+      { href: '/explore', label: 'nav.explore', icon: Sparkles, badge: 'explore' },
+      { href: '/memories', label: 'nav.memories', icon: Images, badge: 'memories' }
     ],
     secondary: [
-      { href: '/memories', label: 'nav.memories', icon: Images, badge: 'memories' },
       { href: '/profile', label: 'nav.settings', icon: Settings }
     ]
   }
@@ -65,10 +60,10 @@ export function AppSidebar({ activeTripId, badges, open, onClose }: { activeTrip
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
 
-  const isActive = ({ href, label }: Item) => {
+  const isActive = ({ href }: Item) => {
     if (href === '/') return pathname === '/'
     // 没有当前旅行时，地图 / 照片 / Travel Story 会回落到旅行列表；这时只高亮“我的旅行”本身
-    if (href === '/trips') return label === 'nav.myTrips' && pathname === '/trips'
+    if (href === '/trips') return pathname.startsWith('/trips')
     return pathname.startsWith(href.split('?')[0])
   }
 
@@ -95,6 +90,7 @@ export function AppSidebar({ activeTripId, badges, open, onClose }: { activeTrip
         </div>
 
         <nav className="workspace-nav" aria-label={t('nav.mainNav')}>{main.map(link)}</nav>
+        <Link href="/trips/new" className="sidebar-create warm-button" onClick={onClose}><Plus size={16} />{t('nav.createTrip')}</Link>
         <div className="sidebar-divider" />
         <nav className="workspace-nav" aria-label={t('nav.secondaryNav')}>{secondary.map(link)}</nav>
 

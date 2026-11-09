@@ -1,0 +1,2177 @@
+[
+  {
+    "name": "360px normal /",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 360,
+        "innerWidth": 360,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 360,
+        "innerWidth": 360,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "360px normal /trips",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 360,
+        "innerWidth": 360,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 360,
+        "innerWidth": 360,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "360px normal /memories",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 360,
+        "innerWidth": 360,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 360,
+        "innerWidth": 360,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "360px normal /pricing?tripId=900001",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 360,
+        "innerWidth": 360,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 360,
+        "innerWidth": 360,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "360px normal /trips/900001/share?mode=nine",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 360,
+        "innerWidth": 360,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 360,
+        "innerWidth": 360,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "360px long title /",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 360,
+        "innerWidth": 360,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 360,
+        "innerWidth": 360,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "360px long title /trips",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 360,
+        "innerWidth": 360,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 360,
+        "innerWidth": 360,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "360px long title /memories",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 360,
+        "innerWidth": 360,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 360,
+        "innerWidth": 360,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "360px long title /pricing?tripId=900001",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 360,
+        "innerWidth": 360,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 360,
+        "innerWidth": 360,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "360px long title /trips/900001/share?mode=nine",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 360,
+        "innerWidth": 360,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 360,
+        "innerWidth": 360,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "390px normal /",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 390,
+        "innerWidth": 390,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 390,
+        "innerWidth": 390,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "390px normal /trips",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 390,
+        "innerWidth": 390,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 390,
+        "innerWidth": 390,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "390px normal /memories",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 390,
+        "innerWidth": 390,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 390,
+        "innerWidth": 390,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "390px normal /pricing?tripId=900001",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 390,
+        "innerWidth": 390,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 390,
+        "innerWidth": 390,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "390px normal /trips/900001/share?mode=nine",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 390,
+        "innerWidth": 390,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 390,
+        "innerWidth": 390,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "390px long title /",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 390,
+        "innerWidth": 390,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 390,
+        "innerWidth": 390,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "390px long title /trips",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 390,
+        "innerWidth": 390,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 390,
+        "innerWidth": 390,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "390px long title /memories",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 390,
+        "innerWidth": 390,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 390,
+        "innerWidth": 390,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "390px long title /pricing?tripId=900001",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 390,
+        "innerWidth": 390,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 390,
+        "innerWidth": 390,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "390px long title /trips/900001/share?mode=nine",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 390,
+        "innerWidth": 390,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 390,
+        "innerWidth": 390,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "768px normal /",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 768,
+        "innerWidth": 768,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 768,
+        "innerWidth": 768,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "768px normal /trips",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 768,
+        "innerWidth": 768,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 768,
+        "innerWidth": 768,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "768px normal /memories",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 768,
+        "innerWidth": 768,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 768,
+        "innerWidth": 768,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "768px normal /pricing?tripId=900001",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 768,
+        "innerWidth": 768,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 768,
+        "innerWidth": 768,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "768px normal /trips/900001/share?mode=nine",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 768,
+        "innerWidth": 768,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 768,
+        "innerWidth": 768,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "768px long title /",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 768,
+        "innerWidth": 768,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 768,
+        "innerWidth": 768,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "768px long title /trips",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 768,
+        "innerWidth": 768,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 768,
+        "innerWidth": 768,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "768px long title /memories",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 768,
+        "innerWidth": 768,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 768,
+        "innerWidth": 768,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "768px long title /pricing?tripId=900001",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 768,
+        "innerWidth": 768,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 768,
+        "innerWidth": 768,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "768px long title /trips/900001/share?mode=nine",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 768,
+        "innerWidth": 768,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 768,
+        "innerWidth": 768,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "1024px normal /",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 1024,
+        "innerWidth": 1024,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 1024,
+        "innerWidth": 1024,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "1024px normal /trips",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 1024,
+        "innerWidth": 1024,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 1024,
+        "innerWidth": 1024,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "1024px normal /memories",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 1024,
+        "innerWidth": 1024,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 1024,
+        "innerWidth": 1024,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "1024px normal /pricing?tripId=900001",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 1024,
+        "innerWidth": 1024,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 1024,
+        "innerWidth": 1024,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "1024px normal /trips/900001/share?mode=nine",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 1024,
+        "innerWidth": 1024,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 1024,
+        "innerWidth": 1024,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "1024px long title /",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 1024,
+        "innerWidth": 1024,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 1024,
+        "innerWidth": 1024,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "1024px long title /trips",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 1024,
+        "innerWidth": 1024,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 1024,
+        "innerWidth": 1024,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "1024px long title /memories",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 1024,
+        "innerWidth": 1024,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 1024,
+        "innerWidth": 1024,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "1024px long title /pricing?tripId=900001",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 1024,
+        "innerWidth": 1024,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 1024,
+        "innerWidth": 1024,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "1024px long title /trips/900001/share?mode=nine",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 1024,
+        "innerWidth": 1024,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 1024,
+        "innerWidth": 1024,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "1440px normal /",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 1440,
+        "innerWidth": 1440,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 1440,
+        "innerWidth": 1440,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "1440px normal /trips",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 1440,
+        "innerWidth": 1440,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 1440,
+        "innerWidth": 1440,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "1440px normal /memories",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 1440,
+        "innerWidth": 1440,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 1440,
+        "innerWidth": 1440,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "1440px normal /pricing?tripId=900001",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 1440,
+        "innerWidth": 1440,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 1440,
+        "innerWidth": 1440,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "1440px normal /trips/900001/share?mode=nine",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 1440,
+        "innerWidth": 1440,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 1440,
+        "innerWidth": 1440,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "1440px long title /",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 1440,
+        "innerWidth": 1440,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 1440,
+        "innerWidth": 1440,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "1440px long title /trips",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 1440,
+        "innerWidth": 1440,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 1440,
+        "innerWidth": 1440,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "1440px long title /memories",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 1440,
+        "innerWidth": 1440,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 1440,
+        "innerWidth": 1440,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "1440px long title /pricing?tripId=900001",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 1440,
+        "innerWidth": 1440,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 1440,
+        "innerWidth": 1440,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "1440px long title /trips/900001/share?mode=nine",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 1440,
+        "innerWidth": 1440,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 1440,
+        "innerWidth": 1440,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "1920px normal /",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 1920,
+        "innerWidth": 1920,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 1920,
+        "innerWidth": 1920,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "1920px normal /trips",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 1920,
+        "innerWidth": 1920,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 1920,
+        "innerWidth": 1920,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "1920px normal /memories",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 1920,
+        "innerWidth": 1920,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 1920,
+        "innerWidth": 1920,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "1920px normal /pricing?tripId=900001",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 1920,
+        "innerWidth": 1920,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 1920,
+        "innerWidth": 1920,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "1920px normal /trips/900001/share?mode=nine",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 1920,
+        "innerWidth": 1920,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 1920,
+        "innerWidth": 1920,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "1920px long title /",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 1920,
+        "innerWidth": 1920,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 1920,
+        "innerWidth": 1920,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "1920px long title /trips",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 1920,
+        "innerWidth": 1920,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 1920,
+        "innerWidth": 1920,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "1920px long title /memories",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 1920,
+        "innerWidth": 1920,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 1920,
+        "innerWidth": 1920,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "1920px long title /pricing?tripId=900001",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 1920,
+        "innerWidth": 1920,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 1920,
+        "innerWidth": 1920,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "1920px long title /trips/900001/share?mode=nine",
+    "ok": true,
+    "details": {
+      "top": {
+        "root": 1920,
+        "innerWidth": 1920,
+        "alerts": [],
+        "unknown": []
+      },
+      "bottom": {
+        "root": 1920,
+        "innerWidth": 1920,
+        "alerts": [],
+        "unknown": []
+      }
+    }
+  },
+  {
+    "name": "360px named upgrade button fits long title",
+    "ok": true,
+    "details": {
+      "enabled": true,
+      "text": "为「东京跨城旅行_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemor」升级 · ¥4",
+      "root": 360
+    }
+  },
+  {
+    "name": "360px FREE price page remains bounded after scrolling",
+    "ok": true,
+    "details": {
+      "root": 360,
+      "innerWidth": 360,
+      "alerts": [],
+      "unknown": []
+    }
+  },
+  {
+    "name": "390px named upgrade button fits long title",
+    "ok": true,
+    "details": {
+      "enabled": true,
+      "text": "为「东京跨城旅行_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemor」升级 · ¥4",
+      "root": 390
+    }
+  },
+  {
+    "name": "390px FREE price page remains bounded after scrolling",
+    "ok": true,
+    "details": {
+      "root": 390,
+      "innerWidth": 390,
+      "alerts": [],
+      "unknown": []
+    }
+  },
+  {
+    "name": "768px named upgrade button fits long title",
+    "ok": true,
+    "details": {
+      "enabled": true,
+      "text": "为「东京跨城旅行_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemor」升级 · ¥4",
+      "root": 768
+    }
+  },
+  {
+    "name": "768px FREE price page remains bounded after scrolling",
+    "ok": true,
+    "details": {
+      "root": 768,
+      "innerWidth": 768,
+      "alerts": [],
+      "unknown": []
+    }
+  },
+  {
+    "name": "1440px named upgrade button fits long title",
+    "ok": true,
+    "details": {
+      "enabled": true,
+      "text": "为「东京跨城旅行_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemory_TravelMemor」升级 · ¥4",
+      "root": 1440
+    }
+  },
+  {
+    "name": "1440px FREE price page remains bounded after scrolling",
+    "ok": true,
+    "details": {
+      "root": 1440,
+      "innerWidth": 1440,
+      "alerts": [],
+      "unknown": []
+    }
+  },
+  {
+    "name": "768px sidebar receives clicks",
+    "ok": true
+  },
+  {
+    "name": "768px sidebar navigates",
+    "ok": true
+  },
+  {
+    "name": "768px sidebar close button",
+    "ok": true
+  },
+  {
+    "name": "768px outside scrim dismisses drawer",
+    "ok": true
+  },
+  {
+    "name": "860px sidebar receives clicks",
+    "ok": true
+  },
+  {
+    "name": "860px sidebar navigates",
+    "ok": true
+  },
+  {
+    "name": "860px sidebar close button",
+    "ok": true
+  },
+  {
+    "name": "860px outside scrim dismisses drawer",
+    "ok": true
+  },
+  {
+    "name": "1023px sidebar receives clicks",
+    "ok": true
+  },
+  {
+    "name": "1023px sidebar navigates",
+    "ok": true
+  },
+  {
+    "name": "1023px sidebar close button",
+    "ok": true
+  },
+  {
+    "name": "1023px outside scrim dismisses drawer",
+    "ok": true
+  },
+  {
+    "name": "360×640 search rows normal",
+    "ok": true,
+    "details": {
+      "count": 14,
+      "fit": true,
+      "stacked": true
+    }
+  },
+  {
+    "name": "360×640 final search result reachable normal",
+    "ok": true,
+    "details": {
+      "panelTop": 2,
+      "panelBottom": 480,
+      "lastTop": 406.5,
+      "lastBottom": 471,
+      "inputHeight": 56,
+      "height": 640,
+      "width": 360
+    }
+  },
+  {
+    "name": "360×640 search closes",
+    "ok": true
+  },
+  {
+    "name": "360×640 search rows long",
+    "ok": true,
+    "details": {
+      "count": 14,
+      "fit": true,
+      "stacked": true
+    }
+  },
+  {
+    "name": "360×640 final search result reachable long",
+    "ok": true,
+    "details": {
+      "panelTop": 2,
+      "panelBottom": 480,
+      "lastTop": 406.5,
+      "lastBottom": 471,
+      "inputHeight": 56,
+      "height": 640,
+      "width": 360
+    }
+  },
+  {
+    "name": "360×640 search closes",
+    "ok": true
+  },
+  {
+    "name": "844×390 search rows normal",
+    "ok": true,
+    "details": {
+      "count": 14,
+      "fit": true,
+      "stacked": true
+    }
+  },
+  {
+    "name": "844×390 final search result reachable normal",
+    "ok": true,
+    "details": {
+      "panelTop": 16,
+      "panelBottom": 354,
+      "lastTop": 280.5,
+      "lastBottom": 345,
+      "inputHeight": 56,
+      "height": 390,
+      "width": 844
+    }
+  },
+  {
+    "name": "844×390 search closes",
+    "ok": true
+  },
+  {
+    "name": "844×390 search rows long",
+    "ok": true,
+    "details": {
+      "count": 8,
+      "fit": true,
+      "stacked": true
+    }
+  },
+  {
+    "name": "844×390 final search result reachable long",
+    "ok": true,
+    "details": {
+      "panelTop": 16,
+      "panelBottom": 354,
+      "lastTop": 280.5,
+      "lastBottom": 345,
+      "inputHeight": 56,
+      "height": 390,
+      "width": 844
+    }
+  },
+  {
+    "name": "844×390 search closes",
+    "ok": true
+  },
+  {
+    "name": "667×375 search rows normal",
+    "ok": true,
+    "details": {
+      "count": 14,
+      "fit": true,
+      "stacked": true
+    }
+  },
+  {
+    "name": "667×375 final search result reachable normal",
+    "ok": true,
+    "details": {
+      "panelTop": 2,
+      "panelBottom": 265,
+      "lastTop": 191.5,
+      "lastBottom": 256,
+      "inputHeight": 56,
+      "height": 375,
+      "width": 667
+    }
+  },
+  {
+    "name": "667×375 search closes",
+    "ok": true
+  },
+  {
+    "name": "667×375 search rows long",
+    "ok": true,
+    "details": {
+      "count": 14,
+      "fit": true,
+      "stacked": true
+    }
+  },
+  {
+    "name": "667×375 final search result reachable long",
+    "ok": true,
+    "details": {
+      "panelTop": 2,
+      "panelBottom": 265,
+      "lastTop": 191.5,
+      "lastBottom": 256,
+      "inputHeight": 56,
+      "height": 375,
+      "width": 667
+    }
+  },
+  {
+    "name": "667×375 search closes",
+    "ok": true
+  },
+  {
+    "name": "1440×700 search rows normal",
+    "ok": true,
+    "details": {
+      "count": 14,
+      "fit": true,
+      "stacked": true
+    }
+  },
+  {
+    "name": "1440×700 final search result reachable normal",
+    "ok": true,
+    "details": {
+      "panelTop": 100,
+      "panelBottom": 578,
+      "lastTop": 504.5,
+      "lastBottom": 569,
+      "inputHeight": 56,
+      "height": 700,
+      "width": 1440
+    }
+  },
+  {
+    "name": "1440×700 search closes",
+    "ok": true
+  },
+  {
+    "name": "1440×700 search rows long",
+    "ok": true,
+    "details": {
+      "count": 14,
+      "fit": true,
+      "stacked": true
+    }
+  },
+  {
+    "name": "1440×700 final search result reachable long",
+    "ok": true,
+    "details": {
+      "panelTop": 100,
+      "panelBottom": 578,
+      "lastTop": 504.5,
+      "lastBottom": 569,
+      "inputHeight": 56,
+      "height": 700,
+      "width": 1440
+    }
+  },
+  {
+    "name": "1440×700 search closes",
+    "ok": true
+  },
+  {
+    "name": "360px map 1 photos per record",
+    "ok": true,
+    "details": {
+      "root": 360,
+      "innerWidth": 360,
+      "tiles": [
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        }
+      ],
+      "contained": true
+    }
+  },
+  {
+    "name": "360px map 4 photos per record",
+    "ok": true,
+    "details": {
+      "root": 360,
+      "innerWidth": 360,
+      "tiles": [
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        }
+      ],
+      "contained": true
+    }
+  },
+  {
+    "name": "360px map 5 photos per record",
+    "ok": true,
+    "details": {
+      "root": 360,
+      "innerWidth": 360,
+      "tiles": [
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        }
+      ],
+      "contained": true,
+      "counter": "+1"
+    }
+  },
+  {
+    "name": "360px map 7 photos per record",
+    "ok": true,
+    "details": {
+      "root": 360,
+      "innerWidth": 360,
+      "tiles": [
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        }
+      ],
+      "contained": true,
+      "counter": "+3"
+    }
+  },
+  {
+    "name": "375px map 1 photos per record",
+    "ok": true,
+    "details": {
+      "root": 375,
+      "innerWidth": 375,
+      "tiles": [
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        }
+      ],
+      "contained": true
+    }
+  },
+  {
+    "name": "375px map 4 photos per record",
+    "ok": true,
+    "details": {
+      "root": 375,
+      "innerWidth": 375,
+      "tiles": [
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        }
+      ],
+      "contained": true
+    }
+  },
+  {
+    "name": "375px map 5 photos per record",
+    "ok": true,
+    "details": {
+      "root": 375,
+      "innerWidth": 375,
+      "tiles": [
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        }
+      ],
+      "contained": true,
+      "counter": "+1"
+    }
+  },
+  {
+    "name": "375px map 7 photos per record",
+    "ok": true,
+    "details": {
+      "root": 375,
+      "innerWidth": 375,
+      "tiles": [
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        }
+      ],
+      "contained": true,
+      "counter": "+3"
+    }
+  },
+  {
+    "name": "390px map 1 photos per record",
+    "ok": true,
+    "details": {
+      "root": 390,
+      "innerWidth": 390,
+      "tiles": [
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        }
+      ],
+      "contained": true
+    }
+  },
+  {
+    "name": "390px map 4 photos per record",
+    "ok": true,
+    "details": {
+      "root": 390,
+      "innerWidth": 390,
+      "tiles": [
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        }
+      ],
+      "contained": true
+    }
+  },
+  {
+    "name": "390px map 5 photos per record",
+    "ok": true,
+    "details": {
+      "root": 390,
+      "innerWidth": 390,
+      "tiles": [
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        }
+      ],
+      "contained": true,
+      "counter": "+1"
+    }
+  },
+  {
+    "name": "390px map 7 photos per record",
+    "ok": true,
+    "details": {
+      "root": 390,
+      "innerWidth": 390,
+      "tiles": [
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        },
+        {
+          "width": 72,
+          "height": 72
+        }
+      ],
+      "contained": true,
+      "counter": "+3"
+    }
+  },
+  {
+    "name": "360px empty /",
+    "ok": true,
+    "details": {
+      "root": 360,
+      "innerWidth": 360,
+      "alerts": [],
+      "unknown": []
+    }
+  },
+  {
+    "name": "360px empty /trips",
+    "ok": true,
+    "details": {
+      "root": 360,
+      "innerWidth": 360,
+      "alerts": [],
+      "unknown": []
+    }
+  },
+  {
+    "name": "360px empty /memories",
+    "ok": true,
+    "details": {
+      "root": 360,
+      "innerWidth": 360,
+      "alerts": [],
+      "unknown": []
+    }
+  },
+  {
+    "name": "360px empty /pricing",
+    "ok": true,
+    "details": {
+      "root": 360,
+      "innerWidth": 360,
+      "alerts": [],
+      "unknown": []
+    }
+  },
+  {
+    "name": "1440px empty /",
+    "ok": true,
+    "details": {
+      "root": 1440,
+      "innerWidth": 1440,
+      "alerts": [],
+      "unknown": []
+    }
+  },
+  {
+    "name": "1440px empty /trips",
+    "ok": true,
+    "details": {
+      "root": 1440,
+      "innerWidth": 1440,
+      "alerts": [],
+      "unknown": []
+    }
+  },
+  {
+    "name": "1440px empty /memories",
+    "ok": true,
+    "details": {
+      "root": 1440,
+      "innerWidth": 1440,
+      "alerts": [],
+      "unknown": []
+    }
+  },
+  {
+    "name": "1440px empty /pricing",
+    "ok": true,
+    "details": {
+      "root": 1440,
+      "innerWidth": 1440,
+      "alerts": [],
+      "unknown": []
+    }
+  },
+  {
+    "name": "No frontend runtime errors",
+    "ok": true,
+    "details": []
+  }
+]

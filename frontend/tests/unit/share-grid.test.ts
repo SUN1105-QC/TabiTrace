@@ -1,7 +1,10 @@
 /** 分享九宫格编辑逻辑：放入 / 替换 / 交换格子、地点与时间文案、素材分组 */
 import { describe, expect, it } from 'vitest'
-import type { PhotoView, TimelineDay } from '@/services/tabitrace-api'
-import { gridMaterialGroups, gridPhotos, materialWhen, placeAddress, placeInSlot, swapSlots } from '@/utils/share-grid'
+import { createElement } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
+import type { PhotoView, TimelineDay, TripView } from '@/services/tabitrace-api'
+import { ShareGridCard } from '@/components/share/ShareGridCard'
+import { gridMaterialGroups, gridPhotos, gridSlotCount, materialWhen, placeAddress, placeInSlot, swapSlots } from '@/utils/share-grid'
 
 describe('照片格操作', () => {
   it('没选满：接在已选之后，不留空格', () => {
@@ -13,13 +16,39 @@ describe('照片格操作', () => {
   it('放入的照片已在别的格子：两格交换', () => {
     expect(placeInSlot([1, 2, 3], 3, 0)).toEqual([3, 2, 1])
   })
-  it('最多 6 张', () => {
-    expect(placeInSlot([1, 2, 3, 4, 5, 6], 9, 6)).toEqual([1, 2, 3, 4, 5, 6])
-    expect(placeInSlot([1, 2, 3, 4, 5, 6], 9, 5)).toEqual([1, 2, 3, 4, 5, 9])
+  it('可选满 9 张，第 9 格可替换，不能超过 9 张', () => {
+    expect(placeInSlot([1, 2, 3, 4, 5, 6, 7, 8], 9, 8)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9])
+    expect(placeInSlot([1, 2, 3, 4, 5, 6, 7, 8, 9], 10, 8)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 10])
+    expect(placeInSlot([1, 2, 3, 4, 5, 6, 7, 8, 9], 10, 9)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9])
   })
   it('交换两个已选格；涉及自动补齐的格子时不变', () => {
     expect(swapSlots([1, 2, 3], 0, 2)).toEqual([3, 2, 1])
     expect(swapSlots([1, 2], 0, 4)).toEqual([1, 2])
+  })
+})
+
+describe('标准九宫格成品', () => {
+  const trip: TripView = { id: 1, title: '东京自驾游', city: '东京', destinationName: '东京', startDate: '2026-10-01', endDate: '2026-10-03', peopleCount: 1, planType: 'FREE', status: 'COMPLETED', visibility: 'PRIVATE' }
+  const photos: PhotoView[] = Array.from({ length: 9 }, (_, i) => ({ id: i + 1, tripId: 1, storageKey: `k${i}`, imageUrl: `/photos/${i + 1}.jpg`, mimeType: 'image/jpeg', featured: false }))
+  const render = (items: PhotoView[], editable = false) => renderToStaticMarkup(createElement(ShareGridCard, { trip, timeline: [], photos: items, onSlot: editable ? () => {} : undefined }))
+
+  it('九格都显示照片，原来的第 1、5、9 格可编辑，导出使用相同顺序', () => {
+    const html = render(photos, true)
+    expect(html.match(/class="sg-tile is-image/g)).toHaveLength(9)
+    expect([...html.matchAll(/<img[^>]+src="([^"]+)"/g)].map(m => m[1])).toEqual(photos.map(p => p.imageUrl))
+    for (const n of [1, 5, 9]) expect(html).toContain(`aria-label="第 ${n} 张照片格"`)
+    const exported = render(photos)
+    expect(exported.match(/class="sg-tile is-image"/g)).toHaveLength(9)
+    expect(exported).not.toContain('is-editable')
+    expect(exported).not.toMatch(/is-(title|data|footer|memo)/)
+  })
+  it('8 张照片保留 1 个空位；没有照片时保留 9 个空位', () => {
+    const eight = render(photos.slice(0, 8))
+    expect(eight.match(/class="sg-tile is-image"/g)).toHaveLength(8)
+    expect(eight.match(/class="sg-tile is-empty"/g)).toHaveLength(1)
+    expect(eight).toContain('待添加照片')
+    expect(render([]).match(/class="sg-tile is-empty"/g)).toHaveLength(9)
+    expect(render(photos)).not.toContain('is-empty')
   })
 })
 
@@ -62,5 +91,19 @@ describe('素材分组与自动补齐', () => {
   it('没选满时自动补齐，手动指定的排在前面', () => {
     expect(gridPhotos(photos, timeline, { photoIds: [12] }).map(p => p.id)[0]).toBe(12)
     expect(gridPhotos(photos, timeline, { photoIds: [] })).toHaveLength(4)
+  })
+  it('两种格式最多选 9 张，标准格式默认自动补齐 9 张', () => {
+    expect(gridSlotCount()).toBe(9)
+    expect(gridSlotCount('scrapbook')).toBe(9)
+    const many = Array.from({ length: 12 }, (_, i) => photo(i + 20))
+    expect(gridPhotos(many, timeline, { photoIds: [31] }).map(p => p.id)).toEqual([31, 20, 21, 22, 23, 24, 25, 26, 27])
+  })
+  it('只有 8 张时不重复照片，上传第 9 张后自动补齐', () => {
+    const eight = Array.from({ length: 8 }, (_, i) => photo(i + 20))
+    expect(gridPhotos(eight, timeline, { photoIds: [] }).map(p => p.id)).toEqual(eight.map(p => p.id))
+    expect(gridPhotos([...eight, photo(28)], timeline, { photoIds: [] })).toHaveLength(9)
+  })
+  it('单日不足 9 张时保留空位，不使用其他日期的照片', () => {
+    expect(gridPhotos(photos, timeline, { photoIds: [12], day: '2026-10-01' }).map(p => p.id)).toEqual([11, 10])
   })
 })

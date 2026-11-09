@@ -23,12 +23,12 @@ export const enUS: Messages = {
   },
   mobileNav: { label: 'Mobile navigation', home: 'Home', trips: 'Trips', checkin: 'Check in', checkinLabel: 'Quick check-in', share: 'Share', me: 'Me' },
   titles: {
-    home: 'Home', trips: 'My trips', newTrip: 'New trip', map: 'Map & check-ins', photos: 'Photos', summary: 'Trip summary',
-    share: 'Share', story: 'Travel Story', exploreTokyo: 'Explore Tokyo', explore: 'Explore cities', memories: 'Memories', pricing: 'Trip Pro',
+    home: 'Home', trips: 'My trips', newTrip: 'New trip', map: 'Map & check-ins', photos: 'Photos',
+    share: 'Share', story: 'Travel Story', exploreTokyo: 'Explore Tokyo', explore: 'Explore countries & cities', memories: 'Memories', pricing: 'Trip Pro',
     settings: 'Settings', fallback: 'TabiTrace'
   },
   tripNav: {
-    label: 'Trip pages', overview: 'Overview', map: 'Map & check-ins', mapShort: 'Map', photos: 'Photos', summary: 'Summary',
+    label: 'Trip pages', map: 'Map & check-ins', mapShort: 'Map', photos: 'Photos',
     share: 'Share', shareShort: 'Share', video: 'Travel Story', videoShort: 'Story'
   },
   publicNav: {

@@ -13,9 +13,9 @@ import java.util.List;
 public class VideoController {
     private final VideoService service;public VideoController(VideoService service){this.service=service;}
 
-    // 目录：模板与音乐都来自数据库，前端不再写死
+    // 视频模板目录
     @GetMapping("/video-templates") public ApiResponse<List<VideoTemplateView>> templates(){return ApiResponse.ok(service.templates());}
-    /** 曲库：可按 category（WARM / CITY_NIGHT / MORNING / LOFI / CINEMATIC）、template（推荐模板）、freeOnly 过滤 */
+    /** 兼容旧客户端：自带曲库已移除，返回空列表。用户音乐走 /user/music。 */
     @GetMapping("/video-music") public ApiResponse<List<VideoMusicView>> music(@RequestParam(required=false) String category,@RequestParam(required=false) String template,@RequestParam(required=false,defaultValue="false") boolean freeOnly){return ApiResponse.ok(service.music(category,template,freeOnly));}
 
     @PostMapping("/trips/{tripId}/video-projects") public ApiResponse<VideoProjectView> create(@PathVariable Long tripId,@Valid @RequestBody UpsertVideoProjectRequest r){return ApiResponse.ok(service.create(SecurityUtils.currentUser().id(),tripId,r));}

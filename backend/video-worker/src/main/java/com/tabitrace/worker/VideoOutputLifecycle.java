@@ -16,7 +16,7 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.Comparator;
 
-/** Publication and durable cleanup coordinate through the project row lock. */
+/** 成片发布与持久化清理通过项目行锁协调，避免项目删除后又被渲染结果重新发布。 */
 @Component
 public class VideoOutputLifecycle {
     private static final Logger log = LoggerFactory.getLogger(VideoOutputLifecycle.class);
@@ -33,7 +33,7 @@ public class VideoOutputLifecycle {
         this.workDir = Path.of(workDir).toAbsolutePath().normalize();
     }
 
-    /** A deletion either waits for this publication, or wins first and prevents the upload. */
+    /** 发布先拿锁则删除等待；删除先完成则拒绝发布，不把已删除项目的成片重新暴露。 */
     public boolean publish(VideoJob job, Path file, String warning) throws IOException, RenderFailure {
         long bytes = Files.size(file);
         try {
@@ -62,7 +62,7 @@ public class VideoOutputLifecycle {
         StoragePublishException(RuntimeException cause) { super(cause); }
     }
 
-    /** Independent schedule: cleanup also runs while no render jobs are queued. */
+    /** 清理独立调度：即使当前没有视频入队，历史待删除成片也会持续尝试清理。 */
     @Scheduled(fixedDelayString = "${worker.cleanup-interval-ms:60000}", initialDelayString = "${worker.cleanup-interval-ms:60000}")
     public void cleanup() {
         var ids = jdbc.queryForList("""
@@ -73,7 +73,7 @@ public class VideoOutputLifecycle {
             try {
                 cleanupOne(id);
             } catch (RuntimeException ex) {
-                // Keep a bounded diagnostic, never a signed URL or credential-bearing exception message.
+                // 只记录异常类型，避免把签名 URL 或带凭证的异常消息持久化到清理队列。
                 jdbc.update("""
                         UPDATE video_output_deletions SET attempts=LEAST(attempts+1,2147483647),last_error=?,
                           next_attempt_at=TIMESTAMPADD(SECOND,300,UTC_TIMESTAMP()) WHERE project_id=?
@@ -104,7 +104,7 @@ public class VideoOutputLifecycle {
         Path directory = workDir.resolve("project-" + id).normalize();
         if (!directory.startsWith(workDir) || directory.equals(workDir)) throw new IllegalArgumentException("Invalid output directory");
         if (!Files.exists(directory, LinkOption.NOFOLLOW_LINKS)) return;
-        // A replaced project directory must not redirect recursive deletion to another directory.
+        // 项目目录若被替换为符号链接，不能让递归清理转向其他目录。
         if (Files.isSymbolicLink(directory)) throw new IllegalStateException("Refusing symbolic output directory");
         try (var paths = Files.walk(directory)) {
             for (Path path : paths.sorted(Comparator.reverseOrder()).toList()) Files.deleteIfExists(path);

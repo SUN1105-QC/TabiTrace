@@ -1,0 +1,300 @@
+[
+  {
+    "name": "tablet-sidebar-768",
+    "data": {
+      "sideZ": "70",
+      "scrimZ": "75",
+      "link": {
+        "text": "首页",
+        "hitClass": "sidebar-scrim",
+        "clickable": false
+      },
+      "close": {
+        "text": "关闭导航",
+        "hitClass": "sidebar-scrim",
+        "clickable": false
+      }
+    }
+  },
+  {
+    "name": "tablet-sidebar-close-768",
+    "data": true
+  },
+  {
+    "name": "tablet-sidebar-860",
+    "data": {
+      "sideZ": "70",
+      "scrimZ": "75",
+      "link": {
+        "text": "首页",
+        "hitClass": "sidebar-scrim",
+        "clickable": false
+      },
+      "close": {
+        "text": "关闭导航",
+        "hitClass": "sidebar-scrim",
+        "clickable": false
+      }
+    }
+  },
+  {
+    "name": "tablet-sidebar-close-860",
+    "data": true
+  },
+  {
+    "name": "tablet-sidebar-1023",
+    "data": {
+      "sideZ": "70",
+      "scrimZ": "75",
+      "link": {
+        "text": "首页",
+        "hitClass": "sidebar-scrim",
+        "clickable": false
+      },
+      "close": {
+        "text": "关闭导航",
+        "hitClass": "sidebar-scrim",
+        "clickable": false
+      }
+    }
+  },
+  {
+    "name": "tablet-sidebar-close-1023",
+    "data": true
+  },
+  {
+    "name": "search-dialog-360x640",
+    "data": {
+      "panel": {
+        "x": 16,
+        "y": 2,
+        "width": 337,
+        "height": 478,
+        "bottom": 480
+      },
+      "viewport": {
+        "w": 369,
+        "h": 656
+      },
+      "results": {
+        "maxHeight": "420px",
+        "height": 420,
+        "scrollHeight": 777
+      },
+      "pageScroll": ""
+    }
+  },
+  {
+    "name": "search-dialog-844x390",
+    "data": {
+      "panel": {
+        "x": 112,
+        "y": 16,
+        "width": 620,
+        "height": 478,
+        "bottom": 494
+      },
+      "viewport": {
+        "w": 844,
+        "h": 390
+      },
+      "results": {
+        "maxHeight": "420px",
+        "height": 420,
+        "scrollHeight": 455
+      },
+      "pageScroll": ""
+    }
+  },
+  {
+    "name": "search-dialog-1440x700",
+    "data": {
+      "panel": {
+        "x": 410,
+        "y": 100,
+        "width": 620,
+        "height": 478,
+        "bottom": 578
+      },
+      "viewport": {
+        "w": 1440,
+        "h": 700
+      },
+      "results": {
+        "maxHeight": "420px",
+        "height": 420,
+        "scrollHeight": 455
+      },
+      "pageScroll": ""
+    }
+  },
+  {
+    "name": "map-overflow-360-true",
+    "data": {
+      "root": 369,
+      "innerWidth": 369,
+      "visual": 360,
+      "offenders": [
+        {
+          "tag": "IMG",
+          "cls": "",
+          "text": "",
+          "right": 369,
+          "width": 72,
+          "position": "static"
+        },
+        {
+          "tag": "DIV",
+          "cls": "tm-mobile-actions",
+          "text": "",
+          "right": 369,
+          "width": 369,
+          "position": "fixed"
+        }
+      ]
+    }
+  },
+  {
+    "name": "map-overflow-360-false",
+    "data": {
+      "root": 369,
+      "innerWidth": 360,
+      "visual": 360,
+      "offenders": [
+        {
+          "tag": "IMG",
+          "cls": "",
+          "text": "",
+          "right": 369,
+          "width": 72,
+          "position": "static"
+        }
+      ]
+    }
+  },
+  {
+    "name": "settings-unsaved-390x640",
+    "data": {
+      "bar": {
+        "top": 461.75,
+        "bottom": 554
+      },
+      "nav": {
+        "top": 554,
+        "bottom": 640
+      },
+      "buttons": [
+        {
+          "label": "取消更改",
+          "top": 505,
+          "bottom": 541
+        },
+        {
+          "label": "保存更改",
+          "top": 505,
+          "bottom": 541
+        }
+      ]
+    }
+  },
+  {
+    "name": "share-lightbox-360x640",
+    "data": {
+      "rect": {
+        "top": 0,
+        "bottom": 640,
+        "width": 360
+      },
+      "buttons": [
+        {
+          "label": "原始大小",
+          "width": 100,
+          "right": 296
+        },
+        {
+          "label": "关闭大图",
+          "width": 44,
+          "right": 348
+        }
+      ]
+    }
+  },
+  {
+    "name": "photo-detail-360x640",
+    "data": {
+      "label": null,
+      "rect": {
+        "top": 0,
+        "bottom": 640,
+        "width": 360
+      },
+      "outsideButtons": [
+        {
+          "text": "取消精选",
+          "label": null
+        },
+        {
+          "text": "设为旅行封面",
+          "label": null
+        },
+        {
+          "text": "下载",
+          "label": null
+        },
+        {
+          "text": "删除",
+          "label": null
+        }
+      ]
+    }
+  },
+  {
+    "name": "pricing-normal-360",
+    "data": {
+      "width": 360,
+      "alerts": [],
+      "unknown": [],
+      "headings": [
+        "让值得留下的旅程，\n拥有完整的表达。"
+      ]
+    }
+  },
+  {
+    "name": "pricing-normal-768",
+    "data": {
+      "width": 768,
+      "alerts": [],
+      "unknown": [],
+      "headings": [
+        "让值得留下的旅程，\n拥有完整的表达。"
+      ]
+    }
+  },
+  {
+    "name": "pricing-normal-1440",
+    "data": {
+      "width": 1440,
+      "alerts": [],
+      "unknown": [],
+      "headings": [
+        "让值得留下的旅程，\n拥有完整的表达。"
+      ]
+    }
+  },
+  {
+    "name": "share-longtitle-390",
+    "data": {
+      "viewport": 1560,
+      "root": 2628,
+      "titleLength": 163,
+      "rect": {
+        "width": 358,
+        "scrollWidth": 2612
+      },
+      "style": {
+        "overflowWrap": "normal",
+        "wordBreak": "normal"
+      }
+    }
+  }
+]

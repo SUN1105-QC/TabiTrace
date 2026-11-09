@@ -8,14 +8,14 @@
 import type { AreaView } from '@/utils/explore'
 import { AreaCard } from './AreaCard'
 
-export function AreaExplorer({ areas, loading, active, onPick }: { areas: AreaView[]; loading: boolean; active: string; onPick: (name: string) => void }) {
+export function AreaExplorer({ cityName = '东京', areas, loading, active, onPick }: { cityName?: string; areas: AreaView[]; loading: boolean; active: string; onPick: (name: string) => void }) {
   if (!loading && !areas.length) return null
   return (
     <section className="xp-section" id="xp-areas" aria-labelledby="xp-areas-title">
       <header className="xp-section-head">
         <div>
           <h2 id="xp-areas-title">按区域探索</h2>
-          <p>用街区的方式认识东京。</p>
+          <p>用街区的方式认识{cityName}。</p>
         </div>
       </header>
       <div className="xp-areas">

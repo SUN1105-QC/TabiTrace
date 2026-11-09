@@ -1,0 +1,7 @@
+19 source hashes and unchanged Compose verified
+/tabi-web-1 1db27d471eb4176e8bdc40dc9843091f31929ae3edcd2456709a1cba26bdd1bf tabitrace-web:usability-20261108-v3 2026-11-08T10:03:40.817211636Z restarts=0 status=running health=healthy
+/tabi-api-1 36fe70f9c0fac44fcacb9c28420287da4f13427e203a52517ba3035d8621841d tabitrace-api:security-20261107-2859ac69 2026-11-07T00:11:26.862573802Z restarts=0 status=running health=healthy
+/tabi-worker-1 fb630aa4026b44fc247fee07226368766d16f6fd45e2e1992161dc51e4ad752f tabitrace-worker:security-20261107-2859ac69 2026-11-07T00:11:44.238083145Z restarts=0 status=running health=not-configured
+/tabi-mysql-1 b717c733714dbc7dd516a8ad22e0436e31f46b97e9ec2a4d35cf0a2e13e65cfe mysql:8.4 2026-10-26T14:09:53.868055565Z restarts=0 status=running health=healthy
+{"status":"ok"}{"groups":["liveness","readiness"],"status":"UP"}tabi-usability-preview
+USABILITY_PRODUCTION_VERIFIED

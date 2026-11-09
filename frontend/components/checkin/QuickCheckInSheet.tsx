@@ -55,6 +55,7 @@ export function QuickCheckInSheet({ preferredTripId, prefill, incoming, onClose,
   const [places, setPlaces] = useState<PlaceView[]>([])
   const trip = trips.find(t => t.id === tripId) ?? null
   const usable = useMemo(() => trips.filter(t => t.status !== 'ARCHIVED'), [trips])
+  const archivedTrip = trips.find(t => t.id === tripId && t.status === 'ARCHIVED')
 
   // ── 照片与时间 ──
   const [photos, setPhotos] = useState<Photo[]>([])
@@ -319,6 +320,12 @@ export function QuickCheckInSheet({ preferredTripId, prefill, incoming, onClose,
           <div className="qk-body"><p className="qk-muted"><Loader2 size={14} className="animate-spin" /> 正在准备…</p></div>
         ) : tripError ? (
           <div className="qk-body"><p className="qk-error"><AlertTriangle size={14} /> {tripError}</p></div>
+        ) : archivedTrip ? (
+          <div className="qk-body qk-empty">
+            <p>这段旅行已归档，无法新增记录。</p>
+            <small>{archivedTrip.title}</small>
+            <Link href="/trips" className="warm-button" onClick={onClose}>选择其他旅行</Link>
+          </div>
         ) : !trip ? (
           <div className="qk-body qk-empty">
             <p>还没有可以记录的旅行。</p>

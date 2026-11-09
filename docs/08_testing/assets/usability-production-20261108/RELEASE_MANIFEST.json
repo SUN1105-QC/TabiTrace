@@ -1,0 +1,102 @@
+{
+  "tag": "usability-20261108-v3",
+  "baseRelease": "security-20261107-2859ac69",
+  "scope": "Frontend travel workspace usability; preserve existing security, map export and business APIs",
+  "files": [
+    {
+      "path": "frontend/app/home-client.tsx",
+      "beforeSha256": "4ccf26704a450aeb81a63ed118194eca1a6d032d41781c225706212a0bc779c5",
+      "sha256": "7774ac5902aa3d8346d715359fee71d8f8a776a8a9973e07414ff95479857a1c"
+    },
+    {
+      "path": "frontend/app/layout.tsx",
+      "beforeSha256": "e87b2af388f2b82833507aa22b9955d7a19ee9ec28937e3e67c6cedd176671fc",
+      "sha256": "51974d9b865767d685c3918bc200db6f694741a8c2b5228f8fb471c9d506a0a4"
+    },
+    {
+      "path": "frontend/app/usability.css",
+      "beforeSha256": null,
+      "sha256": "7b53bba1199e4815024ef106420fc58c42e9052098814f6f3d78cbd4ecf3e41b"
+    },
+    {
+      "path": "frontend/components/home/HomeWorkspace.tsx",
+      "beforeSha256": null,
+      "sha256": "b34a56dc6151704ebb0656470b77a65795ec1b2c208f80df60a2b155dfd801e2"
+    },
+    {
+      "path": "frontend/components/common/AppSidebar.tsx",
+      "beforeSha256": "5e1670f05b35c70150d221c87abdcd44129f0a3e1831ecd675f8afecd88fcee6",
+      "sha256": "b91db9da429d74901cda5b3a5cf56f66dadc14f0eed66f24dfa7b934d057adad"
+    },
+    {
+      "path": "frontend/components/common/SiteHeader.tsx",
+      "beforeSha256": "850fe2ecf77458a718d812f4207cc1adf3f6761a8b8300dbdcac440a5eddcadc",
+      "sha256": "1e8fcd31a011998ad709b8e3657fa8af7ba97bd51cd3c0fd53a07defc92eef36"
+    },
+    {
+      "path": "frontend/components/mobile/MobileBottomNav.tsx",
+      "beforeSha256": "38da9f2b9fe805e0cf027e7d83a2e44870ca76723abbeff683cb25bf2df58748",
+      "sha256": "4adc709fa2c2ebbbcf3da3545b02cc8392f2ae491a7f0fd62ba6f7475557d8c6"
+    },
+    {
+      "path": "frontend/components/trip/LiveTripSubnav.tsx",
+      "beforeSha256": "11c24bf5abf6e52941da6fc4388aa4bb20ec3fc8211320f8b972580f9a335553",
+      "sha256": "80cd0fe4973fd7ea3081e7efa6f40fc7d7b5c07cf95102b71443b13258d6380e"
+    },
+    {
+      "path": "frontend/hooks/useHomeData.ts",
+      "beforeSha256": "38bbcb8a3375a2cc80e4e812962bc0450fca5f6ae5d3a0857b5d86dac5654eda",
+      "sha256": "1e4aa69984d0e945b40d22d68a5d61dc0cf9b044ca797a00bfbf0a63de436479"
+    },
+    {
+      "path": "frontend/app/trips/new/page.tsx",
+      "beforeSha256": "8cc20f8cbbf7d353a0c2ef33d4bb688d9f2321a37355f53a1c8b550fd50fa1fe",
+      "sha256": "42638ab95b7d7caebb37d1706da12135aab31db9cd901874552c697a84d2cafd"
+    },
+    {
+      "path": "frontend/app/trips/[id]/map/page.tsx",
+      "beforeSha256": "42c2ee0a445c15a3516b05ccd4345779fadaba2b3f6dac37b940e3465033ce29",
+      "sha256": "05466fc60c41fc5856f59a5b76b6f67261427e38baf79f0bb30aa773f2493a76"
+    },
+    {
+      "path": "frontend/app/trips/[id]/gallery/page.tsx",
+      "beforeSha256": "960e294511e59f35d7dfe7efcbf1217724756be37daab1da12d0e71c76222b3a",
+      "sha256": "6dd88accc66567db39a4c96e619be57da5a32116a206e424ba97fe55b58a9832"
+    },
+    {
+      "path": "frontend/app/trips/[id]/share/page.tsx",
+      "beforeSha256": "bb3b5f442b947af436397fd3ff82438ce28ab4b719229ee64712cef7eb8f1200",
+      "sha256": "069c341d9b844f79b34dea6511e9661d272e97d5f92c438844bfdc28cd8429d4"
+    },
+    {
+      "path": "frontend/components/share/studio/NineGridEditor.tsx",
+      "beforeSha256": "262be8b8e6b248651b4dbded6cb86e6bbf50d711e512877f7f1e02b1c812b447",
+      "sha256": "1a3b0ae261f7e72ff4df9daaef897963a9af8c3711e20dd903633ca6c3d1e801"
+    },
+    {
+      "path": "frontend/components/share/studio/ShareStudioParts.tsx",
+      "beforeSha256": "423b04e930d575b5e9ee141da3d294ec3ce5f96bc53da2b5516dc43eead24680",
+      "sha256": "fe94fb0c934547d166e99535179f56846ec6143dca506af43ad1cae34c0b6826"
+    },
+    {
+      "path": "frontend/components/gallery/PhotoCard.tsx",
+      "beforeSha256": "6d2fb39ef71a15b89e14677cd0883d89f1706470eb681045b63848794e312ffb",
+      "sha256": "4f0ed8d9d1e1f42652183790e3425aec0da32a1e0849af832bc81a47d6e5569f"
+    },
+    {
+      "path": "frontend/tests/unit/retired-achievements.test.ts",
+      "beforeSha256": "9563b6a2e388005b7afe2ee7f73866d81821961339d5d1866d41172f161a7ef2",
+      "sha256": "a70b5e306d627f3c6b9b75c47de7696efdbc169a5f6f850bd86d0b413336f34d"
+    },
+    {
+      "path": "frontend/lib/active-trip.ts",
+      "beforeSha256": null,
+      "sha256": "753f5e2904e1005a43105b94db70920891cbb070b126220b17a6b589124ebf02"
+    },
+    {
+      "path": "frontend/components/checkin/QuickCheckInSheet.tsx",
+      "beforeSha256": "609ad37f0829ecc475898a417b6b6bc9a66bf5d8a60ec1a95a24f1c126cd0fbd",
+      "sha256": "9fc927fc42e8f81a6713e021feae300119036894d782f1f92a080b74181b3274"
+    }
+  ]
+}

@@ -86,11 +86,13 @@ public class VideoJobPoller {
     }
 
     public void process(VideoJob job) {
+        // 领取结果取决于条件更新是否成功，不能把前面的队列查询视为任务已经归本线程所有。
         int claimed = jdbc.update(
                 "UPDATE video_projects SET status='PROCESSING',renderer='FFMPEG',render_stage='PREPARING',progress=5,updated_at=UTC_TIMESTAMP() WHERE id=? AND status='QUEUED'",
                 job.id());
         if (claimed == 0) return;
         working = Thread.currentThread();
+        // 心跳单独调度，即使 FFmpeg 正在长时间处理，也能与真正失联的任务区分。
         ScheduledFuture<?> beat = heartbeat.scheduleAtFixedRate(() -> touch(job), heartbeatSeconds, heartbeatSeconds, TimeUnit.SECONDS);
         try {
             // 生成成功但有降级时记下告警（目前只有 MUSIC_FALLBACK），完成时写入 render_warning

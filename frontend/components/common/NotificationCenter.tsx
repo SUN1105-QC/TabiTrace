@@ -46,7 +46,7 @@ export function buildNotifications(input: {
   const today = localDateKey(new Date())
   if (tripReminder && trip.status !== 'ARCHIVED' && trip.status !== 'COMPLETED') {
     if (today < trip.startDate) items.push({ id: `trip-soon-${trip.id}`, icon: 'clock', title: tr('notify.tripSoonTitle', { title: trip.title }), body: tr('notify.tripSoonBody', { date: trip.startDate }), at: trip.createdAt || null, href: `/trips/${trip.id}` })
-    else if (today > trip.endDate) items.push({ id: `trip-end-${trip.id}`, icon: 'clock', title: tr('notify.tripEndTitle', { title: trip.title }), body: tr('notify.tripEndBody'), at: trip.createdAt || null, href: `/trips/${trip.id}/summary` })
+    else if (today > trip.endDate) items.push({ id: `trip-end-${trip.id}`, icon: 'clock', title: tr('notify.tripEndTitle', { title: trip.title }), body: tr('notify.tripEndBody'), at: trip.createdAt || null, href: `/trips/${trip.id}/map` })
   }
 
   // 免费额度提醒不受分类开关影响

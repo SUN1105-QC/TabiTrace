@@ -81,7 +81,7 @@ public class VideoService {
     }
 
     /** 校验通过后的完整参数。 */
-    private record Resolved(VideoTemplateEntity template, VideoMusicEntity music, UserMusicEntity userMusic, String ratio, int duration, String quality,
+    private record Resolved(VideoTemplateEntity template, UserMusicEntity userMusic, String ratio, int duration, String quality,
                             Long coverPhotoId, Settings settings, List<Long> photoIds) {}
 
     // ───────────── 目录 ─────────────
@@ -89,30 +89,15 @@ public class VideoService {
     public List<VideoTemplateView> templates() {
         return catalog.templates().stream().filter(t -> Boolean.TRUE.equals(t.enabled))
                 .map(t -> new VideoTemplateView(t.code, t.name, t.englishName, t.description, t.suitableFor, t.pace,
-                        t.transition, t.transitionSeconds.doubleValue(), t.plan, t.recommendedMusic))
+                        t.transition, t.transitionSeconds.doubleValue(), t.plan, null))
                 .toList();
     }
 
     public List<VideoMusicView> music() { return music(null, null, false); }
 
-    /**
-     * 选择器曲库：只列出可用曲目（已启用、授权已核验、音频已导入）。试听只给 45 秒片段，不暴露原曲存储路径。
-     * 可按分类、推荐模板、只看 FREE 过滤；排序由后台 sort_order 决定，新增 / 下架 / 改分类都不需要改前端。
-     */
+    /** 自带曲库已停用；保留旧接口并返回空列表，用户上传音乐走 /user/music。 */
     public List<VideoMusicView> music(String category, String template, boolean freeOnly) {
-        String cat = category == null || category.isBlank() ? null : category.trim().toUpperCase(Locale.ROOT);
-        String tpl = template == null || template.isBlank() ? null : template.trim().toUpperCase(Locale.ROOT);
-        return catalog.music().stream().filter(VideoMusicEntity::usable)
-                .filter(m -> cat == null || cat.equals(m.category))
-                .filter(m -> tpl == null || split(m.recommendedTemplates).contains(tpl))
-                .filter(m -> !freeOnly || "FREE".equals(m.plan))
-                .map(m -> new VideoMusicView(m.code, m.name, m.category, m.mood,
-                        m.durationSeconds == null ? null : m.durationSeconds.doubleValue(), m.plan, split(m.recommendedTemplates),
-                        m.artist, split(m.mood), split(m.instruments), m.bpm, m.energy, Boolean.TRUE.equals(m.essential),
-                        m.previewKey == null ? null : storage.publicUrl(m.previewKey),
-                        Boolean.TRUE.equals(m.attributionRequired), m.attributionText, m.license, m.licenseUrl, m.source, m.sourceUrl,
-                        Boolean.TRUE.equals(m.commercialUse), Boolean.TRUE.equals(m.derivativesAllowed)))
-                .toList();
+        return List.of();
     }
 
     /** 开发环境版权后台用：全部曲目（含 REVIEW_REQUIRED）及授权证据 */
@@ -122,10 +107,6 @@ public class VideoService {
                 Boolean.TRUE.equals(m.commercialUse), Boolean.TRUE.equals(m.exportAllowed), m.status, m.plan, Boolean.TRUE.equals(m.enabled),
                 m.licenseCheckedAt, m.downloadedAt, m.fileSha256, d(m.durationSeconds), m.bpm, m.bpmSource, d(m.loudnessLufs),
                 d(m.introStart), d(m.mainStart), d(m.highlightStart), d(m.outroStart))).toList();
-    }
-
-    private static List<String> split(String csv) {
-        return csv == null || csv.isBlank() ? List.of() : java.util.Arrays.stream(csv.split(",")).map(String::trim).filter(x -> !x.isEmpty()).toList();
     }
 
     private static Double d(java.math.BigDecimal v) { return v == null ? null : v.doubleValue(); }
@@ -214,9 +195,8 @@ public class VideoService {
         }
         // 冻结分镜时一并锁定音乐片段（起点、增益、音量、署名、原曲路径），Worker 只按它渲染；这个字段不会出现在返回给前端的分镜里
         Map<String, Object> frozen = json.convertValue(sb, new tools.jackson.core.type.TypeReference<Map<String, Object>>() {});
-        MusicCues.MusicCue cue = v.userMusic() != null
-                ? MusicCues.userCue(v.userMusic(), v.duration(), v.settings().musicVolume())
-                : MusicCues.cue(v.music(), v.duration(), v.settings().musicVolume());
+        MusicCues.MusicCue cue = v.userMusic() == null ? null
+                : MusicCues.userCue(v.userMusic(), v.duration(), v.settings().musicVolume());
         if (cue != null) frozen.put("music", cue);
         p.storyboardJson = json.writeValueAsString(frozen);
         if (p.name == null) p.name = defaultName(t, v);
@@ -243,9 +223,11 @@ public class VideoService {
         p.duration = src.duration;
         p.quality = src.quality;
         p.coverPhotoId = src.coverPhotoId != null && ids.contains(src.coverPhotoId) ? src.coverPhotoId : null;
-        p.musicCode = src.musicCode;
-        p.musicSource = src.musicSource;
-        p.userMusicId = src.userMusicId;
+        // 历史成片保留原配乐与署名；复制出的新草稿只保留用户上传的音乐。
+        boolean ownMusic = "USER".equals(src.musicSource) || (src.musicSource == null && src.userMusicId != null);
+        p.musicCode = null;
+        p.musicSource = ownMusic ? "USER" : null;
+        p.userMusicId = ownMusic ? src.userMusicId : null;
         p.showText = src.showText;
         p.showAchievements = false;
         p.settingsJson = src.settingsJson;
@@ -305,12 +287,9 @@ public class VideoService {
             }
         }
 
-        VideoMusicEntity music = null;
         UserMusicEntity mine = null;
         try {
-            Object m = resolveMusic(t, r, pro);
-            if (m instanceof VideoMusicEntity vm) music = vm;
-            if (m instanceof UserMusicEntity um) mine = um;
+            mine = resolveMusic(t, r);
         } catch (BusinessException ex) {
             if (strictMusic) throw ex;
         }
@@ -338,19 +317,19 @@ public class VideoService {
         if (cover != null && !ids.contains(cover)) {
             throw new BusinessException("VIDEO_COVER_INVALID", "封面必须是已选择的照片");
         }
-        return new Resolved(template, music, mine, ratio, duration, quality, cover, settings, List.copyOf(ids));
+        return new Resolved(template, mine, ratio, duration, quality, cover, settings, List.copyOf(ids));
     }
 
     /**
-     * 音乐来源：SYSTEM → 系统曲库（下架 / 套餐检查）；USER → 「我的音乐」（必须是自己的、处理完成的，且当前是有效会员）；
-     * NONE / 都没填 → 无音乐（旧客户端可能提交 musicCode = "NONE"，同样视为无音乐）。返回 VideoMusicEntity / UserMusicEntity / null。
+     * 新项目只支持 USER / NONE。拒绝旧客户端提交的自带音乐，用户音乐仍验证主人、状态和会员。
      */
-    private Object resolveMusic(TripEntity t, UpsertVideoProjectRequest r, boolean pro) {
+    private UserMusicEntity resolveMusic(TripEntity t, UpsertVideoProjectRequest r) {
         String source = r.musicSource() == null || r.musicSource().isBlank() ? null : r.musicSource().trim().toUpperCase(Locale.ROOT);
         if (source != null && !List.of("SYSTEM", "USER", "NONE").contains(source)) {
             throw new BusinessException("VIDEO_MUSIC_SOURCE_INVALID", "不支持的音乐来源");
         }
         if ("NONE".equals(source)) return null;
+        if ("SYSTEM".equals(source)) throw systemMusicRemoved();
         if ("USER".equals(source) || (source == null && r.userMusicId() != null)) {
             if (userMusic == null) throw new BusinessException("VIDEO_USER_MUSIC_UNAVAILABLE", "暂时不能使用自定义音乐");
             if (r.userMusicId() == null) throw new BusinessException("VIDEO_USER_MUSIC_REQUIRED", "请选择一首「我的音乐」");
@@ -358,17 +337,12 @@ public class VideoService {
         }
         String musicCode = r.musicCode() == null || r.musicCode().isBlank() || "NONE".equalsIgnoreCase(r.musicCode().trim())
                 ? null : r.musicCode().trim().toUpperCase(Locale.ROOT);
-        if (musicCode == null) return null;
-        VideoMusicEntity music = catalog.musicByCode(musicCode);
-        if (music == null) throw new BusinessException("VIDEO_MUSIC_INVALID", "视频音乐不存在");
-        if (!music.usable()) {
-            // 已下架 / 授权复核中 / 音频未导入：历史视频照常播放，重新生成时请用户换一首
-            throw new BusinessException("VIDEO_MUSIC_UNAVAILABLE", "「" + music.name + "」已下架或暂时不可用，请重新选择音乐");
-        }
-        if (!pro && "PRO".equals(music.plan)) {
-            throw proRequired("PRO_MUSIC_REQUIRED", "「" + music.name + "」是 Trip Pro 音乐，Free 旅行可以使用基础音乐");
-        }
-        return music;
+        if (musicCode != null) throw systemMusicRemoved();
+        return null;
+    }
+
+    private static BusinessException systemMusicRemoved() {
+        return new BusinessException("VIDEO_SYSTEM_MUSIC_REMOVED", "自带音乐已移除，请上传自己的音乐或选择无音乐");
     }
 
     private static BusinessException proRequired(String code, String message) {
@@ -383,9 +357,9 @@ public class VideoService {
         p.duration = v.duration();
         p.quality = v.quality();
         p.coverPhotoId = v.coverPhotoId();
-        p.musicCode = v.music() == null ? null : v.music().code;
+        p.musicCode = null;
         p.userMusicId = v.userMusic() == null ? null : v.userMusic().id;
-        p.musicSource = v.userMusic() != null ? "USER" : v.music() != null ? "SYSTEM" : null;
+        p.musicSource = v.userMusic() != null ? "USER" : null;
         Settings s = v.settings();
         p.showText = s.showCheckinText();
         p.showAchievements = s.showAchievements();

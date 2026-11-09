@@ -1,0 +1,27 @@
+{
+  "hero": "/assets/explore/hero_asakusa.webp",
+  "countries": {
+    "JP": {
+      "banner": "/assets/explore/banner_japan.webp",
+      "thumbnail": "/assets/explore/city_fuji.webp"
+    },
+    "KR": {
+      "banner": "/assets/explore/banner_south_korea.webp",
+      "thumbnail": "/assets/explore/city_seoul.webp"
+    },
+    "CN": {
+      "banner": "/assets/explore/banner_china.webp",
+      "thumbnail": "/assets/explore/city_taipei.webp"
+    }
+  },
+  "cities": {
+    "tokyo": "/assets/explore/city_tokyo.webp",
+    "osaka": "/assets/explore/city_osaka.webp",
+    "kyoto": "/assets/explore/city_kyoto.webp",
+    "seoul": "/assets/explore/city_seoul.webp",
+    "taipei": "/assets/explore/city_taipei.webp",
+    "fuji": "/assets/explore/city_fuji.webp"
+  },
+  "ai_generated": true,
+  "notes": "All images are AI generated style mockups, not documentary photographs; verify geographic accuracy before production use."
+}
