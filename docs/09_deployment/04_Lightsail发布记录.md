@@ -1,5 +1,15 @@
 # 2026-10-26 · Lightsail 发布记录
 
+## 2026-11-11 · 全部付费功能免费开放上线
+
+当前 Web / API / Worker 均为 `open-access-20261111-c32b709b`（提交 `c32b709`，CI 第 12 次运行通过），指针已同步。
+
+- 发布前备份 `shared/backups/20261111T044006Z-before-open-access-20261111-c32b709b.sql.gz`（38560 字节，校验通过），确认没有进行中的视频任务。没有迁移，仍为 V24。
+- `PLANS_OPEN_ACCESS` 取 Compose 默认值 true，服务器 `.env` 没有改。API 启动日志为 `upgraded 1 FREE trips to PRO`；用户 1、旅行 1，切换前后一致。
+- 三容器 restart 均为 0，切换后 30 分钟内 API、Worker 没有错误日志；MySQL 没有重启。公网只读回归 292 / 292（公开页 133、目录 108、新城市 51）。
+- 第一次构建的 `open-access-20261111-737b6f58` 因 CI 失败没有切换上线，源码目录与镜像只作记录保留。回退目标为 `cities-20261110-233bcae8`：旧版不认识开关，旅行保持 PRO，会员恢复按记录判断。
+- 详见[验收报告](../08_testing/09_全部功能免费开放验收_2026-11-11.md)；服务器日志 `releases/open-access-20261111-c32b709b.log`、`-switch.log`。
+
 ## 2026-11-10 · 首尔、香港、台北推荐探索上线（首次从 Git 提交发布）
 
 正式地址 https://tabi.sunows.com 。当前 Web / API / Worker 均为 `cities-20261110-233bcae8`，MySQL 保持原实例，指针 `shared/current-release.txt` 已同步。

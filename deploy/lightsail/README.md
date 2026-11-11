@@ -2,7 +2,9 @@
 
 当前目标为 `https://tabi.sunows.com`，服务器 `175.41.217.207`。本方案补充 Lightsail 独立 Compose 部署；原 Railway 配置保留供参考。
 
-2026-11-10最新版本：Web / API / Worker 均为 `cities-20261110-233bcae8`，由 Git 提交 `233bcae` 的 `git archive` 构建（第一次从提交发布）；V24 已执行，首尔、香港、台北开放，公网 291 项只读验收通过。服务器上的发布脚本为 `releases/deploy-cities-build.sh`（只构建）和 `deploy-cities-switch.sh`（备份、确认无进行中视频任务、依次切换 API / Worker / Web，失败自动回退）。后续发布以 `shared/current-release.txt` 和[最新发布记录](../../docs/09_deployment/04_Lightsail发布记录.md)为准；下文旧版本为历史记录。
+2026-11-11最新版本：Web / API / Worker 均为 `open-access-20261111-c32b709b`（提交 `c32b709`），全部付费功能免费开放（`PLANS_OPEN_ACCESS`，Compose 默认 true；恢复收费在 `shared/.env` 设 false）。脚本为 `releases/deploy-open-access-build.sh` / `deploy-open-access-switch.sh`。
+
+2026-11-10版本：Web / API / Worker 均为 `cities-20261110-233bcae8`，由 Git 提交 `233bcae` 的 `git archive` 构建（第一次从提交发布）；V24 已执行，首尔、香港、台北开放，公网 291 项只读验收通过。服务器上的发布脚本为 `releases/deploy-cities-build.sh`（只构建）和 `deploy-cities-switch.sh`（备份、确认无进行中视频任务、依次切换 API / Worker / Web，失败自动回退）。后续发布以 `shared/current-release.txt` 和[最新发布记录](../../docs/09_deployment/04_Lightsail发布记录.md)为准；下文旧版本为历史记录。
 
 ## 组成与目录
 
