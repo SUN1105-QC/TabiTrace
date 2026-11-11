@@ -2,7 +2,7 @@
 
 当前目标为 `https://tabi.sunows.com`，服务器 `175.41.217.207`。本方案补充 Lightsail 独立 Compose 部署；原 Railway 配置保留供参考。
 
-2026-11-08最新版本：Web和源码目录为 `usability-20261108-v3`，API/Worker继续运行 `security-20261107-2859ac69`。仅更新工作台操作体验，公网464项验收通过，未重启后端或迁移数据库。后续发布以 `shared/current-release.txt` 和[最新发布记录](../../docs/09_deployment/04_Lightsail发布记录.md)为准；下文旧版本为历史记录。
+2026-11-10最新版本：Web / API / Worker 均为 `cities-20261110-233bcae8`，由 Git 提交 `233bcae` 的 `git archive` 构建（第一次从提交发布）；V24 已执行，首尔、香港、台北开放，公网 291 项只读验收通过。服务器上的发布脚本为 `releases/deploy-cities-build.sh`（只构建）和 `deploy-cities-switch.sh`（备份、确认无进行中视频任务、依次切换 API / Worker / Web，失败自动回退）。后续发布以 `shared/current-release.txt` 和[最新发布记录](../../docs/09_deployment/04_Lightsail发布记录.md)为准；下文旧版本为历史记录。
 
 ## 组成与目录
 
@@ -40,7 +40,7 @@ python3 deploy/lightsail/check-env.py /srv/sunows/apps/tabi/shared/.env
 bash deploy/lightsail/deploy.sh
 ```
 
-检查失败会停止发布并只列变量名，不会用 Mock 或开发密钥启动生产 API。`deploy.sh` 构建三个镜像；若现有 MySQL 正在运行，会先将一致性数据库快照保存到受限的 `shared/backups/`，压缩文件校验通过后才更新容器并等待健康检查。当前 MySQL 迁移为 V1–V23，由 API 执行。数据库更新后回滚旧代码不等于回滚数据库；禁止使用 `down -v`。备份包含业务数据，应保持目录 0700、文件 0600，不对外提供下载。
+检查失败会停止发布并只列变量名，不会用 Mock 或开发密钥启动生产 API。`deploy.sh` 构建三个镜像；若现有 MySQL 正在运行，会先将一致性数据库快照保存到受限的 `shared/backups/`，压缩文件校验通过后才更新容器并等待健康检查。当前 MySQL 迁移为 V1–V24，由 API 执行。数据库更新后回滚旧代码不等于回滚数据库；禁止使用 `down -v`。备份包含业务数据，应保持目录 0700、文件 0600，不对外提供下载。
 
 只构建镜像可以在外部服务尚未准备时执行，不启动应用：
 

@@ -1,5 +1,24 @@
 # 2026-10-26 · Lightsail 发布记录
 
+## 2026-11-10 · 首尔、香港、台北推荐探索上线（首次从 Git 提交发布）
+
+正式地址 https://tabi.sunows.com 。当前 Web / API / Worker 均为 `cities-20261110-233bcae8`，MySQL 保持原实例，指针 `shared/current-release.txt` 已同步。
+
+- **来源**：GitHub `main` 的提交 `233bcae8b76a133d36d4c3f02a11ed13d849f7a6`（CI 第 10 次运行通过），用 `git archive` 打包。包大小约 164MB，SHA256 `adc1680a94858c36bb9f633e2e397d12d4f982795d917ec4cd50ea85b4265ae3`，服务器校验一致。发布目录内的 `RELEASE_MANIFEST.json` 记录了提交、基线和迁移。
+- **基线核对（P0-2 关闭）**：发布前对服务器 `releases/usability-20261108-v3` 逐文件取哈希，与提交比对。服务器上只有发布清单不在提交中。去掉换行符差异后共 47 个文件内容不同，全部是提交侧更新：新城市、主屏幕独立窗口、改成中文的代码注释，以及构建时会重新生成的 `next-env.d.ts`。没有线上改动被覆盖。
+- **构建**：`deploy-cities-build.sh` 只解包和构建三个镜像，不动运行中的服务。镜像 ID：Web `sha256:51ddffc8…`，API `sha256:2a8ee6de…`，Worker `sha256:9fd49076…`。
+- **数据库**：迁移前备份 `shared/backups/20261110T115419Z-before-cities-20261110-233bcae8.sql.gz`（27524 字节，0600，gzip 校验通过），同前缀的 `.env` 和 `.images.txt` 记录原配置与旧镜像。确认没有进行中的视频任务后切换。API 启动执行 V24，Flyway 当前版本 24；用户 1、旅行 1，迁移前后一致。
+- **切换中的一次自动回退**：第一次切换已经成功（V24 执行完，API 与 Web 健康），但脚本末尾的统计查询把 `explore_city_entries` 不存在的 `status` 列写进了 SQL，触发脚本的失败回退，三容器回到 `usability-20261108-v3` / `security-20261107-2859ac69`。旧 API 在 V24 已执行的库上正常启动，验证了回退路径可用。修正查询后重新切换成功，前后约 1 分钟，期间站点一直可访问；但目录接口已显示三座新城市开放，旧 Web 还没有对应页面。第二次切换前多了一份备份 `20261110T115542Z-…`，那份已经是 V24 之后的数据。第一次的日志保留为 `releases/cities-20261110-233bcae8-switch-attempt1.log`。
+- **结果**：目录为 3 个国家 / 6 座城市 / 4 座开放 / 120 个地点 / 24 条路线，中国主题内香港在台北前。四个城市各 30 个官方地点；大阪、京都仍为准备中。
+- **运行状态**：四容器健康，Web / API / Worker 的 restart 均为 0，切换后 20 分钟内 API、Worker 日志没有 ERROR 或异常。MySQL 没有重启。Nginx、TLS、共享秘密配置都没有改。
+- **公网只读验收 291 / 291**：
+  - 公开页面 132（含三座新城市页）、探索目录 108、新城市浏览器 51（6 种屏宽、搜索、路线、加入旅行、收藏、深链接与署名、分享、登录回跳）。
+  - 账户与写操作只在测试浏览器内模拟，真实请求全部是 GET；没有注册、发信或付款。
+  - `/manifest.webmanifest` 为 200，主屏幕独立窗口随本次上线，真机效果还没验证。
+- **回退**：`usability-20261108-v3`（Web）、`security-20261107-2859ac69`（API / Worker）的源码与镜像都保留。数据库若需回到 V23 之前，用 `20261110T115419Z` 那份备份；只回退应用不需要动数据库。
+
+服务器日志 `releases/cities-20261110-233bcae8.log`（构建）、`-switch.log`（切换）；本地公网验收日志 `backend/.tabitrace/cities-production-*.log`。部署私钥只用于本次 SSH，没有复制进项目，也没有进入 Git。
+
 ## 2026-11-08 · 旅行工作台改版发布完成
 
 正式地址 https://tabi.sunows.com 。当前Web和源码版本 `usability-20261108-v3`，指针 `shared/current-release.txt` 已同步。以服务器实际运行的 `security-20261107-2859ac69` 为基线，仅发布19个前端路径（含一份单元测试），保留此前安全和导出功能。
