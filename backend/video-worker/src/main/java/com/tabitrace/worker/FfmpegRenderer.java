@@ -23,7 +23,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 /**
@@ -31,6 +37,8 @@ import java.util.stream.Stream;
  *   PREPARING 下载解码照片 → STORY 开场 / 地点 / 结尾帧 → MUSIC 校验音乐 → EXPORTING xfade 转场 + 混音导出 MP4。
  * 每个阶段失败都抛带错误码的 RenderFailure，前端据此显示「素材下载失败 / 画面生成失败 / 视频合成失败」等。
  * 音乐例外：音乐文件不存在、下载失败或混音失败时不让整个视频失败，改用无音乐继续生成，并上报 MUSIC_FALLBACK 告警。
+ * 速度：照片下载解码和画面绘制按 render-threads 并行（结果与顺序执行逐像素一致）；导出时静止段每张图只处理一次，
+ * 转场单独合成后拼接，成片与原先「每帧解码 + xfade 长链」的做法逐帧一致（见 encode）。
  */
 @Component
 public class FfmpegRenderer {
@@ -61,9 +69,17 @@ public class FfmpegRenderer {
     private final Path musicCacheDir;
     private final WorkerStorage storage;
     private final long ffmpegTimeoutSeconds;
+    /** 并行下载解码 / 绘制的线程数（每个线程同一时刻只持有一张原图，内存随线程数而不是照片数增长） */
+    private final int threads;
     private final HttpClient http = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build();
     private final ObjectMapper json = JsonMapper.builder().build();
 
+    public FfmpegRenderer(JdbcTemplate jdbc, String ffmpeg, String workDir, String musicDir, long ffmpegTimeoutSeconds,
+                          String musicCacheDir, WorkerStorage storage) {
+        this(jdbc, ffmpeg, workDir, musicDir, ffmpegTimeoutSeconds, musicCacheDir, storage, 0);
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
     public FfmpegRenderer(
             JdbcTemplate jdbc,
             @Value("${worker.ffmpeg-binary:ffmpeg}") String ffmpeg,
@@ -71,7 +87,9 @@ public class FfmpegRenderer {
             @Value("${worker.music-dir:./video-music}") String musicDir,
             @Value("${worker.ffmpeg-timeout-seconds:600}") long ffmpegTimeoutSeconds,
             @Value("${worker.music-cache-dir:${java.io.tmpdir}/tabitrace-music}") String musicCacheDir,
-            WorkerStorage storage) {
+            WorkerStorage storage,
+            @Value("${worker.render-threads:0}") int renderThreads) {
+        this.threads = renderThreads > 0 ? renderThreads : Math.max(2, Runtime.getRuntime().availableProcessors());
         this.musicCacheDir = Path.of(musicCacheDir);
         this.storage = storage;
         this.jdbc = jdbc;
@@ -113,51 +131,71 @@ public class FfmpegRenderer {
         }
         if (scenes.isEmpty()) throw new RenderFailure("STORYBOARD_EMPTY", "分镜里没有可渲染的段落，请返回编辑后重新生成");
 
-        // ── PREPARING：下载并解码照片 ──
+        // ── PREPARING：并行下载照片并解码成 JPEG（只写到工作目录，绘制时再逐张读入，不同时常驻内存） ──
+        long started = System.nanoTime();
         progress.report("PREPARING", 10);
-        Map<Long, BufferedImage> images = loadPhotos(dir, scenes);
+        Photos photos = preparePhotos(dir, scenes);
 
-        // ── STORY：开场 / 地点照片 / 结尾 ──
+        // ── STORY：开场 / 地点照片 / 结尾。先按原顺序排好镜头和画面编号，再并行绘制 ──
+        long prepared = System.nanoTime();
         progress.report("STORY", 50);
         Map<String, List<Shot>> byScene = new HashMap<>();
+        List<Callable<Shot>> paints = new ArrayList<>();
+        List<Runnable> fill = new ArrayList<>();
+        List<Shot> painted = new ArrayList<>();
         int photoTotal = (int) scenes.stream().filter(sc -> "PLACE".equals(sc.path("type").asText()))
                 .mapToLong(sc -> sc.path("photoIds").size()).sum();
         int photoIndex = 0, frameNo = 0;
-        try {
-            for (JsonNode sc : scenes) {
-                String type = sc.path("type").asText();
-                List<Shot> shots = new ArrayList<>();
-                double seconds = sc.path("duration").asDouble();
-                String title = text(sc, "title"), subtitle = text(sc, "subtitle");
-                JsonNode meta = sc.path("meta");
-                switch (type) {
-                    case "OPENING" -> shots.add(write(dir, ++frameNo, painter.opening(firstImage(sc, images),
+        for (JsonNode sc : scenes) {
+            String type = sc.path("type").asText();
+            List<Shot> shots = new ArrayList<>();
+            double seconds = sc.path("duration").asDouble();
+            String title = text(sc, "title"), subtitle = text(sc, "subtitle");
+            JsonNode meta = sc.path("meta");
+            switch (type) {
+                case "OPENING" -> {
+                    int frame = ++frameNo;
+                    Long cover = firstImageId(sc, photos.files());
+                    paint(paints, fill, painted, shots, () -> write(dir, frame, painter.opening(read(photos, cover),
                             text(meta, "kicker"), title, subtitle, text(meta, "destination")), seconds));
-                    case "PLACE" -> {
-                        List<Long> ids = ids(sc.path("photoIds"));
-                        JsonNode shotSeconds = meta.path("shots");
-                        // 旧版本分镜在地点开头留给路线动画的时长（meta.leg.seconds）并入第一张照片，总时长不变
-                        double extra = meta.path("leg").path("seconds").asDouble(0);
-                        for (int i = 0; i < ids.size(); i++) {
-                            photoIndex++;
-                            double s = (shotSeconds.has(i) ? shotSeconds.get(i).asDouble() : (seconds - extra) / ids.size()) + (i == 0 ? extra : 0);
-                            BufferedImage img = images.get(ids.get(i));
-                            // 照片在排队期间被删：跳过这一张，时长并入相邻镜头
-                            if (img == null) { shots.add(new Shot(null, s)); continue; }
-                            shots.add(write(dir, ++frameNo, painter.photo(img, title, subtitle, text(meta, "note"),
-                                    i == 0, photoIndex, photoTotal), s));
-                        }
-                    }
-                    case "ENDING" -> shots.add(write(dir, ++frameNo, painter.ending(firstImage(sc, images), title, subtitle,
-                            text(meta, "stats"), text(meta, "endingText"), text(meta, "tagline")), seconds));
-                    // 旧版本分镜里的已下线段落：不再渲染，时长并入相邻镜头（总时长不变）
-                    default -> shots.add(new Shot(null, seconds));
                 }
-                byScene.put(sc.path("key").asText(), shots);
+                case "PLACE" -> {
+                    List<Long> ids = ids(sc.path("photoIds"));
+                    JsonNode shotSeconds = meta.path("shots");
+                    // 旧版本分镜在地点开头留给路线动画的时长（meta.leg.seconds）并入第一张照片，总时长不变
+                    double extra = meta.path("leg").path("seconds").asDouble(0);
+                    for (int i = 0; i < ids.size(); i++) {
+                        photoIndex++;
+                        double s = (shotSeconds.has(i) ? shotSeconds.get(i).asDouble() : (seconds - extra) / ids.size()) + (i == 0 ? extra : 0);
+                        Long id = ids.get(i);
+                        // 照片在排队期间被删：跳过这一张，时长并入相邻镜头
+                        if (!photos.files().containsKey(id)) { shots.add(new Shot(null, s)); continue; }
+                        int frame = ++frameNo, index = photoIndex;
+                        boolean first = i == 0;
+                        paint(paints, fill, painted, shots, () -> write(dir, frame, painter.photo(read(photos, id), title, subtitle,
+                                text(meta, "note"), first, index, photoTotal), s));
+                    }
+                }
+                case "ENDING" -> {
+                    int frame = ++frameNo;
+                    Long cover = firstImageId(sc, photos.files());
+                    paint(paints, fill, painted, shots, () -> write(dir, frame, painter.ending(read(photos, cover), title, subtitle,
+                            text(meta, "stats"), text(meta, "endingText"), text(meta, "tagline")), seconds));
+                }
+                // 旧版本分镜里的已下线段落：不再渲染，时长并入相邻镜头（总时长不变）
+                default -> shots.add(new Shot(null, seconds));
             }
-        } catch (IOException ex) {
+            byScene.put(sc.path("key").asText(), shots);
+        }
+        try {
+            painted.addAll(runAll(paints));
+        } catch (RenderFailure | InterruptedException | RuntimeException ex) {
+            throw ex;
+        } catch (Exception ex) {
             throw new RenderFailure("STORY_FAILED", "旅行故事画面生成失败", ex);
         }
+        fill.forEach(Runnable::run);
+        long drawn = System.nanoTime();
 
         List<Shot> timeline = new ArrayList<>();
         for (JsonNode sc : scenes) timeline.addAll(byScene.getOrDefault(sc.path("key").asText(), List.of()));
@@ -188,8 +226,13 @@ public class FfmpegRenderer {
         }
 
         cleanupIntermediate(dir, output);
+        long done = System.nanoTime();
+        log.info("视频项目 {} 渲染完成：{} 秒 {}，{} 个镜头，准备 {}s / 绘制 {}s / 导出 {}s，共 {}s", job.id(), job.duration(), job.quality(),
+                timeline.size(), secs(prepared - started), secs(drawn - prepared), secs(done - drawn), secs(done - started));
         return output;
     }
+
+    private static String secs(long nanos) { return String.format(Locale.ROOT, "%.1f", nanos / 1e9); }
 
     // ───────────── 分镜与素材 ─────────────
 
@@ -204,7 +247,10 @@ public class FfmpegRenderer {
         }
     }
 
-    private Map<Long, BufferedImage> loadPhotos(Path dir, List<JsonNode> scenes) throws RenderFailure {
+    /** files：成功解码的照片（插入顺序与原先的照片表一致，决定开场 / 结尾缺图时的兜底顺序）；ordinal：报错时的「第 n 张」 */
+    private record Photos(Map<Long, Path> files, Map<Long, Integer> ordinal) {}
+
+    private Photos preparePhotos(Path dir, List<JsonNode> scenes) throws Exception {
         Set<Long> wanted = new LinkedHashSet<>();
         scenes.forEach(sc -> wanted.addAll(ids(sc.path("photoIds"))));
         Map<Long, String> urls = new HashMap<>();
@@ -213,27 +259,95 @@ public class FfmpegRenderer {
             jdbc.query("SELECT id,image_url FROM photos WHERE id IN (" + in + ")",
                     rs -> { urls.put(rs.getLong(1), rs.getString(2)); }, wanted.toArray());
         }
-        Map<Long, BufferedImage> out = new HashMap<>();
-        int n = 0;
+        List<Long> order = new ArrayList<>();
+        Map<Long, Integer> ordinal = new HashMap<>();
         for (Long id : wanted) {
-            String url = urls.get(id);
-            if (url == null) continue; // 照片已被删除：由调用方跳过
-            n++;
+            if (urls.get(id) == null) continue; // 照片已被删除：由调用方跳过
+            order.add(id);
+            ordinal.put(id, order.size());
+        }
+        List<Callable<Path>> tasks = new ArrayList<>();
+        for (Long id : order) tasks.add(() -> {
             Path raw = dir.resolve("raw-" + id);
             Path decoded = dir.resolve("decoded-" + id + ".jpg");
             try {
-                if (!download(url, raw)) continue; // 404 / 410：存储里的文件已不存在，同样跳过
-                // 统一交给 FFmpeg 解码（webp / png / heic 都能读），再用 ImageIO 读入
+                if (!download(urls.get(id), raw)) return null; // 404 / 410：存储里的文件已不存在，同样跳过
+                // 统一交给 FFmpeg 解码（webp / png / heic 都能读），绘制时再用 ImageIO 读入
                 exec(dir, List.of(ffmpeg, "-y", "-hide_banner", "-loglevel", "error", "-i", raw.getFileName().toString(),
                         "-frames:v", "1", "-q:v", "2", decoded.getFileName().toString()));
-                BufferedImage img = ImageIO.read(decoded.toFile());
-                if (img == null) throw new IOException("无法解码图片");
-                out.put(id, img);
+                if (!Files.isRegularFile(decoded) || Files.size(decoded) == 0) throw new IOException("无法解码图片");
+                return decoded;
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                throw ex;
             } catch (Exception ex) {
-                throw new RenderFailure("PHOTO_DOWNLOAD_FAILED", "素材下载失败：第 " + n + " 张照片无法读取", ex);
+                throw new RenderFailure("PHOTO_DOWNLOAD_FAILED", "素材下载失败：第 " + ordinal.get(id) + " 张照片无法读取", ex);
             }
+        });
+        List<Path> results = runAll(tasks);
+        Map<Long, Path> files = new HashMap<>();
+        for (int i = 0; i < order.size(); i++) if (results.get(i) != null) files.put(order.get(i), results.get(i));
+        return new Photos(files, ordinal);
+    }
+
+    /** 读入解码后的照片；读不出来按「素材下载失败」处理（与原先在准备阶段读入时的错误一致） */
+    private static BufferedImage read(Photos photos, Long id) throws RenderFailure {
+        if (id == null) return null;
+        try {
+            BufferedImage img = ImageIO.read(photos.files().get(id).toFile());
+            if (img == null) throw new IOException("无法解码图片");
+            return img;
+        } catch (IOException ex) {
+            throw new RenderFailure("PHOTO_DOWNLOAD_FAILED", "素材下载失败：第 " + photos.ordinal().get(id) + " 张照片无法读取", ex);
         }
-        return out;
+    }
+
+    /** 先在镜头列表里占位，绘制完成后按提交顺序回填（镜头顺序和画面编号与串行时一致） */
+    private static void paint(List<Callable<Shot>> paints, List<Runnable> fill, List<Shot> painted, List<Shot> shots, Callable<Shot> task) {
+        int slot = shots.size(), index = paints.size();
+        shots.add(null);
+        paints.add(task);
+        fill.add(() -> shots.set(slot, painted.get(index)));
+    }
+
+    /**
+     * 用 threads 个线程执行，按提交顺序返回结果。任一任务失败就停止其余任务（中断正在运行的 FFmpeg），
+     * 抛出提交顺序最靠前的失败——与串行执行时报告的是同一项。调用线程被中断（Worker 停机）时同样停止全部任务。
+     */
+    private <T> List<T> runAll(List<Callable<T>> tasks) throws Exception {
+        if (tasks.isEmpty()) return List.of();
+        AtomicInteger n = new AtomicInteger();
+        ExecutorService pool = Executors.newFixedThreadPool(Math.min(threads, tasks.size()), r -> {
+            Thread t = new Thread(r, "video-render-" + n.incrementAndGet());
+            t.setDaemon(true);
+            return t;
+        });
+        try {
+            List<Future<T>> futures = new ArrayList<>();
+            for (Callable<T> task : tasks) futures.add(pool.submit(task));
+            List<T> out = new ArrayList<>(tasks.size());
+            for (Future<T> f : futures) {
+                try {
+                    out.add(f.get());
+                } catch (ExecutionException ex) {
+                    pool.shutdownNow();
+                    if (ex.getCause() instanceof Exception e) throw e;
+                    if (ex.getCause() instanceof Error e) throw e;
+                    throw ex;
+                }
+            }
+            return out;
+        } finally {
+            pool.shutdownNow();
+            // 等子线程收尾（被中断的 FFmpeg 已强制结束），再让调用方清理工作目录；保留调用线程的中断标记
+            boolean interrupted = Thread.interrupted();
+            try {
+                pool.awaitTermination(30, TimeUnit.SECONDS);
+            } catch (InterruptedException ex) {
+                interrupted = true;
+            }
+            if (interrupted) Thread.currentThread().interrupt();
+        }
     }
 
     /** 缺图的镜头时长并入前一个（没有前一个就并入后一个），保证总时长不变。 */
@@ -255,13 +369,21 @@ public class FfmpegRenderer {
     // ───────────── 导出 ─────────────
 
     /**
-     * 每个镜头是一张循环静帧输入，用 xfade 链串起来：
-     * 第 k 个镜头在前面镜头累计时长处开始转场，除最后一个外每个输入多留一个转场时长，总长严格等于目标时长。
-     */
-    /**
      * 视觉风格 → 成片调色滤镜，在转场链之后、输出格式之前整体套用。
      * NATURAL 不调色；其余为轻度调整，保证文字与水印依旧清晰。
      */
+    /**
+     * 调色拆成两段：静态部分（逐像素、与帧序无关）对每张静止画面只算一次，对转场帧在混合之后计算；
+     * 时域部分（FILM 的颗粒随帧变化、其后的暗角）仍逐帧作用在整条视频上。两段按原顺序拼起来与 gradeFilter 完全相同。
+     */
+    static String[] gradeParts(String grade) {
+        return switch (grade == null ? "" : grade) {
+            case "FILM" -> new String[]{"eq=contrast=1.06:saturation=0.8:gamma=0.97,colorbalance=rs=0.05:gs=0.01:bs=-0.04:rh=0.04:bh=-0.05,",
+                    "noise=alls=7:allf=t,vignette=angle=PI/5,"};
+            default -> new String[]{gradeFilter(grade), ""};
+        };
+    }
+
     static String gradeFilter(String grade) {
         return switch (grade == null ? "" : grade) {
             // 日系清新：提亮、降对比与饱和，暗部略偏青蓝
@@ -281,29 +403,10 @@ public class FfmpegRenderer {
         double t = shots.size() < 2 ? 0 : round3(Math.max(0.1, Math.min(transitionSeconds, minShot * 0.45)));
 
         List<String> cmd = new ArrayList<>(List.of(ffmpeg, "-y", "-hide_banner", "-loglevel", "error"));
-        for (int i = 0; i < shots.size(); i++) {
-            double len = shots.get(i).seconds() + (i < shots.size() - 1 ? t : 0);
-            cmd.addAll(List.of("-loop", "1", "-framerate", String.valueOf(FPS), "-t", fmt(len),
-                    "-i", shots.get(i).file().getFileName().toString()));
-        }
+        // 每张画面只作为一帧输入：解码、缩放、转格式各只做一次（原先 -loop 1 会对每一帧重复解码和缩放）
+        for (Shot shot : shots) cmd.addAll(List.of("-framerate", String.valueOf(FPS), "-i", shot.file().getFileName().toString()));
         if (music != null) cmd.addAll(List.of("-stream_loop", "-1", "-ss", fmt(music.start()), "-i", music.file().toAbsolutePath().toString()));
-
-        StringBuilder f = new StringBuilder();
-        for (int i = 0; i < shots.size(); i++) {
-            f.append('[').append(i).append(":v]scale=").append(size[0]).append(':').append(size[1])
-                    .append(",setsar=1,format=yuv420p,fps=").append(FPS).append("[v").append(i).append("];");
-        }
-        String last = "v0";
-        double offset = 0;
-        for (int i = 1; i < shots.size(); i++) {
-            offset += shots.get(i - 1).seconds();
-            String label = "x" + i;
-            f.append('[').append(last).append("][v").append(i).append("]xfade=transition=").append(transition)
-                    .append(":duration=").append(fmt(t)).append(":offset=").append(fmt(offset))
-                    .append('[').append(label).append("];");
-            last = label;
-        }
-        f.append('[').append(last).append(']').append(gradeFilter(grade)).append("format=yuv420p[vout]");
+        StringBuilder f = new StringBuilder(videoGraph(shots, transition, t, duration, size, grade));
         if (music != null) {
             f.append(";[").append(shots.size()).append(":a]")
                     .append(music.loudnorm() ? "loudnorm=I=-16:TP=-1.5:LRA=11" : "volume=" + fmt(music.gainDb()) + "dB")
@@ -328,6 +431,75 @@ public class FfmpegRenderer {
             throw new RenderFailure("ENCODE_FAILED", "视频合成失败：没有生成 MP4 文件", ex);
         }
         return output;
+    }
+
+    /**
+     * 视频滤镜图，输出 [vout]。成片与原先「每个镜头循环输入 + xfade 首尾相连 + 整体调色」逐帧一致，但快得多：
+     * - 原先的 xfade 链里，每一帧（包括转场以外的静止帧）都要经过 xfade 处理；这里静止段的画面只经过一次
+     *   fade 型 xfade（取进度 1 的第一帧，与原先的静止帧逐像素相同，且与所选转场无关），然后直接复制帧；
+     * - 每个转场单独用两张画面合成 D 帧（与原链路相同的起点帧和进度），再按时间顺序 concat；
+     * - 静态调色对静止画面只算一次、对转场帧在混合后计算；时域调色（颗粒等）仍逐帧作用在整条视频上。
+     * 帧位置按 FFmpeg 的取整规则计算：秒数先按 3 位小数格式化，换算成微秒后再四舍五入到帧。
+     */
+    static String videoGraph(List<Shot> shots, String transition, double t, int duration, int[] size, String grade) {
+        String[] parts = gradeParts(grade);
+        String still = parts[0], temporal = parts[1];
+        int n = shots.size(), total = duration * FPS;
+        int d = n < 2 ? 0 : frames(t);
+        int[] start = new int[n]; // 第 k 个转场（进入第 k 个镜头）的起始帧
+        double offset = 0;
+        for (int k = 1; k < n; k++) { offset += shots.get(k - 1).seconds(); start[k] = frames(offset); }
+        String setpts = "setpts=N/(" + FPS + "*TB)";
+        String xfade = "xfade=transition=" + transition + ":duration=" + fmt(t) + ":offset=0";
+        // 原链路里转场以外的帧也经过 xfade 的内部处理，结果与所选转场无关，等于 fade 在进度 1 的输出
+        String settle = "xfade=transition=fade:duration=" + fmt(t) + ":offset=0";
+        StringBuilder f = new StringBuilder();
+        List<String> pieces = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            List<String> outs = new ArrayList<>(List.of("s" + i));
+            if (n > 1) outs.add("z" + i);
+            if (i > 0) outs.add("b" + i);
+            if (i < n - 1) outs.add("a" + i);
+            f.append('[').append(i).append(":v]scale=").append(size[0]).append(':').append(size[1]).append(",setsar=1,format=yuv420p");
+            if (outs.size() > 1) {
+                f.append(",split=").append(outs.size());
+                for (String o : outs) f.append('[').append(o).append(']');
+            } else {
+                f.append("[s").append(i).append(']');
+            }
+            f.append(';');
+        }
+        for (int i = 0; i < n; i++) {
+            if (i > 0) {
+                String piece = "p" + pieces.size();
+                f.append("[a").append(i - 1).append("]loop=loop=").append(d).append(":size=1:start=0,").append(setpts).append("[ta").append(i).append("];")
+                        .append("[b").append(i).append("]loop=loop=").append(d).append(":size=1:start=0,").append(setpts).append("[tb").append(i).append("];")
+                        .append("[ta").append(i).append("][tb").append(i).append(']').append(xfade).append(",trim=end_frame=").append(d).append(',')
+                        .append(setpts).append(',').append(still).append("null[").append(piece).append("];");
+                pieces.add(piece);
+            }
+            int from = i == 0 ? 0 : start[i] + d, to = i == n - 1 ? total : start[i + 1], count = to - from;
+            if (count <= 0) {
+                f.append("[s").append(i).append("]nullsink;");
+                if (n > 1) f.append("[z").append(i).append("]nullsink;");
+                continue;
+            }
+            String piece = "p" + pieces.size();
+            f.append("[s").append(i).append(']');
+            // 只有一个镜头时原先没有 xfade，静止画面保持原样
+            if (n > 1) f.append("[z").append(i).append(']').append(settle).append(",trim=end_frame=1,").append(setpts).append(',');
+            f.append(still).append("loop=loop=").append(count - 1).append(":size=1:start=0,").append(setpts).append('[').append(piece).append("];");
+            pieces.add(piece);
+        }
+        for (String p : pieces) f.append('[').append(p).append(']');
+        f.append("concat=n=").append(pieces.size()).append(":v=1:a=0,").append(temporal).append("format=yuv420p[vout]");
+        return f.toString();
+    }
+
+    /** 与 FFmpeg 一致的秒 → 帧换算：按 3 位小数的字符串解析成微秒，再按 1/FPS 四舍五入 */
+    static int frames(double seconds) {
+        long us = Math.round(Double.parseDouble(fmt(seconds)) * 1_000_000d);
+        return (int) Math.floorDiv(us * FPS + 500_000L, 1_000_000L);
     }
 
     /**
@@ -546,9 +718,10 @@ public class FfmpegRenderer {
         deleteContents(dir, keep);
     }
 
-    private static BufferedImage firstImage(JsonNode scene, Map<Long, BufferedImage> images) {
-        for (Long id : ids(scene.path("photoIds"))) if (images.containsKey(id)) return images.get(id);
-        return images.values().stream().findFirst().orElse(null);
+    /** 段落自己的第一张可用照片；都不可用时取任意一张（与原先按照片表遍历顺序取第一张一致） */
+    private static Long firstImageId(JsonNode scene, Map<Long, Path> files) {
+        for (Long id : ids(scene.path("photoIds"))) if (files.containsKey(id)) return id;
+        return files.keySet().stream().findFirst().orElse(null);
     }
 
     private static List<Long> ids(JsonNode arr) {

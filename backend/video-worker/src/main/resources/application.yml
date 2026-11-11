@@ -12,6 +12,8 @@ worker:
   # 停机（SIGTERM）时等待当前视频完成的秒数，超时则中断并放回队列；Railway drainingSeconds 需大于它 + 10
   shutdown-grace-seconds: ${WORKER_SHUTDOWN_GRACE_SECONDS:20}
   ffmpeg-binary: ${FFMPEG_BINARY:ffmpeg}
+  # 照片下载解码与画面绘制的并行线程数；0 = CPU 数（至少 2）
+  render-threads: ${VIDEO_RENDER_THREADS:0}
   work-dir: ${VIDEO_WORK_DIR:../../frontend/public/generated-videos}
   # 背景音乐：本地存储根目录（按对象路径 music/... 读取）；r2 模式从存储桶下载到 music-cache-dir
   music-dir: ${VIDEO_MUSIC_DIR:../api/.tabitrace/uploads}
