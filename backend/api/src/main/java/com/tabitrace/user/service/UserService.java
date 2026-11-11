@@ -44,7 +44,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final StorageService storage;
     /** 手动构造（单测）默认按原付费规则 */
-    @org.springframework.beans.factory.annotation.Autowired private com.tabitrace.common.PlanAccess planAccess = com.tabitrace.common.PlanAccess.CLOSED;
+    @org.springframework.beans.factory.annotation.Autowired(required = false) private com.tabitrace.common.PlanAccess planAccess = com.tabitrace.common.PlanAccess.CLOSED;
 
     public UserService(UserMapper mapper, AccountMapper accounts, RefreshTokenMapper refreshTokens, PasswordEncoder passwordEncoder, StorageService storage) {
         this.mapper = mapper; this.accounts = accounts; this.refreshTokens = refreshTokens; this.passwordEncoder = passwordEncoder; this.storage = storage;

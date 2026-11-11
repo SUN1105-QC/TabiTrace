@@ -23,7 +23,7 @@ public class TripService {
     /** 免费版同时可保留的 FREE 旅行数（归档的不计） */
     public static final int FREE_ACTIVE_TRIP_LIMIT=1;
     /** 全部功能免费开放时新旅行直接是 PRO；手动构造（单测）默认按原付费规则 */
-    @Autowired private PlanAccess planAccess=PlanAccess.CLOSED;
+    @Autowired(required = false) private PlanAccess planAccess=PlanAccess.CLOSED;
     public TripService(TripMapper mapper,PlaceMapper places,TripPlaceMapper tripPlaces,OfficialCityMapper officialCities){this.officialCities=officialCities;this.mapper=mapper;this.places=places;this.tripPlaces=tripPlaces;}
 
     @Transactional

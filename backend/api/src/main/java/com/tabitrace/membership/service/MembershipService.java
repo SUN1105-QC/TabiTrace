@@ -36,7 +36,7 @@ public class MembershipService {
 
     private final MembershipMapper mapper;
     /** 手动构造（单测）默认按原会员规则 */
-    @Autowired private PlanAccess planAccess = PlanAccess.CLOSED;
+    @Autowired(required = false) private PlanAccess planAccess = PlanAccess.CLOSED;
     public MembershipService(MembershipMapper mapper) { this.mapper = mapper; }
 
     public MembershipView current(Long userId) {

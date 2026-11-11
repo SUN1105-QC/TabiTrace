@@ -28,7 +28,7 @@ public class PaymentService {
     private final String mode, publicUrl;
     private final int stripeMinAmount;
     /** 全部功能免费开放时不受理新的付款；手动构造（单测）默认关闭 */
-    @org.springframework.beans.factory.annotation.Autowired private com.tabitrace.common.PlanAccess planAccess = com.tabitrace.common.PlanAccess.CLOSED;
+    @org.springframework.beans.factory.annotation.Autowired(required = false) private com.tabitrace.common.PlanAccess planAccess = com.tabitrace.common.PlanAccess.CLOSED;
     public boolean openAccess() { return planAccess.open(); }
 
     public PaymentService(PaymentMapper mapper, PaymentTransactions tx, StripeGateway stripe,
