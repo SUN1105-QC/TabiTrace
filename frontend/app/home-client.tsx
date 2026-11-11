@@ -64,7 +64,7 @@ function Landing() {
       <TravelStorySection plan={plan} />
       <PlanSection plan={plan} />
       <MemoriesBanner />
-      <FinalCta />
+      <FinalCta openAccess={Boolean(plan?.openAccess)} />
       <SiteFooter />
     </main>
   )

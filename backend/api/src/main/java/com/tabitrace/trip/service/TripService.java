@@ -1,6 +1,7 @@
 package com.tabitrace.trip.service;
 
 import com.tabitrace.common.BusinessException;
+import com.tabitrace.common.PlanAccess;
 import com.tabitrace.city.entity.OfficialCityEntity;
 import com.tabitrace.city.mapper.OfficialCityMapper;
 import com.tabitrace.place.entity.PlaceEntity;
@@ -9,6 +10,7 @@ import com.tabitrace.place.mapper.TripPlaceMapper;
 import com.tabitrace.trip.dto.TripDtos.*;
 import com.tabitrace.trip.entity.TripEntity;
 import com.tabitrace.trip.mapper.TripMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,13 +22,15 @@ public class TripService {
     private final TripMapper mapper; private final PlaceMapper places; private final TripPlaceMapper tripPlaces; private final OfficialCityMapper officialCities;
     /** 免费版同时可保留的 FREE 旅行数（归档的不计） */
     public static final int FREE_ACTIVE_TRIP_LIMIT=1;
+    /** 全部功能免费开放时新旅行直接是 PRO；手动构造（单测）默认按原付费规则 */
+    @Autowired private PlanAccess planAccess=PlanAccess.CLOSED;
     public TripService(TripMapper mapper,PlaceMapper places,TripPlaceMapper tripPlaces,OfficialCityMapper officialCities){this.officialCities=officialCities;this.mapper=mapper;this.places=places;this.tripPlaces=tripPlaces;}
 
     @Transactional
     public TripView create(Long userId,CreateTripRequest r){
         validateDates(r.startDate(),r.endDate());
-        // 已买断终身 Pro：新建的旅行直接是 PRO，不受 Free 旅行数量限制
-        boolean lifetime=mapper.hasLifetimePro(userId)>0;
+        // 已买断终身 Pro 或全部功能免费开放：新建的旅行直接是 PRO，不受 Free 旅行数量限制
+        boolean lifetime=planAccess.open()||mapper.hasLifetimePro(userId)>0;
         if(!lifetime&&mapper.countFreeTrips(userId)>=FREE_ACTIVE_TRIP_LIMIT) throw new BusinessException("FREE_TRIP_LIMIT","免费版同时只能保留 1 个 FREE 旅行，请升级已有旅行或归档后再创建");
         TripEntity t=new TripEntity(); t.userId=userId;t.title=r.title().strip();t.destinationName=r.destinationName().strip();t.countryCode=blankToNull(r.countryCode());t.city=blankToNull(r.city());t.startDate=r.startDate();t.endDate=r.endDate();t.peopleCount=r.peopleCount()==null?1:r.peopleCount();t.coverImage=blankToNull(r.coverImage());t.planType=lifetime?"PRO":"FREE";t.status="PLANNING";t.visibility="PRIVATE";
         mapper.insert(t);
@@ -46,7 +50,7 @@ public class TripService {
     @Transactional public TripView complete(Long userId,Long id){requireWritable(userId,id);mapper.complete(id);return view(mapper.findById(id));}
     @Transactional public TripView archive(Long userId,Long id){TripEntity t=requireOwned(userId,id);if(!"ARCHIVED".equals(t.status))mapper.updateStatus(id,"ARCHIVED");return view(mapper.findById(id));}
     // 归档视为旅行已结束且不保留原状态，取消归档后统一恢复为 COMPLETED
-    @Transactional public TripView unarchive(Long userId,Long id){TripEntity t=requireOwned(userId,id);if(!"ARCHIVED".equals(t.status))return view(t);if("FREE".equals(t.planType)&&mapper.countFreeTrips(userId)>=FREE_ACTIVE_TRIP_LIMIT)throw new BusinessException("FREE_TRIP_LIMIT","免费版同时只能保留 1 个 FREE 旅行，请先归档其他旅行或升级 Trip Pro");mapper.updateStatus(id,"COMPLETED");return view(mapper.findById(id));}
+    @Transactional public TripView unarchive(Long userId,Long id){TripEntity t=requireOwned(userId,id);if(!"ARCHIVED".equals(t.status))return view(t);if(!planAccess.open()&&"FREE".equals(t.planType)&&mapper.countFreeTrips(userId)>=FREE_ACTIVE_TRIP_LIMIT)throw new BusinessException("FREE_TRIP_LIMIT","免费版同时只能保留 1 个 FREE 旅行，请先归档其他旅行或升级 Trip Pro");mapper.updateStatus(id,"COMPLETED");return view(mapper.findById(id));}
     public TripEntity requireOwned(Long userId,Long id){TripEntity t=mapper.findById(id);if(t==null)throw new BusinessException("TRIP_NOT_FOUND","旅行不存在",HttpStatus.NOT_FOUND);if(!userId.equals(t.userId))throw new BusinessException("TRIP_FORBIDDEN","不能访问其他用户的旅行",HttpStatus.FORBIDDEN);return t;}
     public TripEntity requireWritable(Long userId,Long id){TripEntity t=requireOwned(userId,id);if("ARCHIVED".equals(t.status))throw new BusinessException("TRIP_ARCHIVED","旅行已归档，取消归档后才能修改",HttpStatus.CONFLICT);return t;}
     /** 按旅行的城市、再按目的地名称匹配官方城市 */

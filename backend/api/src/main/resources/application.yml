@@ -109,6 +109,9 @@ app:
       secret-key: ${R2_SECRET_KEY:}
       bucket: ${R2_BUCKET:}
       public-base-url: ${R2_PUBLIC_BASE_URL:https://example.invalid/r2}
+  plans:
+    # 全部功能免费开放（见 common.PlanAccess）：所有旅行 PRO、所有账号有会员权益、不受理新付款；成本限额不受影响
+    open-access: ${PLANS_OPEN_ACCESS:false}
   payments:
     mode: ${PAYMENTS_MODE:mock}
     stripe:

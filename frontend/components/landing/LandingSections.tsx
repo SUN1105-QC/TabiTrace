@@ -174,11 +174,12 @@ export function MemoriesBanner() {
   )
 }
 
-export function FinalCta() {
+/** openAccess：全部功能免费开放时不再提「需要时再升级」 */
+export function FinalCta({ openAccess = false }: { openAccess?: boolean }) {
   return (
     <section className="ld-final" aria-labelledby="ld-final-title">
       <h2 id="ld-final-title">下一段旅程，<br />从记录第一步开始。</h2>
-      <p>基础旅行记录免费开始，需要时再为某一段旅行升级。</p>
+      <p>{openAccess ? '现在全部功能免费开放，注册后每段旅行都能使用完整功能。' : '基础旅行记录免费开始，需要时再为某一段旅行升级。'}</p>
       <div className="ld-final-actions">
         <Link href="/register" className="ld-btn is-primary">免费开始 <ArrowRight size={17} /></Link>
         <Link href="/login" className="ld-btn">登录</Link>

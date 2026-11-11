@@ -12,7 +12,7 @@ export function TripProBenefits({ plan, member }: { plan: TripProPlan; member: b
     <section className="pr-section" aria-labelledby="pr-benefits-title">
       <header className="pr-section-head">
         <p className="pr-eyebrow">WHAT YOU GET</p>
-        <h2 id="pr-benefits-title">升级后，这趟旅行多了什么？</h2>
+        <h2 id="pr-benefits-title">{plan.openAccess ? '现在每段旅行都可以使用' : '升级后，这趟旅行多了什么？'}</h2>
         <p>不只是更多功能，更是更完整、更生动的旅行记录。</p>
       </header>
       <div className="pr-benefits">
@@ -25,7 +25,10 @@ export function TripProBenefits({ plan, member }: { plan: TripProPlan; member: b
               <p>{b.desc}</p>
               <p className="pr-benefit-fact">{b.fact}</p>
               {/* 上传自己的音乐是账号会员权益（买断 · 终身 Pro 开通），按当前账号状态如实显示 */}
-              {b.key === 'style' && plan.lifetime && (
+              {b.key === 'style' && plan.openAccess && (
+                <p className="pr-benefit-note is-on"><CheckCircle2 size={13} aria-hidden="true" /> 免费开放期间可以上传自己的音乐</p>
+              )}
+              {b.key === 'style' && plan.lifetime && !plan.openAccess && (
                 member
                   ? <p className="pr-benefit-note is-on"><CheckCircle2 size={13} aria-hidden="true" /> 你的账号已开通上传自己的音乐</p>
                   : <p className="pr-benefit-note">上传自己的音乐：买断 · 终身 Pro 的账号会员权益</p>

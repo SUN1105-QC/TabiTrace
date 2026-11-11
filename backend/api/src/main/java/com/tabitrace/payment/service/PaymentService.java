@@ -27,6 +27,9 @@ public class PaymentService {
     private final StripeGateway stripe;
     private final String mode, publicUrl;
     private final int stripeMinAmount;
+    /** 全部功能免费开放时不受理新的付款；手动构造（单测）默认关闭 */
+    @org.springframework.beans.factory.annotation.Autowired private com.tabitrace.common.PlanAccess planAccess = com.tabitrace.common.PlanAccess.CLOSED;
+    public boolean openAccess() { return planAccess.open(); }
 
     public PaymentService(PaymentMapper mapper, PaymentTransactions tx, StripeGateway stripe,
                           @Value("${app.payments.mode:mock}") String mode,
@@ -178,6 +181,7 @@ public class PaymentService {
     }
 
     private void requireChargeable(int amount) {
+        if (planAccess.open()) throw new BusinessException("PLANS_OPEN_ACCESS", "当前全部功能免费开放，无需购买", HttpStatus.CONFLICT);
         if (!paymentsAvailable()) throw new BusinessException("PAYMENTS_UNAVAILABLE", "支付暂未开放", HttpStatus.SERVICE_UNAVAILABLE);
         if (!canCharge(amount)) throw new BusinessException("PAYMENT_CHANNEL_UNAVAILABLE", "金额低于当前支付渠道配置的最低收款额", HttpStatus.SERVICE_UNAVAILABLE);
     }

@@ -14,7 +14,7 @@ export const jaJP: Messages = {
   nav: {
     home: 'ホーム', myTrips: 'マイ旅行', createTrip: '旅行を作成', mapCheckin: 'マップとチェックイン', photos: '写真とお気に入り', travelStory: 'Travel Story',
     explore: 'おすすめ探索', memories: '旅の思い出', settings: '個人設定', upgradePro: 'Trip Pro にアップグレード',
-    upgradeProSub: 'もっと多くの機能を', taglineTop: '旅は、', taglineBottom: 'いつの出発にも意味をくれる。', mainNav: 'メインナビゲーション', secondaryNav: 'サブナビゲーション',
+    upgradeProSub: 'もっと多くの機能を', openAccess: '全機能を無料で開放中', openAccessSub: 'すべての旅行で Pro 機能が使えます', taglineTop: '旅は、', taglineBottom: 'いつの出発にも意味をくれる。', mainNav: 'メインナビゲーション', secondaryNav: 'サブナビゲーション',
     newContent: '新着あり', closeNav: 'ナビゲーションを閉じる', openNav: 'ナビゲーションを開く', artwork: '旅のイラスト', brandHome: '旅迹 TabiTrace ホーム'
   },
   header: {
@@ -135,6 +135,7 @@ export const jaJP: Messages = {
       hasPro: '{count} 件の旅行を Pro にアップグレード済みです。', allFree: 'すべての旅行が無料プランです。', activeFree: '進行中の無料旅行 {active} / {limit}（アーカイブした旅行は含みません）',
       empty: 'まだ旅行がありません。最初の旅行を作成すると、ここから Trip Pro にアップグレードできます。', paid: '{date} にアップグレード · 支払額 {amount}', upgraded: 'アップグレード済み', mock: 'テスト決済',
       upgradeTrip: 'この旅行をアップグレード', upgradeLabel: '「{title}」を Trip Pro にアップグレード',
+      openAccess: '現在、全機能を無料で開放しています。すべての旅行が Trip Pro になり、自分の音楽もアップロードできます。購入は不要です。', openAccessView: '開放中の機能を見る',
       lifetimeOwned: '買い切り（生涯 Pro）が有効です。アカウントの現在と今後のすべての旅行が Pro になります。', lifetimeOffer: 'よく旅行しますか？ 生涯 Pro（{price}）を買い切ると、今後の旅行はすべて自動で Pro になります。', lifetimeBuy: '買い切りを見る',
       status: { PLANNING: '計画中', ONGOING: '進行中', COMPLETED: '完了', ARCHIVED: 'アーカイブ済み' }
     }

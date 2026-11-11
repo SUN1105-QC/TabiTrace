@@ -19,6 +19,8 @@ public interface TripMapper {
       """) int update(TripEntity trip);
     @Update("UPDATE trips SET status='COMPLETED',updated_at=UTC_TIMESTAMP() WHERE id=#{id}") int complete(Long id);
     @Update("UPDATE trips SET status=#{status},updated_at=UTC_TIMESTAMP() WHERE id=#{id}") int updateStatus(@Param("id") Long id,@Param("status") String status);
+    /** 全部功能免费开放：一次性把所有 FREE 旅行升级为 PRO（启动时执行，重复执行无影响） */
+    @Update("UPDATE trips SET plan_type='PRO',updated_at=UTC_TIMESTAMP() WHERE plan_type='FREE'") int upgradeAllFreeToPro();
     @Update("UPDATE trips SET plan_type=#{planType},updated_at=UTC_TIMESTAMP() WHERE id=#{id}") int updatePlan(@Param("id") Long id,@Param("planType") String planType);
     /** 终身 Pro：账号下所有旅行升级为 PRO（含已归档的） */
     @Update("UPDATE trips SET plan_type='PRO',updated_at=UTC_TIMESTAMP() WHERE user_id=#{userId} AND plan_type<>'PRO'") int upgradeAllOfUser(Long userId);

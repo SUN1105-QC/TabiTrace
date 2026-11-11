@@ -30,7 +30,9 @@ public final class UserDtos {
     /** 设置中心概览：旅行统计 + 按旅行计的 Trip Pro 状态 */
     public record AccountOverview(int trips,int places,int photos,int proTrips,int activeFreeTrips,int freeTripLimit,
                                   /** 金额为最小货币单位（分）：单次旅行 Trip Pro、买断终身 Pro */
-                                  int tripProAmount,int lifetimeAmount,String tripProCurrency,boolean lifetimePro,List<TripPlanView> plans) {}
+                                  int tripProAmount,int lifetimeAmount,String tripProCurrency,boolean lifetimePro,List<TripPlanView> plans,
+                                  /** 全部功能免费开放：设置页不再展示购买与 Free 名额 */
+                                  boolean openAccess) {}
     public record SessionView(Long id,String device,boolean mobile,LocalDateTime signedInAt,LocalDateTime lastActiveAt,LocalDateTime expiresAt,boolean current) {}
     public record RevokeOthersRequest(String refreshToken) {}
 }

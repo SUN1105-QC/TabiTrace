@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { useT } from '@/components/common/PreferencesProvider'
 import { BrandLogo } from '@/components/common/Brand'
+import { useOpenAccess } from '@/hooks/useOpenAccess'
 import type { MessageKey } from '@/i18n'
 
 export type SidebarBadges = { explore?: boolean; memories?: boolean }
@@ -57,6 +58,7 @@ export function AppSidebar({ activeTripId, badges, open, onClose }: { activeTrip
   const pathname = usePathname()
   const t = useT()
   const { main, secondary } = sidebarItems(activeTripId)
+  const openAccess = useOpenAccess()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
 
@@ -97,7 +99,9 @@ export function AppSidebar({ activeTripId, badges, open, onClose }: { activeTrip
         <div className="workspace-sidebar-bottom">
           <Link href="/pricing" className="sidebar-pro" onClick={onClose}>
             <span className="sidebar-pro-icon"><Crown size={16} /></span>
-            <span><b>{t('nav.upgradePro')}</b><small>{t('nav.upgradeProSub')}</small></span>
+            {openAccess
+              ? <span><b>{t('nav.openAccess')}</b><small>{t('nav.openAccessSub')}</small></span>
+              : <span><b>{t('nav.upgradePro')}</b><small>{t('nav.upgradeProSub')}</small></span>}
           </Link>
           <p className="sidebar-tagline">{t('nav.taglineTop')}<br />{t('nav.taglineBottom')}</p>
           <SidebarArtwork />

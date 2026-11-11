@@ -46,6 +46,7 @@ try {
     && Number.isSafeInteger(limits.dailyRenders) && limits.dailyRenders >= 0
     && Number.isSafeInteger(limits.dailyOutputSeconds) && limits.dailyOutputSeconds >= 0)
   t.check('公开方案明确是否可以付款', typeof plan?.data?.paymentsAvailable === 'boolean')
+  t.check('公开方案说明是否全部功能免费开放', typeof plan?.data?.openAccess === 'boolean')
 
   browser = await openBrowser()
   for (const [width, height] of [[360, 800], [1440, 1000]]) {

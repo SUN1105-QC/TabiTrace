@@ -70,6 +70,8 @@ services:
       MAIL_SMTP_SSL: ${MAIL_SMTP_SSL:-false}
       MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-}
       MAIL_FROM_NAME: 旅迹 TabiTrace
+      # 2026-11-11 起全部付费功能免费开放；恢复收费时在 shared/.env 设 PLANS_OPEN_ACCESS=false
+      PLANS_OPEN_ACCESS: ${PLANS_OPEN_ACCESS:-true}
       PAYMENTS_MODE: stripe
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}

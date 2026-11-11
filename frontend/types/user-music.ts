@@ -6,7 +6,7 @@ export type MembershipFeature = 'CUSTOM_MUSIC'
 
 export type Membership = {
   status: MembershipStatus
-  /** LIFETIME（买断终身 Pro）/ SUBSCRIPTION / GRANT */
+  /** LIFETIME（买断终身 Pro）/ SUBSCRIPTION / GRANT / OPEN_ACCESS（全部功能免费开放期间，不落库） */
   source?: string | null
   startedAt?: string | null
   /** 为空且 ACTIVE = 永久 */

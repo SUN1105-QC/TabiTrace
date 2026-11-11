@@ -23,6 +23,19 @@ export function ProSettings({ overview }: { overview: AccountOverview }) {
   // 金额是最小货币单位（分）：¥4 = 400
   const price = formatMoney(overview.tripProAmount, overview.tripProCurrency)
   const lifetime = formatMoney(overview.lifetimeAmount, overview.tripProCurrency)
+  // 全部功能免费开放：所有旅行都是 PRO，不再展示 Free 名额、买断入口和逐段升级按钮
+  if (overview.openAccess) return (
+    <SettingsSection
+      title="Trip Pro"
+      description={t('settings.pro.openAccess')}
+      action={<Link href="/pricing" className="st-btn is-quiet">{t('settings.pro.openAccessView')} <ArrowRight size={13} /></Link>}
+    >
+      <div className="st-pro-status is-pro">
+        <span className="st-plan-badge"><Crown size={13} /> TRIP PRO</span>
+        <p>{t('nav.openAccess')}<span>{t('nav.openAccessSub')}</span></p>
+      </div>
+    </SettingsSection>
+  )
   return (
     <SettingsSection
       title="Trip Pro"

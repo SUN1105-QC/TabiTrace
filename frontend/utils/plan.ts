@@ -32,6 +32,8 @@ export type TripProPlan = {
   storyTemplates: CatalogItem[]
   storyMusic: CatalogItem[]
   videoUsageLimits?: { enforced:boolean;dailyRenders:number;dailyOutputSeconds:number }
+  /** 全部功能免费开放：所有旅行都是 PRO、所有账号有会员权益，页面不再展示购买入口（旧版后端没有这一项） */
+  openAccess?: boolean
 }
 
 /** The same enforced limits are disclosed before purchase, including for anonymous visitors. */

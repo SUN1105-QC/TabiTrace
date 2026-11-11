@@ -11,7 +11,7 @@ export type DistanceUnit = 'KM' | 'MI'
 export type UserSettingsInput = Partial<Pick<UserView,'nickname'|'bio'|'locale'|'timezone'|'distanceUnit'|'shareExactLocation'|'shareLinkExpiryDays'|'notifyTripReminder'|'notifyStory'|'notifyShare'>>
 /** 每段旅行的方案；PRO 旅行附带最近一次成功支付 */
 export type TripPlanView = { tripId:number;title:string;destinationName:string;startDate:string;endDate:string;planType:string;status:string;amount?:number;currency?:string;provider?:string;paidAt?:string }
-export type AccountOverview = { trips:number;places:number;photos:number;proTrips:number;activeFreeTrips:number;freeTripLimit:number;/** 金额为最小货币单位（分） */tripProAmount:number;lifetimeAmount:number;tripProCurrency:string;lifetimePro:boolean;plans:TripPlanView[] }
+export type AccountOverview = { trips:number;places:number;photos:number;proTrips:number;activeFreeTrips:number;freeTripLimit:number;/** 金额为最小货币单位（分） */tripProAmount:number;lifetimeAmount:number;tripProCurrency:string;lifetimePro:boolean;plans:TripPlanView[];/** 全部功能免费开放：不再展示购买与 Free 名额 */openAccess?:boolean }
 export type SessionView = { id:number;device:string;mobile:boolean;signedInAt:string;lastActiveAt:string;expiresAt:string;current:boolean }
 type PresignView = { storageKey:string;uploadUrl:string;publicUrl:string;expiresInSeconds:number;mock:boolean }
 

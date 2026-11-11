@@ -43,6 +43,8 @@ public class UserService {
     private final RefreshTokenMapper refreshTokens;
     private final PasswordEncoder passwordEncoder;
     private final StorageService storage;
+    /** 手动构造（单测）默认按原付费规则 */
+    @org.springframework.beans.factory.annotation.Autowired private com.tabitrace.common.PlanAccess planAccess = com.tabitrace.common.PlanAccess.CLOSED;
 
     public UserService(UserMapper mapper, AccountMapper accounts, RefreshTokenMapper refreshTokens, PasswordEncoder passwordEncoder, StorageService storage) {
         this.mapper = mapper; this.accounts = accounts; this.refreshTokens = refreshTokens; this.passwordEncoder = passwordEncoder; this.storage = storage;
@@ -78,7 +80,7 @@ public class UserService {
         return new AccountOverview(accounts.countTrips(userId), accounts.countPlaces(userId), accounts.countPhotos(userId), pro,
                 accounts.countActiveFreeTrips(userId), TripService.FREE_ACTIVE_TRIP_LIMIT,
                 PaymentService.TRIP_PRO_AMOUNT, PaymentService.LIFETIME_AMOUNT, PaymentService.TRIP_PRO_CURRENCY,
-                me.lifetimeProAt != null, plans);
+                me.lifetimeProAt != null, plans, planAccess.open());
     }
 
     /** 修改密码：校验当前密码，成功后退出其他设备（当前设备保持登录），返回退出的设备数 */

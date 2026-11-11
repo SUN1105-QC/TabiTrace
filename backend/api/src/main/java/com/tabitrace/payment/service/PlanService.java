@@ -36,7 +36,9 @@ public class PlanService {
     public record TripProPlan(Price price, String billing, boolean renews, boolean expires, boolean realPayments, boolean paymentsAvailable,
                               String unavailableReason, LifetimePlan lifetime,
                               FreeLimits freeLimits, StoryTier storyFree, StoryTier storyPro, ShareTier shareFree, ShareTier sharePro,
-                              List<CatalogItem> storyTemplates, List<CatalogItem> storyMusic,VideoUsageLimits videoUsageLimits) {}
+                              List<CatalogItem> storyTemplates, List<CatalogItem> storyMusic,VideoUsageLimits videoUsageLimits,
+                              /** 全部功能免费开放：所有旅行都是 PRO、所有账号都有会员权益，前端据此隐藏购买入口 */
+                              boolean openAccess) {}
 
     private final VideoCatalogMapper catalog;
     private final PaymentService payments;
@@ -59,6 +61,7 @@ public class PlanService {
                 SHARE_FREE, SHARE_PRO,
                 catalog.templates().stream().filter(t -> Boolean.TRUE.equals(t.enabled)).map(t -> new CatalogItem(t.name, t.plan)).toList(),
                 List.of(),
-                new VideoUsageLimits(costs.isEnforce(),costs.getAccountDailyRenders(),costs.getAccountDailySeconds()));
+                new VideoUsageLimits(costs.isEnforce(),costs.getAccountDailyRenders(),costs.getAccountDailySeconds()),
+                payments.openAccess());
     }
 }

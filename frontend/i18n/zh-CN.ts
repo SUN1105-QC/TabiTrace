@@ -16,7 +16,7 @@ export const zhCN = {
   nav: {
     home: '首页', myTrips: '我的旅行', createTrip: '创建旅行', mapCheckin: '地图与打卡', photos: '照片与精选', travelStory: 'Travel Story',
     explore: '推荐探索', memories: '旅行回忆', settings: '个人设置', upgradePro: '升级 Trip Pro',
-    upgradeProSub: '解锁更多精彩功能', taglineTop: '旅行，', taglineBottom: '让每一次出发都有意义。', mainNav: '主导航', secondaryNav: '次级导航',
+    upgradeProSub: '解锁更多精彩功能', openAccess: '全部功能已免费开放', openAccessSub: '所有旅行都可使用 Pro 功能', taglineTop: '旅行，', taglineBottom: '让每一次出发都有意义。', mainNav: '主导航', secondaryNav: '次级导航',
     newContent: '有新内容', closeNav: '关闭导航', openNav: '打开导航', artwork: '旅行插画', brandHome: '旅迹 TabiTrace 首页'
   },
   header: {
@@ -137,6 +137,7 @@ export const zhCN = {
       hasPro: '已有 {count} 段旅行升级为 Pro。', allFree: '目前所有旅行都是免费版。', activeFree: '进行中的免费旅行 {active} / {limit}（归档后不计入）',
       empty: '还没有旅行。创建第一段旅行后，可以在这里为它升级 Trip Pro。', paid: '{date} 升级 · 实付 {amount}', upgraded: '已升级', mock: '模拟支付',
       upgradeTrip: '升级这段旅行', upgradeLabel: '升级「{title}」为 Trip Pro',
+      openAccess: '全部功能免费开放中：所有旅行都是 Trip Pro，上传自己的音乐也可直接使用，无需购买。', openAccessView: '查看开放的功能',
       lifetimeOwned: '已买断终身 Pro：账号下现有和以后新建的所有旅行都是 Pro。', lifetimeOffer: '经常旅行？买断终身 Pro（{price}），以后每段旅行都自动解锁。', lifetimeBuy: '了解买断',
       status: { PLANNING: '计划中', ONGOING: '进行中', COMPLETED: '已完成', ARCHIVED: '已归档' }
     }

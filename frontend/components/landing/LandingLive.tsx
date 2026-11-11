@@ -91,7 +91,9 @@ export function TravelStorySection({ plan }: { plan: TripProPlan | null }) {
         <ul className="ld-story-points">
           <li><Check size={15} aria-hidden="true" />模板、素材、风格、设置、生成，五步完成</li>
           <li><Check size={15} aria-hidden="true" />网页里实时预览，生成后下载 MP4</li>
-          {plan && <li><Check size={15} aria-hidden="true" />免费旅行可以生成 {plan.storyFree.quality.toUpperCase()} 视频；Trip Pro 解锁 {plan.storyPro.quality.toUpperCase()}{plan.storyPro.watermark ? '' : ' 无水印'}与全部模板</li>}
+          {plan && (plan.openAccess
+            ? <li><Check size={15} aria-hidden="true" />全部功能免费开放：每段旅行都能生成 {plan.storyPro.quality.toUpperCase()}{plan.storyPro.watermark ? '' : ' 无水印'}视频，使用全部模板</li>
+            : <li><Check size={15} aria-hidden="true" />免费旅行可以生成 {plan.storyFree.quality.toUpperCase()} 视频；Trip Pro 解锁 {plan.storyPro.quality.toUpperCase()}{plan.storyPro.watermark ? '' : ' 无水印'}与全部模板</li>)}
         </ul>
         <Link href="/pricing" className="ld-btn is-light"><Film size={16} /> 了解 Travel Story</Link>
       </div>
@@ -101,6 +103,27 @@ export function TravelStorySection({ plan }: { plan: TripProPlan | null }) {
 
 export function PlanSection({ plan }: { plan: TripProPlan | null }) {
   const oneTime = plan ? isOneTimePerTrip(plan) : false
+  // 全部功能免费开放：不展示 Free / Trip Pro 两档价格，只说明现在每段旅行都能用完整功能
+  if (plan?.openAccess) return (
+    <section className="ld-section" aria-labelledby="ld-plan-title">
+      <header className="ld-head">
+        <p className="ld-eyebrow">ALL FEATURES FREE</p>
+        <h2 id="ld-plan-title">全部功能免费开放</h2>
+      </header>
+      <div className="ld-plans">
+        <article className="ld-plan is-pro">
+          <h3>TRIP PRO<span>{formatCurrency(0, plan.price.currency)}</span></h3>
+          <p>现在注册即可使用全部功能，每段旅行都是 Trip Pro，无需购买。</p>
+          <ul>
+            <li><Check size={14} />打卡与照片不限数量</li>
+            <li><Check size={14} />旅行海报 · 九宫格 · 每日长图，高清{plan.sharePro?.watermark === false ? '无水印' : ''}导出</li>
+            <li><Check size={14} />Travel Story {plan.storyPro.quality.toUpperCase()}{plan.storyPro.watermark ? '' : ' 无水印'}、全部模板，可上传自己的音乐</li>
+          </ul>
+          <Link href="/register" className="ld-btn is-primary">免费开始 <ArrowRight size={16} /></Link>
+        </article>
+      </div>
+    </section>
+  )
   return (
     <section className="ld-section" aria-labelledby="ld-plan-title">
       <header className="ld-head">

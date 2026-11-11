@@ -14,7 +14,7 @@ export const enUS: Messages = {
   nav: {
     home: 'Home', myTrips: 'My trips', createTrip: 'New trip', mapCheckin: 'Map & check-ins', photos: 'Photos', travelStory: 'Travel Story',
     explore: 'Explore', memories: 'Memories', settings: 'Settings', upgradePro: 'Upgrade to Trip Pro',
-    upgradeProSub: 'Unlock more for your trips', taglineTop: 'Travel,', taglineBottom: 'and make every departure count.', mainNav: 'Main navigation', secondaryNav: 'More',
+    upgradeProSub: 'Unlock more for your trips', openAccess: 'All features are free', openAccessSub: 'Pro features on every trip', taglineTop: 'Travel,', taglineBottom: 'and make every departure count.', mainNav: 'Main navigation', secondaryNav: 'More',
     newContent: 'New', closeNav: 'Close navigation', openNav: 'Open navigation', artwork: 'Travel illustration', brandHome: 'TabiTrace home'
   },
   header: {
@@ -135,6 +135,7 @@ export const enUS: Messages = {
       hasPro: '{count} trips upgraded to Pro.', allFree: 'All your trips are on the free plan.', activeFree: 'Active free trips {active} / {limit} (archived trips don’t count)',
       empty: 'No trips yet. After creating your first trip you can upgrade it to Trip Pro here.', paid: 'Upgraded {date} · Paid {amount}', upgraded: 'Upgraded', mock: 'Test payment',
       upgradeTrip: 'Upgrade this trip', upgradeLabel: 'Upgrade “{title}” to Trip Pro',
+      openAccess: 'All features are free right now: every trip is Trip Pro and you can upload your own music. Nothing to buy.', openAccessView: 'See what is included',
       lifetimeOwned: 'Lifetime Pro is active: every trip on your account, now and in the future, is Pro.', lifetimeOffer: 'Travel often? Get Lifetime Pro ({price}) and every future trip is unlocked automatically.', lifetimeBuy: 'See Lifetime Pro',
       status: { PLANNING: 'Planning', ONGOING: 'Ongoing', COMPLETED: 'Completed', ARCHIVED: 'Archived' }
     }

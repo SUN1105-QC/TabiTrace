@@ -1,8 +1,10 @@
 package com.tabitrace.membership.service;
 
 import com.tabitrace.common.BusinessException;
+import com.tabitrace.common.PlanAccess;
 import com.tabitrace.membership.entity.MembershipEntity;
 import com.tabitrace.membership.mapper.MembershipMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -24,12 +26,17 @@ public class MembershipService {
     public static final String FEATURE_CUSTOM_MUSIC = "CUSTOM_MUSIC";
     public static final List<String> MEMBER_FEATURES = List.of(FEATURE_CUSTOM_MUSIC);
 
-    /** status：NONE / ACTIVE / EXPIRED；source：LIFETIME / SUBSCRIPTION / GRANT；expiresAt 为空且 ACTIVE 表示永久 */
+    /** 全部功能免费开放时的会员来源：不写入数据库，关闭开关后恢复按会员记录判断 */
+    public static final String SOURCE_OPEN_ACCESS = "OPEN_ACCESS";
+
+    /** status：NONE / ACTIVE / EXPIRED；source：LIFETIME / SUBSCRIPTION / GRANT / OPEN_ACCESS；expiresAt 为空且 ACTIVE 表示永久 */
     public record MembershipView(String status, String source, LocalDateTime startedAt, LocalDateTime expiresAt, boolean lifetime, List<String> features) {
         public boolean active() { return ACTIVE.equals(status); }
     }
 
     private final MembershipMapper mapper;
+    /** 手动构造（单测）默认按原会员规则 */
+    @Autowired private PlanAccess planAccess = PlanAccess.CLOSED;
     public MembershipService(MembershipMapper mapper) { this.mapper = mapper; }
 
     public MembershipView current(Long userId) {
@@ -39,6 +46,8 @@ public class MembershipService {
         MembershipEntity active = rows.stream().filter(m -> ACTIVE.equals(m.status) && (m.expiresAt == null || m.expiresAt.isAfter(now)))
                 .max(Comparator.comparing((MembershipEntity m) -> m.expiresAt == null ? LocalDateTime.MAX : m.expiresAt)).orElse(null);
         if (active != null) return view(ACTIVE, active);
+        // 全部功能免费开放：没有有效会员记录的账号也按有效会员处理（不过期、不落库）
+        if (planAccess.open()) return new MembershipView(ACTIVE, SOURCE_OPEN_ACCESS, null, null, false, MEMBER_FEATURES);
         if (rows.isEmpty()) return new MembershipView(NONE, null, null, null, false, List.of());
         // 已到期：展示最近结束的一段
         MembershipEntity last = rows.stream().max(Comparator.comparing((MembershipEntity m) -> m.expiresAt == null ? m.updatedAt : m.expiresAt,

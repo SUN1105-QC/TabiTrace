@@ -30,6 +30,8 @@ export default function PricingPage() {
   const s = useTripPro()
   const { plan, planError, loadPlan, trip, pay, checkout } = s
   const pro = trip?.planType === 'PRO'
+  // 全部功能免费开放：不展示状态卡、价格、对比、购买 FAQ 与底部购买条，只保留权益说明、成果展示和历史付款记录
+  const open = Boolean(plan?.openAccess)
 
   // 底部购买条：状态卡和价格卡都不在屏幕上时才显示，避免同一个购买按钮在屏幕上出现两次
   const [showSticky, setShowSticky] = useState(false)
@@ -48,7 +50,7 @@ export default function PricingPage() {
     return () => io.disconnect()
   }, [plan, s.loadingTrip, trip?.id])
 
-  const sticky = plan && trip && showSticky
+  const sticky = plan && trip && showSticky && !open
 
   return (
     <main>
@@ -67,12 +69,12 @@ export default function PricingPage() {
           <div className="pr-trip is-loading" aria-busy="true" aria-label="正在读取 Trip Pro 方案"><div className="skeleton" /></div>
         ) : (
           <>
-            <TripStatusCard s={s} />
+            {!open && <TripStatusCard s={s} />}
             <TripProBenefits plan={plan} member={s.member} />
             <TripProOutcomeShowcase plan={plan} trip={trip} loggedIn={s.loggedIn} />
-            <TripProPricingSection s={s} />
-            <TripProComparisonTable plan={plan} trip={trip} />
-            <TripProFaq plan={plan} />
+            {!open && <TripProPricingSection s={s} />}
+            {!open && <TripProComparisonTable plan={plan} trip={trip} />}
+            {!open && <TripProFaq plan={plan} />}
             {s.loggedIn && <PaymentHistory refreshKey={`${s.pay}:${s.lifePay}`} onUpdated={s.reloadEntitlements} />}
             {s.loggedIn && <AccountUsage />}
           </>
