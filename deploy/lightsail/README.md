@@ -2,7 +2,9 @@
 
 当前目标为 `https://tabi.sunows.com`，服务器 `175.41.217.207`。本方案补充 Lightsail 独立 Compose 部署；原 Railway 配置保留供参考。
 
-2026-11-12最新版本：Web 为 `home-20261112-9cc8ef50`（提交 `9cc8ef5`，登录后首页改版，只更新 Web）；API / Worker 仍为 speed 版本镜像（已打同名新标签）。脚本 `releases/deploy-home-build.sh` / `deploy-home-switch.sh`。
+2026-11-13最新版本：Web 为 `fix-20261113-31cfd17a`（提交 `31cfd17`，九宫格手机页、成品图导出、iOS 输入框放大修复，只更新 Web）；API / Worker 仍为 speed 版本镜像。脚本 `releases/deploy-fix-build.sh` / `deploy-fix-switch.sh`。
+
+2026-11-12版本：Web 为 `home-20261112-9cc8ef50`（提交 `9cc8ef5`，登录后首页改版，只更新 Web）；API / Worker 仍为 speed 版本镜像（已打同名新标签）。脚本 `releases/deploy-home-build.sh` / `deploy-home-switch.sh`。
 
 2026-11-11版本：Web / API / Worker 均为 `speed-20261111-83c006db`（提交 `83c006d`，视频生成提速，成片逐字节不变）；脚本 `releases/deploy-speed-build.sh` / `deploy-speed-switch.sh`。Worker 并行线程数可用 `VIDEO_RENDER_THREADS` 调整（默认 CPU 数）。
 
