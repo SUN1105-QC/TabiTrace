@@ -14,7 +14,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { ImageOff, Maximize2, X } from 'lucide-react'
-import { toPng } from 'html-to-image'
 import { SiteHeader } from '@/components/common/SiteHeader'
 import { LiveTripSubnav } from '@/components/trip/LiveTripSubnav'
 import { CheckinExportButton } from '@/components/checkin/CheckinExportButton'
@@ -31,7 +30,7 @@ import { ShareActionBar, ShareLinkCard, ShareTemplateTabs, TripProCard, type Sha
 import { DEFAULT_GRID_OPTIONS, gridPhotos, gridSlotCount, placeInSlot, scopePhotos, swapSlots, type GridOptions } from '@/utils/share-grid'
 import { DEFAULT_POSTER_OPTIONS, buildPosterData, type PosterOptions } from '@/utils/poster-data'
 import { exportPosterPng } from '@/utils/export-poster'
-import { deliverFiles, exportGridTiles, upgradeImagesForExport, waitForImages } from '@/utils/share-export'
+import { deliverFiles, exportGridTiles, exportPixelRatio, prepareImagesForExport, renderPng, waitForImages } from '@/utils/share-export'
 import { shareTierOf, watermarkDataUrl } from '@/utils/share-tier'
 import type { TripProPlan } from '@/utils/plan'
 import { planApi, tripApi, type ItineraryView, type PhotoView, type PlaceView, type ShareLinkView, type TimelineDay, type TripSummary, type TripView } from '@/services/tabitrace-api'
@@ -135,13 +134,15 @@ export default function SharePage() {
       const poster = mode === 'poster' ? ref.current.querySelector<HTMLElement>('.cp-poster') : null
       if (mode === 'poster' && !poster) throw new Error('海报还没有生成')
       let data: string
-      // 预览用中图；按导出倍率不够清晰的照片临时换成原图，导出后换回
+      // 预览用中图；导出前每张照片换成刚好够导出倍率的内嵌图片（不够清晰的读原图再缩小），导出后换回
       const target = poster ?? ref.current
+      // iOS 画布有面积上限，很长的每日长图在 iOS 上自动降低倍率，避免整张画不出来
+      const ratio = poster ? tier.posterWidth / poster.offsetWidth : exportPixelRatio(target, tier.scale)
       await waitForImages(target)
-      const restore = await upgradeImagesForExport(target, poster ? tier.posterWidth / poster.offsetWidth : tier.scale, photos)
+      const restore = await prepareImagesForExport(target, ratio, photos)
       try {
         if (poster) data = await exportPosterPng(poster, tier.posterWidth)
-        else data = await toPng(ref.current, { cacheBust: true, includeQueryParams: true, pixelRatio: tier.scale })
+        else data = await renderPng(target, { cacheBust: true, includeQueryParams: true, pixelRatio: ratio })
       } finally { restore() }
       if (tier.watermark) data = await watermarkDataUrl(data)
       const a = document.createElement('a')
@@ -165,11 +166,13 @@ export default function SharePage() {
     setExporting(`正在生成 0/${scrapbook ? card.querySelectorAll('.sb-card').length : 9}`); setError('')
     try {
       await waitForImages(card)
-      // 单张按 tileSize 导出：按最窄的一格估算倍率，不够清晰的照片换成原图
+      // 单张按 tileSize 导出：按最窄的一格估算倍率，照片换成刚好够清晰的内嵌图片
       const cells = Array.from(card.querySelectorAll<HTMLElement>(scrapbook ? '.sb-card' : '.sg-tile'))
-      const restore = await upgradeImagesForExport(card, tier.tileSize / Math.max(1, Math.min(...cells.map(c => c.offsetWidth))), photos)
-      const files = await exportGridTiles(card, `tabitrace-${trip?.id}-${scrapbook ? 'scrapbook-card' : 'grid'}`, tier, (done, total) => setExporting(`正在生成 ${done}/${total}`))
-      restore()
+      const restore = await prepareImagesForExport(card, tier.tileSize / Math.max(1, Math.min(...cells.map(c => c.offsetWidth))), photos)
+      let files
+      try {
+        files = await exportGridTiles(card, `tabitrace-${trip?.id}-${scrapbook ? 'scrapbook-card' : 'grid'}`, tier, (done, total) => setExporting(`正在生成 ${done}/${total}`))
+      } finally { restore() }
       const how = await deliverFiles(files)
       if (how !== 'cancelled') setToast(how === 'shared' ? `${files.length} 张图片已准备好` : `已导出 ${files.length} 张图片`)
     } catch (e) {

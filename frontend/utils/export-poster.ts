@@ -5,12 +5,11 @@
  * SVG 路线与邮戳是矢量，放大后依然清晰。
  */
 
-import { toPng } from 'html-to-image'
-import { waitForImages } from '@/utils/share-export'
+import { renderPng, waitForImages } from '@/utils/share-export'
 
 export async function exportPosterPng(node: HTMLElement, width: number) {
   await waitForImages(node)
-  return toPng(node, {
+  return renderPng(node, {
     cacheBust: true,
     // 图片地址形如 /local-storage/file?key=…，只有参数不同；不带参数做缓存键会让所有照片变成同一张
     includeQueryParams: true,

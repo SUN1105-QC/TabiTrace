@@ -33,10 +33,19 @@ export const viewport: Viewport = {
 }
 
 /**
+ * iOS Safari 在输入框聚焦时会自动放大页面（字号小于 16px、iPad 外接触控板等情况）。只在 iOS 上给 viewport 追加
+ * maximum-scale=1：iOS 仍允许双指缩放，只是不再自动放大；安卓不会自动放大，不加，以免关闭双指缩放。
+ * Next 切换页面会重写或追加 viewport 标签（登录页等有自己的设置；可能在 head 也可能在 body；浏览器以最后一个为准），
+ * 用 MutationObserver 每次给所有标签补上。
+ */
+const IOS_NO_FOCUS_ZOOM = `(function(){var n=navigator;if(!(/iP(hone|ad|od)/.test(n.userAgent)||(n.platform==='MacIntel'&&n.maxTouchPoints>1)))return;function f(){document.querySelectorAll('meta[name="viewport"]').forEach(function(m){if(!/maximum-scale/.test(m.content))m.content+=', maximum-scale=1'})}f();new MutationObserver(f).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['content']})})()`
+
+/**
  * 语言与时区的首屏值来自 cookie（用户保存过的偏好会同步写入），服务端与客户端首屏用同一语言渲染；
  * 登录后由 PreferencesProvider 以数据库里的偏好为准。
  * DevDataRoot 只在开发环境生效（数据源切换器）；生产环境原样渲染。
  */
+
 export default async function RootLayout({children}:{children:React.ReactNode}){
   const store = await cookies()
   const savedLocale = matchLocale(store.get(LOCALE_COOKIE)?.value)
@@ -45,6 +54,7 @@ export default async function RootLayout({children}:{children:React.ReactNode}){
   return (
     <html lang={initial.locale} data-scroll-behavior="smooth">
       <body>
+        <script dangerouslySetInnerHTML={{ __html: IOS_NO_FOCUS_ZOOM }} />
         <DevDataRoot>
           <PreferencesProvider initial={initial} hasSavedLocal={Boolean(savedLocale)}>
             <QuickCheckInProvider>{children}</QuickCheckInProvider>

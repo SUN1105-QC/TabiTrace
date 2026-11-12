@@ -7,11 +7,16 @@ import { checkinMapPoints } from './checkin-map'
 const FONT = '"Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif'
 const font = (size: number, bold = false) => `${bold ? 700 : 400} ${size}px ${FONT}`
 
-// 跨域照片按公开资源读取，不携带账户 Cookie；超时后由绘制层保留记录并提示缺图。
+// 跨域照片按公开资源读取，不携带账户 Cookie，也不用页面 <img> 留下的可能缺 CORS 头的缓存；超时后由绘制层保留记录并提示缺图。
 async function loadPhoto(url: string): Promise<ImageBitmap> {
-  const response = await fetch(url, { signal: AbortSignal.timeout(15000), mode: 'cors', credentials: 'omit' })
-  if (!response.ok) throw new Error('照片加载失败')
-  return createImageBitmap(await response.blob())
+  // AbortSignal.timeout 在 iOS 16 以前不存在，用计时器中止以兼容旧 iPhone
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), 15000)
+  try {
+    const response = await fetch(url, { signal: controller.signal, mode: 'cors', credentials: 'omit', cache: 'no-store' })
+    if (!response.ok) throw new Error('照片加载失败')
+    return await createImageBitmap(await response.blob())
+  } finally { clearTimeout(timer) }
 }
 
 /** CSV 直接导出结构化记录；图片/PDF 共用分页指令和画布，地图页可选且使用同一套记录编号。 */
