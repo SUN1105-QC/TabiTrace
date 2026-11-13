@@ -11,7 +11,7 @@ const config: Config = {
         canvas: '#FBF7F1',
         paper: '#FFFCF8',
         ink: '#26221E',
-        warm: '#E97A33',
+        warm: '#B54C1E',
         vermilion: '#E97A33',
         orangeSoft: '#F5E4D2',
         sand: '#E9DCCB',

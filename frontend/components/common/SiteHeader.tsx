@@ -25,6 +25,8 @@ import type { MessageKey } from '@/i18n'
 import { ACTIVE_TRIP_KEY, ACTIVE_TRIP_CHANGED } from '@/lib/active-trip'
 
 const APP_PREFIXES = ['/trips', '/explore', '/pricing', '/profile', '/memories']
+/** 访客也能看的页面：登录后用工作区外壳，未登录用公开导航（不显示通知、头像、打卡和「我的」入口） */
+const PUBLIC_APP_PREFIXES = ['/explore', '/pricing']
 
 export function SiteHeader() {
   const pathname = usePathname()
@@ -47,7 +49,10 @@ export function SiteHeader() {
 
   useEffect(() => { setMounted(true); setSession(hasSession()) }, [pathname])
 
-  const isAppRoute = pathname === '/' ? session : APP_PREFIXES.some(p => pathname.startsWith(p))
+  // 首次渲染（服务端 / 未挂载）读不到登录状态：首页按访客渲染，探索与价格页按工作区渲染，挂载后再按实际状态切换
+  const isAppRoute = pathname === '/'
+    ? session
+    : APP_PREFIXES.some(p => pathname.startsWith(p)) && (session || !mounted || !PUBLIC_APP_PREFIXES.some(p => pathname.startsWith(p)))
 
   const activeTripId = useMemo(() => {
     const routeTrip = Number(pathname.match(/^\/trips\/(\d+)(?:\/|$)/)?.[1])

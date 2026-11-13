@@ -62,7 +62,7 @@ export function DayPicker({ timeline, value, onPick, allLabel = '整趟旅行' }
 
 function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: ReactNode }) {
   return (
-    <button onClick={onClick} className={`rounded-full px-3 py-1.5 text-[11px] transition ${active ? 'bg-ink text-white' : 'border border-black/10 bg-white/60 text-black/60 hover:border-black/25'}`}>
+    <button onClick={onClick} className={`ss-day-chip rounded-full px-3 py-1.5 text-[11px] transition ${active ? 'bg-ink text-white' : 'border border-black/10 bg-white/60 text-black/60 hover:border-black/25'}`}>
       {children}
     </button>
   )

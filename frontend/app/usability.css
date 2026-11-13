@@ -94,3 +94,40 @@
   .cj-form{display:flex;flex-direction:column}.cj-actionbar{position:static;padding:0;background:none}.cj-mobile-preview{order:3;margin-top:14px;padding:8px 14px;border:1px solid var(--cj-line);border-radius:14px;background:var(--paper)}.cj-page .cj-mobile-preview>summary{display:list-item}.cj-page .cj-mobile-preview .cj-preview{margin-top:12px}.cj-input{font-size:16px}.cj-setup-details{padding:12px 18px}
   .gl-page .gl-add-desktop{display:inline-flex}.gl-page .gl-fab{display:none}.gl-head-actions{flex-wrap:wrap}.gl-page .gl-head{gap:12px}.gl-page .gl-toolbar{align-items:stretch;gap:10px}.gl-filter-details .gl-toolbar-right{display:flex;gap:12px}.gl-card-info{gap:2px}.gl-card-text{min-width:0}
 }
+
+/* ── 2026-11-13 全页面审查 ──
+ * 1. 统一操作主色：视频、回忆、探索、行程详情（手机）、落地页原来仍是浅橙 #F2762E / #E97A33，
+ *    白字按钮对比度不足 3:1；改用与其他页面相同的 --action（白字对比度约 5.9:1）。 */
+.vs-page{--vs-brand:var(--action);--vs-brand-2:var(--action-hover)}
+.mm-page{--mm-brand:var(--action);--mm-brand-2:var(--action-hover)}
+.ex-page,.ex-drawer-backdrop,.xp-trips{--ex-brand:var(--action);--ex-brand-2:var(--action-hover)}
+.td-mobile{--td-brand:var(--action)}
+.ld-page{--ld-brand:var(--action)}
+/* 2. 手机与平板：海报素材面板里的「导出 PNG」排在预览之前，与预览下方的导出区重复，只在电脑端保留 */
+@media(max-width:1279px){.ss-image-workspace .cp-panel-export{display:none}}
+/* 3. 触屏（含平板）：小号文字链接、面包屑、筛选小标签和图标按钮用透明伪元素扩大点击区域，外观与排版不变。
+ *    原规则只在 ≤767px 生效，iPad 上这些入口只有 19～31px 高。 */
+@media(pointer:coarse){
+  :is(.panel-link,.mm-text-btn,.vs-text-btn,.td-sec-head a,.td-ready-list a,.tm-link,.xp-link,.xp-crumb,.ss-day-chip,.mm-chips button,.xp-view button,.ts-player>button,.public-header nav>a){position:relative}
+  :is(.panel-link,.mm-text-btn,.vs-text-btn,.td-sec-head a,.td-ready-list a,.tm-link,.xp-link,.xp-crumb,.public-header nav>a)::after{content:"";position:absolute;inset:-10px -6px}
+  :is(.ss-day-chip,.mm-chips button,.xp-view button,.ts-player>button)::after{content:"";position:absolute;inset:-7px -3px}
+  .tm-icon{position:relative}.tm-icon::after{content:"";position:absolute;inset:-8px}
+  .vs-template-dot::after{content:"";position:absolute;inset:-11px -4px}
+  .tm-marker{position:relative}.tm-marker::before{content:"";position:absolute;inset:-11px;border-radius:50%}
+  .hw-trip .hw-trip-title select{min-height:44px}
+}
+/* 4. 过小的界面文字（不含导出成品里的设计排版）：最小约 10.5px */
+.vs-template-body em,.ts-plan,.ts-project-cover .ts-pill{font-size:10.5px}
+.vs-shot-thumb strong,.vs-mini-seg em,.vs-pills em,.vs-template-cover-text small,.ts-template-thumb-text small,.ts-segmented button b em,.workspace-title small{font-size:10px}
+@media(max-width:767px){.xp-area-foot small{font-size:11px}.hw-date-card span{font-size:11px}}
+/* 5. 未登录访客看推荐探索目录：公开导航下没有工作区的左右边距（工作区在 ≤1023px 由外壳统一加），这里补上 */
+@media(max-width:1023px){main:not(:has(> .workspace-spacer))>.xp-directory-page{padding-inline:16px}}
+@media(min-width:640px) and (max-width:1023px){main:not(:has(> .workspace-spacer))>.xp-directory-page{padding-inline:32px}}
+/* 6. 触屏补充：我的旅程「新旅行」、视频素材筛选与步骤条、相册视图切换、地图时间轴地点名、探索页当前旅行链接 */
+@media(pointer:coarse){
+  :is(.tr-new-link,.tm-tl-name,.xp-trip-line a,.vs-steps-item){position:relative}
+  :is(.tr-new-link,.tm-tl-name,.xp-trip-line a)::after{content:"";position:absolute;inset:-10px -6px}
+  .vs-steps-item::after{content:"";position:absolute;inset:-9px -2px}
+  :is(.vs-chips button,.gl-seg button){position:relative}
+  :is(.vs-chips button,.gl-seg button)::after{content:"";position:absolute;inset:-7px -3px}
+}
