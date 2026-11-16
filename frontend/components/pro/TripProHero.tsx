@@ -49,7 +49,7 @@ export function TripProHero({ s }: { s: TripProState }) {
         ) : plan && isOneTimePerTrip(plan) && (
           <ul className="pr-trust" aria-label="购买说明">
             <li><CheckCircle2 size={14} aria-hidden="true" />一次购买</li>
-            <li><CheckCircle2 size={14} aria-hidden="true" />当前旅行永久生效</li>
+            <li><CheckCircle2 size={14} aria-hidden="true" />功能无需续费，旅程保存期限按账号权限</li>
             <li><CheckCircle2 size={14} aria-hidden="true" />不自动续费</li>
           </ul>
         )}

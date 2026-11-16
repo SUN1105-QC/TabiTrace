@@ -26,6 +26,17 @@ export function MembershipGate({ feature, membership, children, readOnlyChildren
   const state = gateState(membership, feature)
   const copy = FEATURE_COPY[feature]
   if (state === 'ACTIVE') return <>{children}</>
+  if (membership?.source === 'ADMIN') return (
+    <>
+      <div className="mg-expired" role="status">
+        <Lock size={16} aria-hidden="true" />
+        <p>当前账号未开通自定义音乐，请联系管理员申请。</p>
+        <Link href="/support" className="vs-btn is-primary">联系管理员</Link>
+      </div>
+      {readOnlyChildren && children}
+      {footer}
+    </>
+  )
   if (state === 'EXPIRED') {
     return (
       <>

@@ -5,7 +5,8 @@
  * 刻意使用与旅迹产品不同的开发工具样式（深色 + 黄色标签），一眼能看出这是 Developer Tool。
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { createPortal } from 'react-dom'
 import { API_BASE, resetDataCaches } from '@/services/api'
 import { resetDevData } from '@/dev/data/adapter'
 import { DATA_SOURCE_KEY, DATA_SOURCE_MODES, DEV_DATA_NOTICE, readMode, writeMode, type DataSourceMode } from '@/dev/data/mode'
@@ -18,14 +19,24 @@ const META: Record<DataSourceMode, { tag: string; label: string; hint: string }>
 
 type Health = 'checking' | 'online' | 'offline'
 
+// 管理页提供内联位置；其他页面继续使用原有浮动条。
+const subscribeAdminHost = (listener: () => void) => {
+  const observer = new MutationObserver(listener)
+  observer.observe(document.body, { childList: true, subtree: true })
+  return () => observer.disconnect()
+}
+const readAdminHost = () => document.getElementById('admin-dev-control-slot')
+
 export function DevDataSwitcher({ onSwitched }: { onSwitched: () => void }) {
   const [mode, setMode] = useState<DataSourceMode>('local')
   const [open, setOpen] = useState(false)
   const [switching, setSwitching] = useState<DataSourceMode | null>(null)
   const [toast, setToast] = useState('')
   const [health, setHealth] = useState<Health>('checking')
+  const adminHost = useSyncExternalStore(subscribeAdminHost, readAdminHost, () => null)
   const root = useRef<HTMLDivElement | null>(null)
   const toastTimer = useRef<number | undefined>(undefined)
+
 
   const say = useCallback((msg: string) => {
     setToast(msg)
@@ -99,7 +110,7 @@ export function DevDataSwitcher({ onSwitched }: { onSwitched: () => void }) {
 
   const status = health === 'online' ? 'Connected' : health === 'offline' ? 'Offline' : '…'
 
-  return (
+  const content = (
     <div ref={root} className={`devds devds-${mode}`} data-dev-data-switcher="">
       <style>{CSS}</style>
       <button type="button" className="devds-pill" onClick={() => setOpen(v => !v)} aria-haspopup="menu" aria-expanded={open} aria-label={`开发数据源：${META[mode].label}`}>
@@ -133,6 +144,7 @@ export function DevDataSwitcher({ onSwitched }: { onSwitched: () => void }) {
       {toast && <div className="devds-toast" role="status">{toast}</div>}
     </div>
   )
+  return adminHost ? createPortal(content, adminHost) : content
 }
 
 const CSS = `

@@ -109,7 +109,7 @@ export function planFaq(p: TripProPlan): Faq[] {
   const price = planPrice(p)
   const life = lifetimePrice(p)
   const list: Faq[] = []
-  if (isOneTimePerTrip(p)) list.push({ q: 'Trip Pro 是订阅吗？', a: `不是。Trip Pro 是为单段旅行一次性购买（${price}），购买后这段旅行永久有效，不会自动续费。` })
+  if (isOneTimePerTrip(p)) list.push({ q: 'Trip Pro 是订阅吗？', a: `不是。Trip Pro 是为单段旅行一次性购买（${price}），功能无需续费。旅程数量与保存期限仍按账号等级执行，可联系管理员升级。` })
   list.push({ q: 'Trip Pro 可以用于几趟旅行？', a: `一次购买只对应你选择升级的那一段旅行，其他旅行不受影响。${p.lifetime ? `如果希望账号下所有旅行都自动解锁，可以选择「买断 · 终身 Pro」（${life}）。` : ''}` })
   list.push({ q: '已经生成的成果以后还能下载吗？', a: '可以。分享成果随时可以在这段旅行里重新导出；生成好的 Travel Story 保存在这段旅行的视频列表里，可以再次下载。只要旅行还在你的账号中，就一直可以使用。' })
   list.push({ q: '升级后可以取消吗？', a: '已解锁的 Trip Pro 权益会一直保留在这段旅行上，不会自动取消，也不会再次扣款。具体退款规则以平台说明为准。' })

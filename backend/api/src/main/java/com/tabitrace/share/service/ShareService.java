@@ -31,12 +31,15 @@ import java.util.List;
 
 @Service
 public class ShareService {
+    @org.springframework.beans.factory.annotation.Autowired(required=false) private com.tabitrace.admin.AccountPermissions permissions;
     private final ShareLinkMapper mapper;private final TripService trips;private final TripMapper tripMapper;private final SummaryService summaries;private final CheckinService checkins;private final PhotoMapper photos;private final UserMapper users;private final String publicUrl;
     public ShareService(ShareLinkMapper mapper,TripService trips,TripMapper tripMapper,SummaryService summaries,CheckinService checkins,PhotoMapper photos,UserMapper users,@Value("${app.public-url:http://localhost:3000}") String publicUrl){this.mapper=mapper;this.trips=trips;this.tripMapper=tripMapper;this.summaries=summaries;this.checkins=checkins;this.photos=photos;this.users=users;this.publicUrl=publicUrl.replaceAll("/$","");}
-    @Transactional public ShareLinkView create(Long userId,Long tripId,CreateShareRequest r){trips.requireOwned(userId,tripId);ShareLinkEntity l=new ShareLinkEntity();l.tripId=tripId;l.shareToken=token();l.expiresAt=r!=null&&r.expiresAt()!=null?r.expiresAt():defaultExpiry(users.findById(userId));mapper.insert(l);tripMapper.updateVisibility(tripId,"UNLISTED");return view(mapper.findById(l.id));}
+    @Transactional public ShareLinkView create(Long userId,Long tripId,CreateShareRequest r){if(permissions!=null)permissions.require(userId,"SHARE");var t=trips.requireOwned(userId,tripId);ShareLinkEntity l=new ShareLinkEntity();l.tripId=tripId;l.shareToken=token();l.expiresAt=r!=null&&r.expiresAt()!=null?r.expiresAt():defaultExpiry(users.findById(userId));if(t.expiresAt!=null&&(l.expiresAt==null||l.expiresAt.isAfter(t.expiresAt)))l.expiresAt=t.expiresAt;mapper.insert(l);tripMapper.updateVisibility(tripId,"UNLISTED");return view(mapper.findById(l.id));}
     public List<ShareLinkView> list(Long userId,Long tripId){trips.requireOwned(userId,tripId);return mapper.listByTrip(tripId).stream().map(this::view).toList();}
     @Transactional public void revoke(Long userId,Long tripId,Long shareId){trips.requireOwned(userId,tripId);ShareLinkEntity l=mapper.findById(shareId);if(l==null||!tripId.equals(l.tripId))throw new BusinessException("SHARE_LINK_NOT_FOUND","分享链接不存在",HttpStatus.NOT_FOUND);mapper.revoke(shareId);if(mapper.countActive(tripId)==0)tripMapper.updateVisibility(tripId,"PRIVATE");}
     @Transactional public PublicShareView publicView(String token){ShareLinkEntity l=mapper.findActiveByToken(token);if(l==null)throw new BusinessException("SHARE_LINK_INVALID","分享链接无效或已失效",HttpStatus.NOT_FOUND);mapper.incrementViews(l.id);TripEntity t=tripMapper.findById(l.tripId);if(t==null)throw new BusinessException("TRIP_NOT_FOUND","旅行不存在",HttpStatus.NOT_FOUND);var featured=photos.listFeatured(t.id).stream().map(PhotoService::view).toList();var owner=users.findById(t.userId);
+        if(owner==null||!"ACTIVE".equals(owner.status)||Boolean.FALSE.equals(owner.canShare))throw new BusinessException("SHARE_LINK_INVALID","分享链接无效或已失效",HttpStatus.NOT_FOUND);
+        trips.requireOwned(t.userId,t.id);
         var timeline=checkins.timeline(t.userId,t.id);
         // 默认不公开精确坐标：除非本人在隐私设置里开启，否则分享页只拿到约 1 公里精度的位置
         if(owner==null||!Boolean.TRUE.equals(owner.shareExactLocation))timeline=coarsen(timeline);

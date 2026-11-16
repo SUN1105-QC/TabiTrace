@@ -20,8 +20,8 @@ import java.util.List;
 @Service
 public class TripService {
     private final TripMapper mapper; private final PlaceMapper places; private final TripPlaceMapper tripPlaces; private final OfficialCityMapper officialCities;
-    /** 免费版同时可保留的 FREE 旅行数（归档的不计） */
-    public static final int FREE_ACTIVE_TRIP_LIMIT=1;
+    /** 基础账号保留的旅行总数，含归档和 Pro 旅行。 */
+    public static final int FREE_ACTIVE_TRIP_LIMIT=20;
     /** 全部功能免费开放时新旅行直接是 PRO；手动构造（单测）默认按原付费规则 */
     @Autowired(required = false) private PlanAccess planAccess=PlanAccess.CLOSED;
     public TripService(TripMapper mapper,PlaceMapper places,TripPlaceMapper tripPlaces,OfficialCityMapper officialCities){this.officialCities=officialCities;this.mapper=mapper;this.places=places;this.tripPlaces=tripPlaces;}
@@ -29,10 +29,16 @@ public class TripService {
     @Transactional
     public TripView create(Long userId,CreateTripRequest r){
         validateDates(r.startDate(),r.endDate());
+        var policy=mapper.lockPolicy(userId);
+        if(policy!=null && (!"USER".equals(policy.role)||!"ACTIVE".equals(policy.status)))
+            throw new BusinessException("ACCOUNT_NOT_ACTIVE","此账号不能创建旅程",HttpStatus.FORBIDDEN);
+        int limit=policy==null?FREE_ACTIVE_TRIP_LIMIT:policy.tripLimit;
+        if(mapper.countLiveTrips(userId)>=limit) throw new BusinessException("TRIP_LIMIT_REACHED","已达到旅程上限（"+limit+" 条），请导出并删除旧旅程，或联系管理员升级",HttpStatus.CONFLICT);
         // 已买断终身 Pro 或全部功能免费开放：新建的旅行直接是 PRO，不受 Free 旅行数量限制
         boolean lifetime=planAccess.open()||mapper.hasLifetimePro(userId)>0;
-        if(!lifetime&&mapper.countFreeTrips(userId)>=FREE_ACTIVE_TRIP_LIMIT) throw new BusinessException("FREE_TRIP_LIMIT","免费版同时只能保留 1 个 FREE 旅行，请升级已有旅行或归档后再创建");
         TripEntity t=new TripEntity(); t.userId=userId;t.title=r.title().strip();t.destinationName=r.destinationName().strip();t.countryCode=blankToNull(r.countryCode());t.city=blankToNull(r.city());t.startDate=r.startDate();t.endDate=r.endDate();t.peopleCount=r.peopleCount()==null?1:r.peopleCount();t.coverImage=blankToNull(r.coverImage());t.planType=lifetime?"PRO":"FREE";t.status="PLANNING";t.visibility="PRIVATE";
+        t.createdAt=java.time.LocalDateTime.now(java.time.ZoneOffset.UTC).truncatedTo(java.time.temporal.ChronoUnit.MICROS);
+        t.expiresAt=t.createdAt.plusMonths(policy==null?1:policy.tripRetentionMonths);
         mapper.insert(t);
         // 目的地有官方探索内容（official_cities）且用户选择加入时，把该城市的官方地点加入旅行
         OfficialCityEntity official=Boolean.TRUE.equals(r.joinOfficialExplore())?officialCityOf(t):null;
@@ -50,8 +56,8 @@ public class TripService {
     @Transactional public TripView complete(Long userId,Long id){requireWritable(userId,id);mapper.complete(id);return view(mapper.findById(id));}
     @Transactional public TripView archive(Long userId,Long id){TripEntity t=requireOwned(userId,id);if(!"ARCHIVED".equals(t.status))mapper.updateStatus(id,"ARCHIVED");return view(mapper.findById(id));}
     // 归档视为旅行已结束且不保留原状态，取消归档后统一恢复为 COMPLETED
-    @Transactional public TripView unarchive(Long userId,Long id){TripEntity t=requireOwned(userId,id);if(!"ARCHIVED".equals(t.status))return view(t);if(!planAccess.open()&&"FREE".equals(t.planType)&&mapper.countFreeTrips(userId)>=FREE_ACTIVE_TRIP_LIMIT)throw new BusinessException("FREE_TRIP_LIMIT","免费版同时只能保留 1 个 FREE 旅行，请先归档其他旅行或升级 Trip Pro");mapper.updateStatus(id,"COMPLETED");return view(mapper.findById(id));}
-    public TripEntity requireOwned(Long userId,Long id){TripEntity t=mapper.findById(id);if(t==null)throw new BusinessException("TRIP_NOT_FOUND","旅行不存在",HttpStatus.NOT_FOUND);if(!userId.equals(t.userId))throw new BusinessException("TRIP_FORBIDDEN","不能访问其他用户的旅行",HttpStatus.FORBIDDEN);return t;}
+    @Transactional public TripView unarchive(Long userId,Long id){TripEntity t=requireOwned(userId,id);if(!"ARCHIVED".equals(t.status))return view(t);mapper.updateStatus(id,"COMPLETED");return view(mapper.findById(id));}
+    public TripEntity requireOwned(Long userId,Long id){TripEntity t=mapper.findById(id);if(t==null)throw new BusinessException("TRIP_NOT_FOUND","旅行不存在",HttpStatus.NOT_FOUND);if(!userId.equals(t.userId))throw new BusinessException("TRIP_FORBIDDEN","不能访问其他用户的旅行",HttpStatus.FORBIDDEN);if(t.expiresAt!=null&&!t.expiresAt.isAfter(java.time.LocalDateTime.now(java.time.ZoneOffset.UTC)))throw new BusinessException("TRIP_EXPIRED","旅程已到期，相关数据正在自动清理",HttpStatus.GONE);return t;}
     public TripEntity requireWritable(Long userId,Long id){TripEntity t=requireOwned(userId,id);if("ARCHIVED".equals(t.status))throw new BusinessException("TRIP_ARCHIVED","旅行已归档，取消归档后才能修改",HttpStatus.CONFLICT);return t;}
     /** 按旅行的城市、再按目的地名称匹配官方城市 */
     OfficialCityEntity officialCityOf(TripEntity t){
@@ -61,7 +67,7 @@ public class TripService {
     /** 探索进度按实际已开放城市统计，与创建旅行时加入的官方指南使用同一匹配规则。 */
     public String officialCityName(TripEntity t){OfficialCityEntity c=officialCityOf(t);return c==null?null:c.name;}
     public static boolean isTokyo(TripEntity t){return "东京".equals(t.city)||"Tokyo".equalsIgnoreCase(t.city)|| (t.destinationName!=null&&(t.destinationName.contains("东京")||t.destinationName.toLowerCase().contains("tokyo")));}
-    public static TripView view(TripEntity t){return new TripView(t.id,t.title,t.destinationName,t.countryCode,t.city,t.startDate,t.endDate,t.peopleCount,t.coverImage,t.planType,t.status,t.visibility,t.createdAt);}
+    public static TripView view(TripEntity t){return new TripView(t.id,t.title,t.destinationName,t.countryCode,t.city,t.startDate,t.endDate,t.peopleCount,t.coverImage,t.planType,t.status,t.visibility,t.createdAt,t.expiresAt);}
     private static void validateDates(java.time.LocalDate s,java.time.LocalDate e){if(e.isBefore(s))throw new BusinessException("INVALID_TRIP_DATES","结束日期不能早于开始日期");}
     private static String blankToNull(String s){return s==null||s.isBlank()?null:s.trim();}
 }

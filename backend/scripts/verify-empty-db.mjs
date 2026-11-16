@@ -60,7 +60,7 @@ check(`核心表都存在（${core.join('、')}）`, core.every(t => tables.incl
 
 // 4.（先检查）没有 Mock / 演示数据
 const count = t => Number(sql(EMPTY, `SELECT COUNT(*) FROM ${t}`))
-check('空库没有任何用户 / 旅行 / 打卡 / 照片（无演示数据）', ['users', 'trips', 'checkins', 'photos', 'video_projects', 'share_links', 'payments'].every(t => count(t) === 0))
+check('空库只有唯一管理员，无普通用户或演示旅程', Number(sql(EMPTY, "SELECT COUNT(*) FROM users WHERE role='ADMIN'")) === 1 && Number(sql(EMPTY, "SELECT COUNT(*) FROM users WHERE role='USER'")) === 0 && ['trips', 'checkins', 'photos', 'video_projects', 'share_links', 'payments'].every(t => count(t) === 0))
 check('产品目录数据已写入（官方城市、地点、成就、视频模板 / 音乐）', count('official_cities') > 0 && count('places') > 0 && count('achievements') > 0 && count('video_templates') > 0 && count('video_music') > 0)
 
 // 3. 在空库上启动 API，走真实接口
@@ -82,7 +82,7 @@ try {
   check('空库：创建旅行（加入东京官方探索）', trip.success, JSON.stringify(trip).slice(0, 200))
   const ck = await call('POST', `/trips/${trip.data?.id}/checkins`, { checkinType: 'MANUAL', checkinTime: '2026-10-01T10:00:00+09:00', latitude: 35.7148, longitude: 139.7967, customPlaceName: '浅草寺', placeName: '浅草寺' }, token)
   check('空库：打卡', ck.success, JSON.stringify(ck).slice(0, 200))
-  check('数据落在空库里', count('users') === 1 && count('trips') === 1 && count('checkins') === 1)
+  check('数据落在空库里（含初始管理员）', count('users') === 2 && count('trips') === 1 && count('checkins') === 1)
 } finally {
   api.kill()
 }

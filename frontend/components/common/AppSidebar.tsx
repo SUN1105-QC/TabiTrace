@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import {
-  Crown, Home, Images, MapPinned, Plus, Settings, Sparkles, X
+  Crown, Home, Images, MapPinned, MessageSquare, Plus, Settings, Sparkles, X
 } from 'lucide-react'
 import { useT } from '@/components/common/PreferencesProvider'
 import { BrandLogo } from '@/components/common/Brand'
@@ -94,7 +94,7 @@ export function AppSidebar({ activeTripId, badges, open, onClose }: { activeTrip
         <nav className="workspace-nav" aria-label={t('nav.mainNav')}>{main.map(link)}</nav>
         <Link href="/trips/new" className="sidebar-create warm-button" onClick={onClose}><Plus size={16} />{t('nav.createTrip')}</Link>
         <div className="sidebar-divider" />
-        <nav className="workspace-nav" aria-label={t('nav.secondaryNav')}>{secondary.map(link)}</nav>
+        <nav className="workspace-nav" aria-label={t('nav.secondaryNav')}>{secondary.map(link)}<Link href="/support" className={pathname.startsWith('/support')?'active':''} onClick={onClose}><MessageSquare aria-hidden="true"/><span>联系管理员</span></Link></nav>
 
         <div className="workspace-sidebar-bottom">
           <Link href="/pricing" className="sidebar-pro" onClick={onClose}>

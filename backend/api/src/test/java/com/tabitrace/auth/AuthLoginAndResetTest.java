@@ -80,6 +80,20 @@ class AuthLoginAndResetTest {
     }
 
     // ------------------------------------------------------------ 忘记密码
+    @Test void administratorDeletionCannotBeCancelledByLoggingIn(){
+        var u=user("DELETION_PENDING");u.deletionRequestedByAdmin=true;
+        when(users.lockById(u.id)).thenReturn(u);when(encoder.matches("right","$real")).thenReturn(true);
+        assertEquals("ACCOUNT_ADMIN_DELETION_PENDING",assertThrows(BusinessException.class,()->service.login(new LoginRequest(u.email,"right",true),"UA",null)).getCode());
+        verify(users,never()).cancelDeletion(any());verifyNoInteractions(tokens);
+    }
+
+    @Test void ownerCanStillCancelTheirOwnDeletionAfterTheRowIsLocked(){
+        var pending=user("DELETION_PENDING");when(users.lockById(pending.id)).thenReturn(pending);
+        var active=new UserEntity();active.id=pending.id;active.email=pending.email;active.role="USER";active.status="ACTIVE";
+        when(users.findById(pending.id)).thenReturn(active);when(encoder.matches("right","$real")).thenReturn(true);
+        assertNotNull(service.login(new LoginRequest(pending.email,"right",true),"UA",null).accessToken());
+        verify(users).cancelDeletion(pending.id);
+    }
 
     @Test
     void resetPasswordConsumesTheResetTokenUpdatesPasswordAndSignsOutOtherDevices() {

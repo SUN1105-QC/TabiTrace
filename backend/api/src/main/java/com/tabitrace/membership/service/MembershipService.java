@@ -35,11 +35,17 @@ public class MembershipService {
     }
 
     private final MembershipMapper mapper;
+    @Autowired(required=false) private com.tabitrace.user.mapper.UserMapper users;
     /** 手动构造（单测）默认按原会员规则 */
     @Autowired(required = false) private PlanAccess planAccess = PlanAccess.CLOSED;
     public MembershipService(MembershipMapper mapper) { this.mapper = mapper; }
 
     public MembershipView current(Long userId) {
+        if(users!=null){
+            var u=users.findById(userId);
+            if(u!=null && "DENY".equals(u.customMusicAccess))return new MembershipView(EXPIRED,"ADMIN",null,null,false,List.of());
+            if(u!=null && "ALLOW".equals(u.customMusicAccess))return new MembershipView(ACTIVE,"ADMIN",null,null,false,MEMBER_FEATURES);
+        }
         List<MembershipEntity> rows = mapper.listByUser(userId);
         LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
         // 有多段有效会员时取结束最晚的（永久优先）
@@ -64,6 +70,9 @@ public class MembershipService {
     public MembershipView require(Long userId, String feature) {
         MembershipView m = current(userId);
         if (m.active()) return m;
+        if ("ADMIN".equals(m.source())) {
+            throw new BusinessException("FEATURE_DISABLED", "当前账号未开通自定义音乐，请联系管理员申请", HttpStatus.FORBIDDEN);
+        }
         String code = FEATURE_CUSTOM_MUSIC.equals(feature) ? "CUSTOM_MUSIC_REQUIRES_MEMBERSHIP" : "MEMBERSHIP_REQUIRED";
         String message = EXPIRED.equals(m.status())
                 ? "会员已到期，续费后可继续使用自定义音乐。"

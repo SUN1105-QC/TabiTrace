@@ -67,9 +67,9 @@ export default function LoginPage() {
     inflight.current = true
     setBusy(true)
     try {
-      await authApi.login({ email: values.email.trim(), password: values.password, ...(cancelDeletion ? { cancelDeletion: true } : {}) })
+      const result = await authApi.login({ email: values.email.trim(), password: values.password, ...(cancelDeletion ? { cancelDeletion: true } : {}) })
       setPhase('redirecting')
-      router.push(safeNextPath(next ?? readNext()))
+      router.push(result.user.role === 'ADMIN' ? '/admin' : safeNextPath(next ?? readNext()))
       // 跳转期间保持禁用，避免再次提交
     } catch (error) {
       if (error instanceof ApiError && error.code === 'ACCOUNT_DELETION_PENDING') {

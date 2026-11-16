@@ -30,6 +30,8 @@ public class AuthService {
     private final JwtService jwt;
     private final EmailVerificationService verifications;
     private final LoginThrottleService throttle;
+    @org.springframework.beans.factory.annotation.Autowired(required=false)
+    private com.tabitrace.admin.RegistrationDefaultsService registrationDefaults;
     /** 邮箱不存在时也跑一次 BCrypt，避免通过响应时间判断邮箱是否注册 */
     private final String timingDummyHash;
 
@@ -54,9 +56,11 @@ public class AuthService {
         u.nickname=registerNickname(request.nickname(), email);
         // 注册时沿用用户在注册页正在使用的界面语言与设备时区，避免注册完成后界面被切回默认语言；无效值回退到默认
         u.locale=registerLocale(request.locale()); u.timezone=registerTimezone(request.timezone()); u.defaultVisibility="PRIVATE"; u.emailNotifications=false;
+        if (registrationDefaults != null) registrationDefaults.apply(u);
         // 并发注册同一邮箱时，以数据库 users.email 唯一约束为准
         try { users.insert(u); }
         catch(DuplicateKeyException ex) { throw emailExists(); }
+        if (registrationDefaults != null) registrationDefaults.registered(email);
         u=users.findById(u.id);
         return issue(u, userAgent, null);
     }
@@ -98,6 +102,10 @@ public class AuthService {
         }
         // 注销冷静期：密码正确才告诉用户账号在冷静期，确认撤销后恢复账号并登录
         if(UserService.STATUS_DELETION_PENDING.equals(u.status)) {
+            // 与管理员删除 / 撤销共享账号行锁，不能用旧状态恢复已被管理员停用的账号。
+            u=users.lockById(u.id);
+            if (u==null || Boolean.TRUE.equals(u.deletionRequestedByAdmin))
+                throw new BusinessException("ACCOUNT_ADMIN_DELETION_PENDING","账号由管理员安排删除，请联系管理员处理",HttpStatus.FORBIDDEN);
             if(!Boolean.TRUE.equals(request.cancelDeletion()))
                 throw new BusinessException("ACCOUNT_DELETION_PENDING","这个账号已申请注销",HttpStatus.FORBIDDEN,
                         java.util.Map.of("scheduledAt",String.valueOf(u.deletionScheduledAt)));
@@ -220,6 +228,7 @@ public class AuthService {
                 u.defaultVisibility,Boolean.TRUE.equals(u.shareExactLocation),u.shareLinkExpiryDays==null?0:u.shareLinkExpiryDays,
                 Boolean.TRUE.equals(u.emailNotifications),!Boolean.FALSE.equals(u.notifyTripReminder),!Boolean.FALSE.equals(u.notifyStory),
                 false,!Boolean.FALSE.equals(u.notifyShare),u.createdAt,
-                u.lifetimeProAt!=null,u.lifetimeProAt);
+                u.lifetimeProAt!=null,u.lifetimeProAt,u.role,u.userLevel,u.tripLimit,u.tripRetentionMonths,
+                Boolean.TRUE.equals(u.canShare),Boolean.TRUE.equals(u.canVideo),u.customMusicAccess);
     }
 }

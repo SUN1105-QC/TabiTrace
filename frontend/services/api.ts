@@ -143,7 +143,7 @@ export async function stageDevUpload(storageKey: string, blob: Blob) {
 }
 
 /** 统一处理开发数据源、访问令牌、会话续期与错误封装；业务组件不各自维护一套请求规则。 */
-async function request<T>(path: string, init: RequestInit, auth: boolean, allowRefresh: boolean): Promise<T> {
+async function request<T>(path: string, init: RequestInit, auth: boolean, allowRefresh: boolean, binary = false): Promise<T> {
   const dev = await devRoute(path, init)
   if (dev) return dev.data as T
 
@@ -171,7 +171,7 @@ async function request<T>(path: string, init: RequestInit, auth: boolean, allowR
   // 续期后的重试会把 allowRefresh 置为 false，防止无效会话反复刷新形成请求循环。
   if (response.status === 401 && auth && allowRefresh) {
     const refreshed = await refreshAccessToken()
-    if (refreshed) return request<T>(path, init, auth, false)
+    if (refreshed) return request<T>(path, init, auth, false, binary)
     clearTokens()
     if (typeof window !== 'undefined' && !/^\/(login|register|forgot-password)(\/|$)/.test(window.location.pathname)) {
       const next = `${window.location.pathname}${window.location.search}`
@@ -180,6 +180,7 @@ async function request<T>(path: string, init: RequestInit, auth: boolean, allowR
     }
   }
 
+  if (binary && response.ok) return await response.blob() as T
   let envelope: ApiEnvelope<T> | null = null
   try { envelope = await response.json() } catch {}
   if (!response.ok || !envelope?.success) {
@@ -190,6 +191,10 @@ async function request<T>(path: string, init: RequestInit, auth: boolean, allowR
 
 export async function api<T>(path: string, init: RequestInit = {}, auth = true): Promise<T> {
   return request<T>(path, init, auth, true)
+}
+
+export async function downloadApi(path: string): Promise<Blob> {
+  return request<Blob>(path, { signal: AbortSignal.timeout(300000) }, true, true, true)
 }
 
 export const jsonBody = (value: unknown) => JSON.stringify(value)

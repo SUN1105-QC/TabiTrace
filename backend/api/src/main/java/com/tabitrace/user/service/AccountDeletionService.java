@@ -51,6 +51,7 @@ public class AccountDeletionService {
     public AccountDeletionView request(Long userId, DeleteAccountRequest r) {
         UserEntity u = users.findById(userId);
         if (u == null) throw new BusinessException("USER_NOT_FOUND", "用户不存在", HttpStatus.NOT_FOUND);
+        if ("ADMIN".equals(u.role)) throw new BusinessException("ADMIN_PROTECTED", "唯一管理员不能注销", HttpStatus.FORBIDDEN);
         if (!passwordEncoder.matches(r.password(), u.passwordHash)) throw new BusinessException("INVALID_PASSWORD", "密码不正确");
         LocalDateTime scheduledAt = LocalDateTime.now(ZoneOffset.UTC).plusDays(COOLING_OFF_DAYS);
         if (users.requestDeletion(userId, scheduledAt) == 0) throw new BusinessException("ACCOUNT_NOT_ACTIVE", "账号当前不能注销");

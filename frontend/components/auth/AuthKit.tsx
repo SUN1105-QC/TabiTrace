@@ -48,7 +48,7 @@ export function useSignedInRedirect(fallback: string) {
     let alive = true
     // 会话失效时 api 层会清掉令牌并抛错，这里回到表单
     userApi.me()
-      .then(() => { if (!alive) return; setPhase('redirecting'); router.replace(safeNextPath(readNext(), fallback)) })
+      .then(user => { if (!alive) return; setPhase('redirecting'); router.replace(user.role === 'ADMIN' ? '/admin' : safeNextPath(readNext(), fallback)) })
       .catch(() => { if (alive) setPhase('form') })
     return () => { alive = false }
   }, [router, fallback])

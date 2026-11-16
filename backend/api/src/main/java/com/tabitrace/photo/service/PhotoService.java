@@ -44,6 +44,9 @@ public class PhotoService {
     @Transactional public PhotoView feature(Long userId,Long id,boolean featured){PhotoEntity p=requireWritable(userId,id);mapper.setFeatured(id,featured);p.featured=featured;return view(p);}
     @Transactional public void delete(Long userId,Long id){PhotoEntity p=requireWritable(userId,id);remove(p);}
 
+    /** 管理端已验证角色并锁定所属账号 / 旅行；归档照片也能清理，复用文件和封面引用清理。 */
+    @Transactional public void deleteForAdmin(Long ownerId,Long id){PhotoEntity p=mapper.findById(id);if(p==null||!ownerId.equals(p.userId))throw new BusinessException("PHOTO_NOT_FOUND","照片不存在",HttpStatus.NOT_FOUND);remove(p);}
+
     /** 删除一张照片并清理引用：Travel Story 的照片列表随外键级联删除，封面引用在这里清空；打卡本身不受影响 */
     /** 先删对象存储里的文件：删不掉就整体失败（事务回滚），不会出现“记录没了但公开地址还能访问”的情况 */
     private void remove(PhotoEntity p){storage.deleteAll(keys(p));mapper.delete(p.id);mapper.clearVideoCover(p.id);tripMapper.clearCoverIf(p.tripId,p.imageUrl);if(p.mediumUrl!=null)tripMapper.clearCoverIf(p.tripId,p.mediumUrl);}

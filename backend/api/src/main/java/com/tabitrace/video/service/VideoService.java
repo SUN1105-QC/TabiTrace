@@ -27,6 +27,7 @@ import java.util.Locale;
 
 @Service
 public class VideoService {
+    @org.springframework.beans.factory.annotation.Autowired(required=false) private com.tabitrace.admin.AccountPermissions permissions;
     public static final int FREE_MAX_PHOTOS = 10;
     /** 每个用户同时排队 / 生成中的视频上限：渲染很耗 CPU，防止刷生成拖垮渲染机或造成账单失控 */
     public static final int MAX_ACTIVE_RENDERS_PER_USER = 2;
@@ -115,6 +116,7 @@ public class VideoService {
 
     @Transactional
     public VideoProjectView create(Long userId, Long tripId, UpsertVideoProjectRequest r) {
+        if(permissions!=null)permissions.require(userId,"VIDEO");
         TripEntity t = trips.requireWritable(userId, tripId);
         Resolved v = validate(t, r, true);
         VideoProjectEntity p = new VideoProjectEntity();
@@ -140,6 +142,7 @@ public class VideoService {
 
     @Transactional
     public VideoProjectView update(Long userId, Long id, UpsertVideoProjectRequest r) {
+        if(permissions!=null)permissions.require(userId,"VIDEO");
         VideoProjectEntity p = requireOwned(userId, id);
         if (!"DRAFT".equals(p.status)) {
             throw new BusinessException("VIDEO_NOT_EDITABLE", "只有草稿可以直接修改；已生成的视频请使用「重新编辑」创建新版本", HttpStatus.CONFLICT);
@@ -175,6 +178,7 @@ public class VideoService {
     /** 开始生成 / 失败重试 / 已完成后重新生成，都走这里。分镜在此刻冻结，Worker 只按冻结结果渲染。 */
     @Transactional
     public VideoProjectView render(Long userId, Long id) {
+        if(permissions!=null)permissions.require(userId,"VIDEO");
         if(costs!=null)costs.lockRendering(userId);
         VideoProjectEntity p = requireOwned(userId, id);
         TripEntity t = trips.requireWritable(userId, p.tripId);
@@ -210,6 +214,7 @@ public class VideoService {
     /** 复制版本：已生成的视频不能改，复制出一个新草稿继续编辑。 */
     @Transactional
     public VideoProjectView duplicate(Long userId, Long id) {
+        if(permissions!=null)permissions.require(userId,"VIDEO");
         VideoProjectEntity src = requireOwned(userId, id);
         TripEntity t = trips.requireWritable(userId, src.tripId);
         List<Long> ids = projectPhotos.photoIds(id);
@@ -240,11 +245,19 @@ public class VideoService {
 
     @Transactional
     public void delete(Long userId, Long id) {
+        deleteInternal(userId,id,false);
+    }
+
+    /** 角色及资源归属由管理服务验证；仍禁止删除正在生成的视频，并保留持久化文件清理任务。 */
+    @Transactional
+    public void deleteForAdmin(Long ownerId,Long id) { deleteInternal(ownerId,id,true); }
+
+    private void deleteInternal(Long userId,Long id,boolean admin) {
         // Serializes deletion with Worker claim/publication. Never act on a stale status snapshot.
         VideoProjectEntity p = mapper.lockById(id);
         if (p == null) throw new BusinessException("VIDEO_PROJECT_NOT_FOUND", "视频项目不存在或已被删除", HttpStatus.NOT_FOUND);
         if (!userId.equals(p.userId)) throw new BusinessException("VIDEO_FORBIDDEN", "不能访问其他用户的视频项目", HttpStatus.FORBIDDEN);
-        trips.requireWritable(userId, p.tripId);
+        if (!admin) trips.requireWritable(userId, p.tripId);
         if ("PROCESSING".equals(p.status)) {
             throw new BusinessException("VIDEO_PROCESSING", "正在生成的视频不能删除，请等待完成后再删除", HttpStatus.CONFLICT);
         }

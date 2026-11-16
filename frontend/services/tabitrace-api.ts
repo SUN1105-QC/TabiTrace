@@ -5,7 +5,7 @@ import { runtimePrefs } from '@/lib/preferences'
 
 /** refresh token 由后端写入 HttpOnly Cookie，不出现在响应里 */
 export type TokenResponse = { accessToken:string; expiresInSeconds:number; user:UserView }
-export type UserView = { id:number;email:string;nickname:string;avatarUrl?:string;avatarSmallUrl?:string|null;bio?:string;locale?:string;timezone?:string;distanceUnit?:DistanceUnit;defaultVisibility?:string;shareExactLocation?:boolean;shareLinkExpiryDays?:number;emailNotifications:boolean;notifyTripReminder?:boolean;notifyStory?:boolean;notifyShare?:boolean;createdAt?:string;/** 买断终身 Pro：账号下所有旅行都是 PRO */lifetimePro?:boolean;lifetimeProAt?:string }
+export type UserView = { id:number;email:string;nickname:string;avatarUrl?:string;avatarSmallUrl?:string|null;bio?:string;locale?:string;timezone?:string;distanceUnit?:DistanceUnit;defaultVisibility?:string;shareExactLocation?:boolean;shareLinkExpiryDays?:number;emailNotifications:boolean;notifyTripReminder?:boolean;notifyStory?:boolean;notifyShare?:boolean;createdAt?:string;lifetimePro?:boolean;lifetimeProAt?:string;role?:'ADMIN'|'USER';userLevel?:string;tripLimit?:number;tripRetentionMonths?:number;canShare?:boolean;canVideo?:boolean;customMusicAccess?:'INHERIT'|'ALLOW'|'DENY' }
 export type DistanceUnit = 'KM' | 'MI'
 /** 可在设置中心修改的字段（头像走单独的上传接口） */
 export type UserSettingsInput = Partial<Pick<UserView,'nickname'|'bio'|'locale'|'timezone'|'distanceUnit'|'shareExactLocation'|'shareLinkExpiryDays'|'notifyTripReminder'|'notifyStory'|'notifyShare'>>
@@ -25,7 +25,7 @@ export const planApi = {
 export const destinationApi = {
   search:(q:string,limit=8,signal?:AbortSignal)=>api<DestinationView[]>(`/destinations/search?q=${encodeURIComponent(q)}&limit=${limit}`,{signal})
 }
-export type TripView = { id:number;title:string;destinationName:string;countryCode?:string;city?:string;startDate:string;endDate:string;peopleCount:number;coverImage?:string;planType:string;status:string;visibility:string;createdAt?:string }
+export type TripView = { id:number;title:string;destinationName:string;countryCode?:string;city?:string;startDate:string;endDate:string;peopleCount:number;coverImage?:string;planType:string;status:string;visibility:string;createdAt?:string;expiresAt?:string }
 export type PlaceView = { id:number;name:string;countryCode?:string;country?:string;city?:string;area?:string;address?:string;latitude?:number;longitude?:number;category?:string;sourceType:string;description?:string;coverImage?:string;tagline?:string;recommendReason?:string;stayMinutes?:number;bestTime?:string;tags?:string[];editorRank?:number;tripCount?:number }
 /** 官方专题路线：placeIds 为游览顺序 */
 export type OfficialRouteView = { id:number;code:string;title:string;englishTitle:string;description:string;durationHint?:string;season?:string;coverImage?:string;placeIds:number[] }

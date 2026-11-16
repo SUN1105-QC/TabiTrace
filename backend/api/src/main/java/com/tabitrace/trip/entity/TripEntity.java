@@ -18,5 +18,6 @@ public class TripEntity {
     public String status;
     public String visibility;
     public LocalDateTime createdAt;
+    public LocalDateTime expiresAt;
     public LocalDateTime updatedAt;
 }

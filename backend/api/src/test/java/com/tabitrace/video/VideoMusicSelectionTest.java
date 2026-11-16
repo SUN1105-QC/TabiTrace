@@ -61,6 +61,16 @@ class VideoMusicSelectionTest {
         assertNull(service.templates().getFirst().recommendedMusic());
         verify(catalog, never()).music();
     }
+    @Test void administratorDeletionStillProtectsActiveRenderingAndQueuesDurableCleanup(){
+        var p=new VideoProjectEntity();p.id=77L;p.userId=1L;p.tripId=2L;p.status="PROCESSING";
+        when(projects.lockById(77L)).thenReturn(p);
+        assertEquals("VIDEO_PROCESSING",assertThrows(BusinessException.class,()->service.deleteForAdmin(1L,77L)).getCode());
+        verify(projects,never()).delete(any());verify(projects,never()).enqueueOutputDeletion(any());
+        p.status="COMPLETED";service.deleteForAdmin(1L,77L);
+        var order=inOrder(projects);order.verify(projects,atLeastOnce()).lockById(77L);order.verify(projects).enqueueOutputDeletion(p);order.verify(projects).delete(77L);
+        verify(trips,never()).requireWritable(any(),any());
+        assertEquals("VIDEO_FORBIDDEN",assertThrows(BusinessException.class,()->service.deleteForAdmin(9L,77L)).getCode());
+    }
 
     @Test void explicitAndLegacySystemSelectionsCannotCreateProjects() {
         for (var r : List.of(request("SYSTEM", "LEGACY", null), request(null, "LEGACY", null), request("system", null, 9L))) {

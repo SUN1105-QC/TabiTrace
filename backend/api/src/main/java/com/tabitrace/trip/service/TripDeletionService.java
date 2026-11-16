@@ -27,13 +27,32 @@ public class TripDeletionService {
 
     @Transactional
     public void delete(Long userId, Long tripId) {
+        tripMapper.lockPolicy(userId);
         trips.requireOwned(userId, tripId);
         // Parent lock also blocks new projects from being inserted while we capture all outputs.
         if (!userId.equals(tripMapper.lockOwner(tripId)))
             throw new com.tabitrace.common.BusinessException("TRIP_NOT_FOUND", "旅行不存在", org.springframework.http.HttpStatus.NOT_FOUND);
+        removeFiles(userId, tripId);
+        tripMapper.delete(tripId);
+    }
+
+    /** The scheduler calls this through the Spring proxy; upgrades and cleanup share the account lock. */
+    @Transactional
+    public boolean deleteExpired(Long userId, Long tripId) {
+        if (tripMapper.lockPolicy(userId) == null || !userId.equals(tripMapper.lockOwner(tripId))) return false;
+        var trip = tripMapper.findById(tripId);
+        if (trip == null || trip.expiresAt == null || trip.expiresAt.isAfter(java.time.LocalDateTime.now(java.time.ZoneOffset.UTC))) return false;
+        removeFiles(userId, tripId);
+        tripMapper.deleteExclusiveCustomPlaces(tripId);
+        tripMapper.delete(tripId);
+        return true;
+    }
+
+    private void removeFiles(Long userId, Long tripId) {
         for (var video : videos.lockByTrip(tripId)) videos.enqueueOutputDeletion(video);
         // 原图与缩略图 / 中图一起删除
         storage.deleteAll(photos.listByTrip(tripId).stream().flatMap((PhotoEntity p) -> java.util.stream.Stream.of(p.storageKey, p.thumbKey, p.mediumKey)).filter(java.util.Objects::nonNull).toList());
-        trips.delete(userId, tripId);
+        // Also remove staged uploads that were never registered as photos.
+        storage.deletePrefix("users/" + userId + "/trips/" + tripId + "/");
     }
 }

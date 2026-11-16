@@ -35,7 +35,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/v1/auth/**", "/api/v1/share/**", "/api/v1/local-storage/**", "/api/v1/payments/stripe/webhook", "/api/v1/plans/**", "/actuator/health").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/official-cities/**", "/api/v1/places/search").permitAll()
-                .anyRequest().authenticated())
+                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/v1/users/me").authenticated()
+                .requestMatchers("/api/v1/users/me/password", "/api/v1/users/me/sessions/**").authenticated()
+                .anyRequest().hasRole("USER"))
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

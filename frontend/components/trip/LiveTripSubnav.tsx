@@ -9,7 +9,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
-import { tripApi, type TripView } from '@/services/tabitrace-api'
+import { tripApi, userApi, type TripView, type UserView } from '@/services/tabitrace-api'
 import { useT } from '@/components/common/PreferencesProvider'
 import type { MessageKey } from '@/i18n'
 import { rememberActiveTrip } from '@/lib/active-trip'
@@ -25,6 +25,8 @@ export function LiveTripSubnav({ tripId, sticky = false }: { tripId: number; sti
   const t = useT()
   const nav = useRef<HTMLElement | null>(null)
   const [trips, setTrips] = useState<TripView[]>([])
+  const [user, setUser] = useState<UserView|null>(null)
+  useEffect(()=>{userApi.me().then(setUser).catch(()=>{})},[])
   useEffect(() => { let alive = true; tripApi.list().then(rows => { if (alive) setTrips(rows) }).catch(() => {}); return () => { alive = false } }, [])
   const trip = trips.find(row => row.id === tripId)
   useEffect(() => { rememberActiveTrip(tripId) }, [tripId])
@@ -50,9 +52,10 @@ export function LiveTripSubnav({ tripId, sticky = false }: { tripId: number; sti
     </div>
     <nav ref={nav} aria-label={t('tripNav.label')} className="trip-subnav relative flex flex-nowrap gap-2 overflow-x-auto pb-2">
     {items.map(([suffix, label, short]) => {
-      const href = `/trips/${tripId}${suffix}`
+      const disabled = suffix === '/video' && user?.canVideo === false
+      const href = disabled ? '/support' : `/trips/${tripId}${suffix}`
       const active = pathname === href || pathname.startsWith(href + '/')
-      return <Link key={suffix} href={href} aria-current={active ? 'page' : undefined} className={`shrink-0 whitespace-nowrap rounded-full px-3.5 py-2 text-xs transition sm:px-4 ${active ? 'bg-ink text-white' : 'border border-black/10 bg-white/50 text-black/55 hover:border-vermilion/30'}`}>
+      return <Link key={suffix} href={href} title={disabled?'联系管理员开通视频功能':undefined} aria-current={active ? 'page' : undefined} className={`shrink-0 whitespace-nowrap rounded-full px-3.5 py-2 text-xs transition sm:px-4 ${active ? 'bg-ink text-white' : 'border border-black/10 bg-white/50 text-black/55 hover:border-vermilion/30'}`}>
         <span className="md:hidden">{suffix === '/share' ? '导出分享' : t(short)}</span><span className="hidden md:inline">{suffix === '/share' ? '导出与分享' : t(label)}</span>
       </Link>
     })}

@@ -53,6 +53,13 @@ class PhotoGalleryServiceTest {
         assertThrows(BusinessException.class, () -> service.delete(1L, 10L));
         verify(photos, never()).delete(10L);
     }
+    @Test void administratorCleanupWorksForArchivedPhotosAndStillChecksTheOwner(){
+        var p=photo(10L,5L);p.userId=1L;p.thumbKey="thumb";p.mediumKey="medium";p.mediumUrl="medium-url";when(photos.findById(10L)).thenReturn(p);
+        assertThrows(BusinessException.class,()->service.deleteForAdmin(9L,10L));verifyNoInteractions(storage);
+        service.deleteForAdmin(1L,10L);
+        verify(storage).deleteAll(List.of(p.storageKey,"thumb","medium"));verify(photos).clearVideoCover(10L);verify(tripMapper).clearCoverIf(5L,"medium-url");
+        verify(trips,never()).requireWritable(any(),any());
+    }
 
     @Test
     void presignRejectsSvgAndMissingSize() {

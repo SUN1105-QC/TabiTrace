@@ -71,7 +71,7 @@ export function TripStatusCard({ s }: { s: TripProState }) {
         {pro ? (
           <>
             <p className="pr-badge is-pro"><CheckCircle2 size={16} aria-hidden="true" /> 已解锁 Trip Pro</p>
-            <p className="pr-trip-note">{lifetime ? <><Crown size={13} aria-hidden="true" /> 买断终身 Pro：账号下所有旅行都已解锁</> : '这段旅行永久有效：打卡与照片不限数量，成果可高清无水印导出。'}</p>
+            <p className="pr-trip-note">{lifetime ? <><Crown size={13} aria-hidden="true" /> 买断终身 Pro：账号下所有旅行都已解锁，保存期限按账号权限</> : 'Pro 功能无需续费，成果可高清无水印导出；旅程保存期限按账号权限。'}</p>
             <PayNotice state={pay} message={payMessage} trip={trip} mock={mockPaid} onRetry={() => void s.recheckTrip()} />
             <div className="pr-trip-actions">
               <Link href={`/trips/${trip.id}/share`} className="pr-btn is-primary"><Share2 size={15} aria-hidden="true" /> 查看分享成果</Link>

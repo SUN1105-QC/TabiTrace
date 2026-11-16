@@ -15,7 +15,7 @@ export function PricingCardLifetimePro({ plan, cta }: { plan: TripProPlan; cta: 
       </dl>
       <ul>
         <li><Check size={14} aria-hidden="true" />每段旅行都是 Trip Pro，无需单独升级</li>
-        <li><Check size={14} aria-hidden="true" />不再受免费旅行数量的限制</li>
+        <li><Check size={14} aria-hidden="true" />旅程数量和保留时间按账号权限，联系管理员可升级</li>
         <li><Check size={14} aria-hidden="true" />包含 Trip Pro 的全部功能</li>
         <li><Check size={14} aria-hidden="true" />账号会员：上传自己的音乐，保存个人音乐库、跨旅行复用</li>
       </ul>

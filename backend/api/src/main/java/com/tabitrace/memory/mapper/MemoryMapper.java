@@ -15,10 +15,10 @@ public interface MemoryMapper {
     class ShareRow { public Long id; public Long tripId; public String tripTitle; public String shareToken; public Long viewCount; public LocalDateTime createdAt; }
 
     /** 最近结束的旅行在前 */
-    @Select("SELECT * FROM trips WHERE user_id=#{userId} AND status IN ('COMPLETED','ARCHIVED') ORDER BY end_date DESC,id DESC")
+    @Select("SELECT * FROM trips WHERE user_id=#{userId} AND expires_at>UTC_TIMESTAMP(6) AND status IN ('COMPLETED','ARCHIVED') ORDER BY end_date DESC,id DESC")
     List<TripEntity> archivedTrips(Long userId);
 
-    @Select("SELECT COUNT(*) FROM photos p JOIN trips t ON t.id=p.trip_id WHERE t.user_id=#{userId} AND t.status IN ('COMPLETED','ARCHIVED')")
+    @Select("SELECT COUNT(*) FROM photos p JOIN trips t ON t.id=p.trip_id WHERE t.user_id=#{userId} AND t.expires_at>UTC_TIMESTAMP(6) AND t.status IN ('COMPLETED','ARCHIVED')")
     int countArchivedPhotos(Long userId);
 
     /** 某段旅行的照片：精选在前，再按拍摄时间 */
@@ -39,7 +39,7 @@ public interface MemoryMapper {
     @Select("""
       SELECT v.id,v.trip_id,t.title AS trip_title,v.name,v.template_code,v.duration,v.output_url,v.renderer,v.cover_photo_id,v.completed_at,v.updated_at
       FROM video_projects v JOIN trips t ON t.id=v.trip_id
-      WHERE t.user_id=#{userId} AND t.status IN ('COMPLETED','ARCHIVED') AND v.status='COMPLETED' AND v.output_url IS NOT NULL
+      WHERE t.user_id=#{userId} AND t.expires_at>UTC_TIMESTAMP(6) AND t.status IN ('COMPLETED','ARCHIVED') AND v.status='COMPLETED' AND v.output_url IS NOT NULL
         AND COALESCE(v.renderer,'')<>'MOCK' AND v.output_url NOT LIKE '%example.invalid%'
       ORDER BY COALESCE(v.completed_at,v.updated_at) DESC,v.id DESC
       """)
@@ -49,7 +49,7 @@ public interface MemoryMapper {
     @Select("""
       SELECT s.id,s.trip_id,t.title AS trip_title,s.share_token,s.view_count,s.created_at
       FROM share_links s JOIN trips t ON t.id=s.trip_id
-      WHERE t.user_id=#{userId} AND t.status IN ('COMPLETED','ARCHIVED') AND s.status='ACTIVE' AND (s.expires_at IS NULL OR s.expires_at>UTC_TIMESTAMP())
+      WHERE t.user_id=#{userId} AND t.expires_at>UTC_TIMESTAMP(6) AND t.status IN ('COMPLETED','ARCHIVED') AND s.status='ACTIVE' AND (s.expires_at IS NULL OR s.expires_at>UTC_TIMESTAMP())
       ORDER BY s.created_at DESC,s.id DESC
       """)
     List<ShareRow> shareLinks(Long userId);
@@ -58,12 +58,12 @@ public interface MemoryMapper {
     @Select("""
       SELECT p.id,p.trip_id,t.title AS trip_title,COALESCE(p.thumb_url,p.medium_url,p.image_url) AS image_url,p.thumb_url,p.medium_url,p.image_url AS original_url,p.width,p.height,p.is_featured AS featured,p.captured_at,p.created_at
       FROM photos p JOIN trips t ON t.id=p.trip_id
-      WHERE t.user_id=#{userId} AND t.status IN ('COMPLETED','ARCHIVED')
+      WHERE t.user_id=#{userId} AND t.expires_at>UTC_TIMESTAMP(6) AND t.status IN ('COMPLETED','ARCHIVED')
       ORDER BY (YEAR(t.start_date)=#{year}) DESC,p.is_featured DESC,COALESCE(p.captured_at,p.created_at) DESC,p.id DESC LIMIT #{limit}
       """)
     List<PhotoRow> highlightPhotos(@Param("userId") Long userId, @Param("year") int year, @Param("limit") int limit);
 
-    @Select("SELECT COUNT(*) FROM photos p JOIN trips t ON t.id=p.trip_id WHERE t.user_id=#{userId} AND t.status IN ('COMPLETED','ARCHIVED') AND YEAR(t.start_date)=#{year}")
+    @Select("SELECT COUNT(*) FROM photos p JOIN trips t ON t.id=p.trip_id WHERE t.user_id=#{userId} AND t.expires_at>UTC_TIMESTAMP(6) AND t.status IN ('COMPLETED','ARCHIVED') AND YEAR(t.start_date)=#{year}")
     int countPhotosInYear(@Param("userId") Long userId, @Param("year") int year);
 
 }

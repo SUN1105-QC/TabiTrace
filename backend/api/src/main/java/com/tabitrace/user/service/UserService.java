@@ -78,7 +78,7 @@ public class UserService {
                 .toList();
         int pro = (int) plans.stream().filter(p -> "PRO".equals(p.planType())).count();
         return new AccountOverview(accounts.countTrips(userId), accounts.countPlaces(userId), accounts.countPhotos(userId), pro,
-                accounts.countActiveFreeTrips(userId), TripService.FREE_ACTIVE_TRIP_LIMIT,
+                accounts.countActiveFreeTrips(userId), me.tripLimit,
                 PaymentService.TRIP_PRO_AMOUNT, PaymentService.LIFETIME_AMOUNT, PaymentService.TRIP_PRO_CURRENCY,
                 me.lifetimeProAt != null, plans, planAccess.open());
     }

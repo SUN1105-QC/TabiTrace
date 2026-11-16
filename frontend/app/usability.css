@@ -131,3 +131,16 @@
   :is(.vs-chips button,.gl-seg button){position:relative}
   :is(.vs-chips button,.gl-seg button)::after{content:"";position:absolute;inset:-7px -3px}
 }
+/* The account notice occupies the topbar offset once; the following page keeps normal spacing. */
+main:has(> .tt-retention-notice) > .tt-retention-notice {
+  padding-top: calc(var(--topbar) + 16px) !important;
+  padding-bottom: 0 !important;
+}
+main:has(> .tt-retention-notice) > section:not(.tt-retention-notice) {
+  padding-top: 24px !important;
+}
+@media (max-width: 1023px) {
+  main:has(> .tt-retention-notice) > .tt-retention-notice {
+    padding: 12px 16px 0 !important;
+  }
+}

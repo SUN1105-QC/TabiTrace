@@ -13,8 +13,18 @@ public class UserEntity {
     public String bio;
     /** ACTIVE / DELETION_PENDING（注销冷静期） */
     public String status;
+    public String role = "USER";
+    public String userLevel = "基础用户";
+    public Integer tripLimit = 20;
+    public Integer tripRetentionMonths = 1;
+    public Boolean canShare = true;
+    public Boolean canVideo = true;
+    public String customMusicAccess = "INHERIT";
     public java.time.LocalDateTime deletionRequestedAt;
     public java.time.LocalDateTime deletionScheduledAt;
+    /** 管理员申请的删除须由管理员撤销，不能通过用户登录绕过停用。 */
+    public Boolean deletionRequestedByAdmin = false;
+    public String deletionPreviousStatus;
     public String locale;
     public String timezone;
     public String distanceUnit;

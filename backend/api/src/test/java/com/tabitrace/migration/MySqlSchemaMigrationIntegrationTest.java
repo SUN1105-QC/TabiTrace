@@ -38,14 +38,14 @@ class MySqlSchemaMigrationIntegrationTest {
         flyway = Flyway.configure().dataSource(dataSource).schemas(schema).createSchemas(false)
                 .locations("classpath:db/migration").cleanDisabled(true).baselineOnMigrate(false)
                 .validateMigrationNaming(true).load();
-        assertEquals(24, flyway.migrate().migrationsExecuted, "Every V1–V24 migration must execute from empty");
+        assertEquals(26, flyway.migrate().migrationsExecuted, "Every V1–V26 migration must execute from empty");
     }
 
     @Test void migrationHistoryIsCompleteValidAndIdempotent() {
-        assertEquals(IntStream.rangeClosed(1, 24).mapToObj(Integer::toString).toList(),
+        assertEquals(IntStream.rangeClosed(1, 26).mapToObj(Integer::toString).toList(),
                 jdbc.queryForList("SELECT version FROM flyway_schema_history WHERE version IS NOT NULL ORDER BY installed_rank", String.class));
         assertEquals(0L, jdbc.queryForObject("SELECT COUNT(*) FROM flyway_schema_history WHERE success=FALSE", Long.class));
-        assertEquals("24", flyway.info().current().getVersion().getVersion());
+        assertEquals("26", flyway.info().current().getVersion().getVersion());
         assertDoesNotThrow(() -> flyway.validate());
         assertEquals(0, flyway.migrate().migrationsExecuted, "Repeated startup must not replay migrations");
     }
@@ -55,12 +55,17 @@ class MySqlSchemaMigrationIntegrationTest {
                 "checkins", "photos", "achievements", "user_achievements", "payments", "share_links", "video_projects", "video_project_photos",
                 "video_templates", "video_music", "official_routes", "place_favorites", "destinations", "email_verifications", "login_failures",
                 "memberships", "user_music", "payment_events", "cost_control_locks", "render_usage_daily", "cost_alerts", "video_output_deletions",
-                "explore_countries", "explore_city_entries", "flyway_schema_history");
+                "explore_countries", "explore_city_entries", "support_messages", "admin_audit_logs", "flyway_schema_history",
+                "admin_registration_defaults", "admin_user_invitations", "admin_maintenance_jobs");
         assertEquals(new TreeSet<>(expected), new TreeSet<>(jdbc.queryForList(
                 "SELECT table_name FROM information_schema.tables WHERE table_schema=DATABASE()", String.class)));
-        for (String table : List.of("users", "trips", "checkins", "photos", "user_achievements", "payments", "payment_events", "share_links",
-                "video_projects", "video_project_photos", "memberships", "user_music", "render_usage_daily", "cost_alerts", "video_output_deletions"))
+        assertEquals(1L,jdbc.queryForObject("SELECT COUNT(*) FROM users WHERE role='ADMIN' AND email='sunqingchuan1105@gmail.com'",Long.class));
+        assertEquals(0L,jdbc.queryForObject("SELECT COUNT(*) FROM users WHERE role='USER'",Long.class));
+        for (String table : List.of("trips", "checkins", "photos", "user_achievements", "payments", "payment_events", "share_links",
+                "video_projects", "video_project_photos", "memberships", "user_music", "render_usage_daily", "cost_alerts", "video_output_deletions",
+                "admin_user_invitations", "admin_maintenance_jobs"))
             assertEquals(0L, jdbc.queryForObject("SELECT COUNT(*) FROM " + table, Long.class), table + " must not contain demonstration records");
+        assertEquals(1L,jdbc.queryForObject("SELECT COUNT(*) FROM admin_registration_defaults WHERE id=1 AND trip_limit=20 AND trip_retention_months=1",Long.class));
     }
 
     @Test void productCatalogAndPermanentRenderLockAreSeeded() {

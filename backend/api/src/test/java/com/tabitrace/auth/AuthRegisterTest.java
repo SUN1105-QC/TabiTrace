@@ -47,6 +47,22 @@ class AuthRegisterTest {
         assertEquals("旅 行者", captureInserted(req("a@example.test", "password1", "  旅   行者 ")).nickname);
         assertThrows(BusinessException.class, () -> captureInserted(req("b@example.test", "password1", "字".repeat(31))));
     }
+    @Test void administratorDefaultsApplyOnlyAfterTheEmailHasBeenVerified(){
+        var defaults=mock(com.tabitrace.admin.RegistrationDefaultsService.class);
+        org.springframework.test.util.ReflectionTestUtils.setField(service,"registrationDefaults",defaults);
+        doAnswer(i->{((UserEntity)i.getArgument(0)).tripLimit=33;return null;}).when(defaults).apply(any());
+        assertEquals(33,captureInserted(req("invited@example.test","password1","受邀者")).tripLimit);
+        InOrder order=inOrder(verifications,defaults,users);
+        order.verify(verifications).consume("token-1","invited@example.test",VerificationPurpose.REGISTER);
+        order.verify(defaults).apply(any());order.verify(users).insert(any());order.verify(defaults).registered("invited@example.test");
+    }
+    @Test void anInvitationNeverReplacesEmailVerification(){
+        var defaults=mock(com.tabitrace.admin.RegistrationDefaultsService.class);
+        org.springframework.test.util.ReflectionTestUtils.setField(service,"registrationDefaults",defaults);
+        doThrow(new BusinessException("EMAIL_TOKEN_INVALID","invalid")).when(verifications).consume(any(),any(),any());
+        assertThrows(BusinessException.class,()->service.register(req("invited@example.test","password1","受邀者")));
+        verifyNoInteractions(defaults);verify(users,never()).insert(any());
+    }
 
     @Test
     void blankNicknameFallsBackToEmailPrefixCappedAt30() {

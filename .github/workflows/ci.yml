@@ -31,6 +31,10 @@ jobs:
       SCHEMA_TEST_DB_URL: jdbc:mysql://127.0.0.1:3306/tabitrace_schema_test?sslMode=DISABLED&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SCHEMA_TEST_DB_USER: tabitrace_test
       SCHEMA_TEST_DB_PASSWORD: ci_payment_only
+      # 管理集成套件将全部 SQL 重写到随机前缀表，结束后清理，不触碰空库迁移套件的正式表。
+      ADMIN_TEST_DB_URL: jdbc:mysql://127.0.0.1:3306/tabitrace_schema_test?sslMode=DISABLED&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      ADMIN_TEST_DB_USER: tabitrace_test
+      ADMIN_TEST_DB_PASSWORD: ci_payment_only
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4

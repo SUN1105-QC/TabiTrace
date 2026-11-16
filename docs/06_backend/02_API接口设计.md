@@ -1,5 +1,9 @@
 # API 接口设计
 
+2026-11-15：管理端补充用户状态筛选、10 / 25 / 50 分页、用户详情及留言总数分页。权限保存携带 `expectedUpdatedAt`，在事务行锁内检查并发冲突并返回最新资料；详见 [管理员与旅程保留策略](../07_security/04_管理员与旅程保留策略.md)。
+
+2026-11-14：新增 `/admin/overview`、`/admin/users`、`/admin/users/{id}`、`/admin/messages`、`/admin/messages/{id}/reply`、`/support/messages` 和 `/trips/{id}/export`；接口、鉴权与请求字段见 [管理员与旅程保留策略](../07_security/04_管理员与旅程保留策略.md)。用户响应增加 role / userLevel / tripLimit / tripRetentionMonths / canShare / canVideo / customMusicAccess；旅程响应增加 expiresAt。
+
 2026-11-02 从全部 `@RestController` 整理（共 106 个接口，另加 Spring 的 `/actuator/health`；已用脚本逐条比对，无遗漏）。项目**没有 OpenAPI 文件**，本表就是接口清单；请求和响应字段以后端 `dto/XxxDtos.java` 和前端 `services/tabitrace-api.ts` 为准（两边同名）。
 
 ## 1. 约定

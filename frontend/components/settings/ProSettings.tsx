@@ -46,7 +46,7 @@ export function ProSettings({ overview }: { overview: AccountOverview }) {
         <span className="st-plan-badge">{pro ? <><Crown size={13} /> TRIP PRO</> : 'FREE'}</span>
         <p>
           {overview.lifetimePro ? t('settings.pro.lifetimeOwned') : pro ? t('settings.pro.hasPro', { count: overview.proTrips }) : t('settings.pro.allFree')}
-          {!overview.lifetimePro && <span>{t('settings.pro.activeFree', { active: overview.activeFreeTrips, limit: overview.freeTripLimit })}</span>}
+          <span>账号旅程上限 {overview.freeTripLimit} 条 · <Link href="/support">联系管理员升级配额与保留时间</Link></span>
         </p>
       </div>
       {!overview.lifetimePro && (

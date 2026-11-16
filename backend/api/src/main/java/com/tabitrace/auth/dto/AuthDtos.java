@@ -31,7 +31,9 @@ public final class AuthDtos {
                            boolean emailNotifications,boolean notifyTripReminder,boolean notifyStory,boolean notifyAchievement,boolean notifyShare,
                            LocalDateTime createdAt,
                            /** 买断终身 Pro：账号下所有旅行都是 PRO */
-                           boolean lifetimePro,LocalDateTime lifetimeProAt) {}
+                           boolean lifetimePro,LocalDateTime lifetimeProAt,
+                           String role,String userLevel,int tripLimit,int tripRetentionMonths,
+                           boolean canShare,boolean canVideo,String customMusicAccess) {}
     /** refreshToken 只在服务端内部传递，写入 Cookie 后从响应 JSON 中去掉（non_null 序列化） */
     public record TokenResponse(String accessToken,String refreshToken,long expiresInSeconds,UserView user) {}
 }

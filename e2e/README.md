@@ -1,5 +1,11 @@
 # 旅迹 E2E 测试
 
+后台再次复查：`node e2e/tools/check-admin-review.mjs`。20 项检查折叠 / 矮屏导航、独立概览、查询分页隔离、保存后重读失败、6500ms 慢请求轮询、手机首屏和抽屉；业务请求全部在浏览器内隔离。支持 `ADMIN_TEST_WEB`、`ADMIN_TEST_OUTPUT`，默认输出到 `backend/.tabitrace/admin-review/browser/`。
+
+后台真实功能回归：`node e2e/tools/check-admin-modules.mjs`，使用浏览器内隔离请求，覆盖邀请发送 / 失败、撤销、账号删除冷静期 / 撤销、批量删除部分成功与冲突重试、旅程操作、媒体、默认设置、审计分页、维护入队 / 轮询及手机布局。`ADMIN_TEST_WEB` 指定开发或正式预览地址，`ADMIN_TEST_OUTPUT` 指定证据目录；默认输出 `backend/.tabitrace/admin-full-features/browser/`。不会发真实邮件、创建真实账号或删除业务资源。
+
+管理员与用户留言验收：`node e2e/tools/check-admin-support.mjs`，`ADMIN_TEST_WEB` 可指定前端地址。浏览器拦截所有 API 并使用测试数据，不读写真实账号。覆盖 19 项：后台编辑配额 / 保留时间、留言与回复、角色跳转、到期备份提醒、360 / 768 / 1440 布局和提醒条间距；截图与报告位于 `backend/.tabitrace/admin-support-qa/`。
+
 对真实运行的 web（Next.js）+ API（Spring Boot）+ MySQL 做端到端验证。只依赖 Node 20+ 和本机的 Chrome / Edge（通过 DevTools Protocol 驱动，不需要安装 Playwright）。
 
 ## 运行
@@ -61,6 +67,10 @@ DELETE FROM users WHERE email LIKE 'tt-e2e-%@example.test' OR email LIKE 'tt-lan
 推荐探索 V2 只读验收：在本地前后端启动后运行 node e2e/tools/check-explore-directory.mjs。覆盖六种屏宽、真实目录筛选、错误/权限/弱网/空目录、120 城市与封面回退；测试数据只注入浏览器，不写入业务库。截图与日志位于 backend/.tabitrace/。
 
 设置标签导航回归：node e2e/tools/check-settings-navigation.mjs；PROFILE_TEST_WEB 可指定线上地址。通过浏览器内虚拟账户验证36项点击/草稿/刷新/返回行为，不操作真实用户数据。
+
+用户管理重构回归：`node e2e/tools/check-admin-users.mjs`；`ADMIN_TEST_WEB` 可指定本地开发或生产构建预览地址。55 项覆盖真实接口契约、搜索 / 状态 / 分页、保存与冲突、403 / 422 / 500 / 离线、草稿返回保护、缩短保留期与停用确认、留言回复及 320 / 375 / 768 / 1024 / 1440px 布局。所有账号与写入均隔离在测试浏览器，输出在 `backend/.tabitrace/admin-users-redesign/browser/`。原 `check-admin-support.mjs` 继续覆盖管理员登录及普通用户留言、配额、到期与备份入口（19 项）。
+
+原图对照：`node e2e/tools/check-admin-image-alignment.mjs`，使用 1162×1354、13 个浏览器隔离用户进行 21 项检查。覆盖全侧栏分组、4+3 铺满、37px 紧凑行、三列权限面板、选择 / 新增引导 / 更多菜单 / 批量部分成功与显式重载重试。`ADMIN_TEST_WEB` / `ADMIN_TEST_OUTPUT` 可指定生产预览和输出目录，默认产物在 `backend/.tabitrace/admin-image-alignment/`。不会创建真实账号或调用真实业务写接口。
 
 打卡记录导出回归：`node e2e/tools/check-checkin-export.mjs`；`CHECKIN_EXPORT_WEB` 可指定测试前端（默认 `http://127.0.0.1:3000`），`CHECKIN_EXPORT_OUTPUT` 可指定结果目录。只需启动前端，账户及 API 响应均注入测试浏览器，不读取或写入真实用户数据。每种地图模式覆盖 37 项：四种文件格式、地图页与记录顺序、日期与坐标回退、可取消地图、无坐标状态、45 条完整记录、长笔记跨页、照片失败提示、归档及空旅行、桌面和手机对话框。默认禁用 WebGL 检查明确的示意图回退；设置 `CHECKIN_EXPORT_WEBGL=1` 使用软件 WebGL 检查真实底图导出（前端需配置可访问的地图服务）。样例、截图和报告默认保存到 `backend/.tabitrace/checkin-export-qa/`，PDF 样例使用 Poppler 渲染后检查地图署名、分页与中文。
 

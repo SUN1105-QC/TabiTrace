@@ -43,9 +43,9 @@ export default function NewTripPage() {
 
   // 默认从今天出发、三天行程（可改），日期在客户端生成，避免服务端与浏览器日期不一致
   useEffect(() => { const s = localToday(); setStartDate(s); setEndDate(addDays(s, 2)) }, [])
-  // 免费版同时只能保留 1 段进行中的 FREE 旅行（后端同样会拦截），提前告诉用户
+  // 所有未到期旅程共用账号配额，归档仍占名额。
   useEffect(() => {
-    userApi.overview().then(o => { if (o.activeFreeTrips >= o.freeTripLimit) setLimit({ active: o.activeFreeTrips, max: o.freeTripLimit }) }).catch(() => {})
+    Promise.all([userApi.me(),tripApi.list()]).then(([u,rows]) => { const max=u.tripLimit??20;if(rows.length>=max)setLimit({active:rows.length,max}) }).catch(() => {})
     return () => window.clearTimeout(goTimer.current)
   }, [])
 
@@ -112,8 +112,8 @@ export default function NewTripPage() {
           <div className="cj-limit" role="status">
             <TriangleAlert size={17} aria-hidden="true" />
             <p>
-              免费版同时只能保留 {limit.max} 段进行中的旅行，你已经有 {limit.active} 段。
-              <span>把已有旅行升级为 Trip Pro，或在旅行详情里将它归档后，就可以创建新的旅行。</span>
+              账号最多保留 {limit.max} 条旅程，你已经有 {limit.active} 条。
+              <span>请导出并删除旧旅程，或联系管理员提高配额。归档和 Trip Pro 不增加账号名额。</span>
             </p>
             <Link href="/trips">管理我的旅行</Link>
           </div>

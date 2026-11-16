@@ -23,8 +23,9 @@ import { useQuickCheckIn } from '@/components/checkin/QuickCheckInProvider'
 import { usePreferences } from '@/components/common/PreferencesProvider'
 import type { MessageKey } from '@/i18n'
 import { ACTIVE_TRIP_KEY, ACTIVE_TRIP_CHANGED } from '@/lib/active-trip'
+import { TripRetentionNotice } from '@/components/trip/TripRetentionNotice'
 
-const APP_PREFIXES = ['/trips', '/explore', '/pricing', '/profile', '/memories']
+const APP_PREFIXES = ['/trips', '/explore', '/pricing', '/profile', '/memories', '/support']
 /** 访客也能看的页面：登录后用工作区外壳，未登录用公开导航（不显示通知、头像、打卡和「我的」入口） */
 const PUBLIC_APP_PREFIXES = ['/explore', '/pricing']
 
@@ -68,6 +69,7 @@ export function SiteHeader() {
     try {
       const [me, rows] = await Promise.all([userApi.me().catch(() => null), tripApi.list().catch(() => [] as TripView[])])
       setUser(me); setTrips(rows)
+      if(me?.role==='ADMIN'){router.replace('/admin');return}
       const stored = Number(localStorage.getItem(ACTIVE_TRIP_KEY) || 0)
       const trip = rows.find(t => t.id === stored) || rows.find(t => t.status !== 'ARCHIVED') || rows[0] || null
       if (!trip) { setNotifyInput(null); return }
@@ -78,7 +80,7 @@ export function SiteHeader() {
       ])
       setNotifyInput({ trip, summary, videos, shares, prefs: me })
     } catch { /* 外壳数据失败不阻塞页面本身 */ }
-  }, [])
+  }, [router])
 
   useEffect(() => {
     const changed = () => { setRememberedTrip(Number(localStorage.getItem(ACTIVE_TRIP_KEY) || 0)); void load() }
@@ -113,7 +115,7 @@ export function SiteHeader() {
   }, [])
 
   useEffect(() => {
-    const isProtected = pathname.startsWith('/trips') || pathname.startsWith('/profile') || pathname.startsWith('/memories')
+    const isProtected = pathname.startsWith('/trips') || pathname.startsWith('/profile') || pathname.startsWith('/memories') || pathname.startsWith('/support')
     // 带上查询参数，登录后回到原来的筛选 / 标签页
     if (isProtected && mounted && !hasSession()) router.replace(`/login?next=${encodeURIComponent(pathname + window.location.search)}`)
   }, [pathname, router, mounted])
@@ -161,7 +163,7 @@ export function SiteHeader() {
       <AppSidebar activeTripId={activeTripId} badges={badges} open={drawer} onClose={() => setDrawer(false)} />
       <AppHeader
         showTitle={pathname !== '/'}
-        title={t(titleKey(pathname))}
+        title={pathname.startsWith('/support')?'联系管理员':t(titleKey(pathname))}
         user={user}
         notifications={notifications}
         activeTripId={activeTripId}
@@ -173,6 +175,7 @@ export function SiteHeader() {
       <MobileBottomNav activeTripId={activeTripId} readOnly={trips.find(trip => trip.id === activeTripId)?.status === 'ARCHIVED'} />
       {searchOpen && <GlobalSearch activeTripId={activeTripId} onClose={() => setSearchOpen(false)} />}
       <div className="workspace-spacer" />
+      <TripRetentionNotice user={user} trips={trips}/>
     </>
   )
 }

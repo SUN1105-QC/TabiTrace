@@ -10,7 +10,7 @@ export function PricingCardTripPro({ plan, cta }: { plan: TripProPlan; cta: Reac
       <p className="pr-plan-tag" id="pr-plan-pro">TRIP PRO</p>
       <p className="pr-plan-price">{planPrice(plan)}<small>{oneTime ? ' / 每段旅行 · 一次性' : ''}</small></p>
       <dl className="pr-plan-terms">
-        <div><dt>生效范围</dt><dd>只对你选择升级的这一段旅行{oneTime ? '，永久有效' : ''}</dd></div>
+        <div><dt>生效范围</dt><dd>只对你选择升级的这一段旅行{oneTime ? '，无需续费' : ''}；保存期限按账号权限</dd></div>
         {oneTime && <div><dt>续费</dt><dd>不是订阅，不会自动续费</dd></div>}
       </dl>
       <ul>

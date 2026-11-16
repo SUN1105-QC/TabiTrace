@@ -43,7 +43,7 @@ beforeEach(() => {
     const auth = new Headers(init.headers).get('Authorization')
     calls.push({ url, auth })
     const r = replies(url, auth)
-    return { ok: r.status >= 200 && r.status < 300, status: r.status, json: async () => r.body } as Response
+    return { ok: r.status >= 200 && r.status < 300, status: r.status, json: async () => r.body, blob: async () => r.body } as Response
   }))
 })
 afterEach(() => { vi.unstubAllGlobals() })
@@ -79,6 +79,22 @@ describe('访问令牌只保存在内存', () => {
 })
 
 describe('刷新流程', () => {
+  it('备份下载遇到过期令牌时刷新后仍返回二进制文件', async () => {
+    const client = await loadApi()
+    client.saveTokens('old')
+    const zip = new Blob(['zip-test'], { type: 'application/zip' })
+    replies = (url, auth) => url.endsWith('/auth/refresh') ? ok({ accessToken: 'fresh' }) : auth === 'Bearer fresh' ? json(200, zip) : json(401, { success: false })
+    expect(await client.downloadApi('/trips/1/export')).toBe(zip)
+    expect(calls.filter(c => c.url.endsWith('/auth/refresh'))).toHaveLength(1)
+  })
+
+  it('备份下载保留服务端的归属和到期错误', async () => {
+    const client = await loadApi()
+    client.saveTokens('valid')
+    replies = () => json(410, { success: false, code: 'TRIP_EXPIRED', message: '旅程已到期' })
+    await expect(client.downloadApi('/trips/1/export')).rejects.toMatchObject({ status: 410, code: 'TRIP_EXPIRED' })
+  })
+
   it('刷新页面后（内存为空但有会话标记）先静默刷新，再带新令牌请求', async () => {
     storage.setItem('tabitrace-session', '1')
     replies = url => (url.endsWith('/auth/refresh') ? ok({ accessToken: 'fresh' }) : ok({ id: 1 }))
