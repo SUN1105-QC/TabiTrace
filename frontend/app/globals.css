@@ -129,6 +129,11 @@ main:has(> .workspace-spacer)>section,main:has(> .workspace-spacer)>div:not(.wor
 .popover-icon{display:grid;place-items:center;width:32px;height:32px;border-radius:11px;background:var(--brand-soft);color:var(--brand);flex:0 0 auto}
 .popover-icon.warn{background:#FDE9E4;color:#C8452C}
 .popover-empty{padding:26px 20px;text-align:center;font-size:12px;line-height:1.7;color:#9B8D82}
+/* 账号规则与业务通知共用滚动区，小屏上保留完整的备份和联系入口。 */
+.notification-popover{width:min(420px,90vw)}
+.notification-scroll{max-height:min(640px,calc(100dvh - 160px));overflow:auto;overscroll-behavior:contain}
+.notification-scroll .popover-list{max-height:none;overflow:visible}
+.notification-account{padding:12px 12px 0;line-height:1.7;overflow-wrap:anywhere}
 .command-group{padding:10px 12px 4px;font-size:10px;letter-spacing:.14em;color:#A4958A;font-weight:800}
 
 /* 首页栅格 */

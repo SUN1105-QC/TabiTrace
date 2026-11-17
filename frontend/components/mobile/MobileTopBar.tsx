@@ -11,14 +11,15 @@ import { useEffect, useState } from 'react'
 import { Search } from 'lucide-react'
 import { NotificationCenter, type NotificationItem } from '@/components/common/NotificationCenter'
 import { BrandLogo } from '@/components/common/Brand'
-import type { UserView } from '@/services/tabitrace-api'
+import type { TripView, UserView } from '@/services/tabitrace-api'
 import { avatarImage } from '@/utils/avatar'
 import { useT } from '@/components/common/PreferencesProvider'
 
 export function MobileTopBar({
-  user, notifications, onOpenSearch, compact = false
+  user, trips, notifications, onOpenSearch, compact = false
 }: {
   user: UserView | null
+  trips: TripView[]
   notifications: NotificationItem[]
   onOpenSearch: () => void
   compact?: boolean
@@ -47,7 +48,7 @@ export function MobileTopBar({
               <Search size={20} />
             </button>
           )}
-          <NotificationCenter items={notifications} />
+          <NotificationCenter items={notifications} user={user} trips={trips} />
           <Link href="/profile" className="m-avatar" aria-label={t('nav.settings')}>
             {avatar ? <img src={avatar.src} srcSet={avatar.srcSet} sizes="46px" alt="" /> : <span>{name.slice(0, 1)}</span>}
           </Link>

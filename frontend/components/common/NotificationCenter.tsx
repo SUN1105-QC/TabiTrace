@@ -5,13 +5,14 @@
  * 行程日期、免费额度），已读状态存在本地。不使用任何假数据。
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Bell, Clock3, Film, Share2, TriangleAlert } from 'lucide-react'
 import { relativeTime, toDate, localDateKey } from '@/lib/time'
 import { tr } from '@/i18n'
 import { useT } from '@/components/common/PreferencesProvider'
 import type { ShareLinkView, TripSummary, TripView, UserView, VideoProjectView } from '@/services/tabitrace-api'
+import { TripRetentionNotice } from '@/components/trip/TripRetentionNotice'
 
 export type NotificationItem = { id: string; icon: 'film' | 'share' | 'clock' | 'warn'; title: string; body: string; at: string | null; href: string }
 
@@ -61,19 +62,24 @@ export function buildNotifications(input: {
 const READ_KEY = 'tabitrace-notifications-read-at'
 const ICONS = { film: Film, share: Share2, clock: Clock3, warn: TriangleAlert }
 
-export function NotificationCenter({ items }: { items: NotificationItem[] }) {
+export function NotificationCenter({ items, user, trips }: { items: NotificationItem[]; user: UserView | null; trips: TripView[] }) {
   const router = useRouter()
   const t = useT()
   const [open, setOpen] = useState(false)
   const [readAt, setReadAt] = useState<number>(0)
   const ref = useRef<HTMLDivElement | null>(null)
+  const panelId = useId()
 
   useEffect(() => { setReadAt(Number(localStorage.getItem(READ_KEY) || 0)) }, [])
   useEffect(() => {
     if (!open) return
     const onDown = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { setOpen(false); ref.current?.querySelector('button')?.focus() }
+    }
     window.addEventListener('mousedown', onDown)
-    return () => window.removeEventListener('mousedown', onDown)
+    window.addEventListener('keydown', onKey)
+    return () => { window.removeEventListener('mousedown', onDown); window.removeEventListener('keydown', onKey) }
   }, [open])
 
   const unread = useMemo(() => items.filter(i => {
@@ -89,32 +95,35 @@ export function NotificationCenter({ items }: { items: NotificationItem[] }) {
 
   return (
     <div className="relative" ref={ref}>
-      <button className="icon-button" onClick={toggle} aria-label={unread ? t('notify.buttonUnread', { count: unread }) : t('notify.button')}>
+      <button type="button" className="icon-button" onClick={toggle} aria-expanded={open} aria-haspopup="dialog" aria-controls={open ? panelId : undefined} aria-label={unread ? t('notify.buttonUnread', { count: unread }) : t('notify.button')}>
         <Bell size={17} />
         {unread > 0 && <i className="icon-dot" />}
       </button>
       {open && (
-        <div className="popover" role="dialog" aria-label={t('notify.list')}>
+        <div id={panelId} className="popover notification-popover" role="dialog" aria-label={t('notify.list')}>
           <div className="popover-head"><b>{t('notify.title')}</b><span>{t('notify.count', { count: items.length })}</span></div>
-          {items.length === 0 ? (
-            <p className="popover-empty">{t('notify.empty')}</p>
-          ) : (
-            <div className="popover-list">
-              {items.map(item => {
-                const Icon = ICONS[item.icon]
-                return (
-                  <button key={item.id} onClick={() => { setOpen(false); router.push(item.href) }}>
-                    <span className={`popover-icon ${item.icon === 'warn' ? 'warn' : ''}`}><Icon size={15} /></span>
-                    <span className="min-w-0 flex-1">
-                      <b>{item.title}</b>
-                      <small>{item.body}</small>
-                    </span>
-                    <time>{relativeTime(item.at)}</time>
-                  </button>
-                )
-              })}
-            </div>
-          )}
+          <div className="notification-scroll">
+            <TripRetentionNotice user={user} trips={trips} onNavigate={() => setOpen(false)} />
+            {items.length === 0 ? (
+              <p className="popover-empty">{t('notify.empty')}</p>
+            ) : (
+              <div className="popover-list">
+                {items.map(item => {
+                  const Icon = ICONS[item.icon]
+                  return (
+                    <button key={item.id} onClick={() => { setOpen(false); router.push(item.href) }}>
+                      <span className={`popover-icon ${item.icon === 'warn' ? 'warn' : ''}`}><Icon size={15} /></span>
+                      <span className="min-w-0 flex-1">
+                        <b>{item.title}</b>
+                        <small>{item.body}</small>
+                      </span>
+                      <time>{relativeTime(item.at)}</time>
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

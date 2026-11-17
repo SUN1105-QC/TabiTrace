@@ -55,7 +55,8 @@ export function TripExportButton({ tripId }: { tripId: number }) {
   )
 }
 
-export function TripRetentionNotice({ user, trips }: { user: UserView | null; trips: TripView[] }) {
+/** 通知内的账号规则常驻展示，不计入业务通知的未读数量。 */
+export function TripRetentionNotice({ user, trips, onNavigate }: { user: UserView | null; trips: TripView[]; onNavigate: () => void }) {
   const pathname = usePathname()
   if (!user || user.role === 'ADMIN') return null
   const currentId = Number(pathname.match(/^\/trips\/(\d+)/)?.[1])
@@ -69,16 +70,17 @@ export function TripRetentionNotice({ user, trips }: { user: UserView | null; tr
     .sort((a, b) => (a.expiresAt ?? '').localeCompare(b.expiresAt ?? ''))
   const shown = current ? [current] : due.slice(0, 3)
   return (
-    <section aria-label="账号配额与保留期限" className="tt-retention-notice page-container is-wide">
+    <section aria-label="账号配额与保留期限" className="notification-account">
       <div
         className={`rounded-2xl border p-4 text-xs sm:text-sm ${due.length ? 'border-amber-300 bg-amber-50' : 'border-black/10 bg-white/80'}`}
       >
+        <h2 className="mb-2 font-semibold">账号用量与保留期限</h2>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p>
             <b>{user.userLevel ?? '基础用户'}</b> · 已使用 {trips.length} / {user.tripLimit ?? 20} 条旅程 ·
             从创建起保留 {user.tripRetentionMonths ?? 1} 个月
           </p>
-          <Link href="/support" className="inline-flex items-center gap-1 font-semibold text-warm underline">
+          <Link href="/support" onClick={onNavigate} className="inline-flex min-h-10 items-center gap-1 font-semibold text-warm underline">
             <MessageSquare size={14} /> 联系管理员 / 申请升级
           </Link>
         </div>
@@ -96,7 +98,7 @@ export function TripRetentionNotice({ user, trips }: { user: UserView | null; tr
             className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-black/10 pt-3"
           >
             <p className="min-w-0 break-words">
-              <Link href={`/trips/${t.id}/map`} className="font-semibold">
+              <Link href={`/trips/${t.id}/map`} onClick={onNavigate} className="font-semibold">
                 {t.title}
               </Link>
               <span className="ml-2 text-black/60">到期：{expiryLabel(t.expiresAt)}</span>
@@ -105,7 +107,7 @@ export function TripRetentionNotice({ user, trips }: { user: UserView | null; tr
           </div>
         ))}
         {due.length > 3 && !current && (
-          <Link href="/support" className="mt-3 inline-block underline">
+          <Link href="/support" onClick={onNavigate} className="mt-3 inline-block underline">
             查看所有旅程及备份
           </Link>
         )}

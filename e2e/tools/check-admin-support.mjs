@@ -40,7 +40,7 @@ window.fetch=async(input,init={})=>{
   else if(p==='/api/v1/admin/messages')data=localStorage.getItem('qa-reply')&&url.searchParams.get('status')==='OPEN'?[]:[{...message,...(localStorage.getItem('qa-reply')?{reply:localStorage.getItem('qa-reply'),status:'REPLIED',repliedAt:created}:{})}];
   else if(p.endsWith('/reply')){localStorage.setItem('qa-reply',body.reply);data={...message,reply:body.reply,status:'REPLIED'};}
   else if(p==='/api/v1/support/messages'){data=method==='POST'?{...message,id:900021,...body}:[{...message,reply:localStorage.getItem('qa-reply')||'已收到升级申请',status:'REPLIED',repliedAt:created}];}
-  else if(p==='/api/v1/trips')data=[trip];
+  else if(p==='/api/v1/trips')data=Array.from({length:Number(localStorage.getItem('qa-trip-count')||1)},(_,i)=>({...trip,id:trip.id+i}));
   else if(p.endsWith('/export'))return new Response(new Blob(['browser-fixture-zip']),{headers:{'Content-Type':'application/zip'}});
   else if(p.endsWith('/summary'))data={tripId:trip.id,places:1,photos:1,days:5,explorationRate:0,readiness:{}};
   else if(p==='/api/v1/membership')data={status:'ACTIVE',features:['CUSTOM_MUSIC']};
@@ -85,8 +85,13 @@ try {
   await browser.goto(`${web}/support`, 500)
   check('普通用户可查看升级后的配额与保留月数', await browser.waitFor("document.body.innerText.includes('1 / 50')&&document.body.innerText.includes('12 个月')", 30000))
   check('用户可看到管理员回复', await browser.js("document.body.innerText.includes('已为你升级配额和保留时间。')"))
-  check('显示到期提醒和原图备份入口', await browser.js("document.body.innerText.includes('将在 7 天内到期')&&document.body.innerText.includes('导出数据和原始照片')"))
-  check('到期提醒与正文间距正常', await browser.js("document.querySelector('main > section:last-child > header').getBoundingClientRect().top-document.querySelector('.tt-retention-notice').getBoundingClientRect().bottom<80"))
+  check('页面不再显示常驻账号横幅', await browser.js("!document.querySelector('.tt-retention-notice')&&!document.querySelector('[aria-label=\"账号配额与保留期限\"]')"))
+  const openNotifications = () => browser.js("[...document.querySelectorAll('button[aria-haspopup=\"dialog\"]')].find(b=>b.getBoundingClientRect().width>0).click()")
+  await openNotifications()
+  check('通知内显示真实账号用量和保留月数', await browser.waitFor("document.querySelector('[role=dialog] [aria-label=\"账号配额与保留期限\"]')?.innerText.includes('1 / 50 条旅程')&&document.querySelector('[role=dialog]').innerText.includes('12 个月')"))
+  check('通知内保留到期提醒、删除说明和原图备份入口', await browser.js("(()=>{const p=document.querySelector('[role=dialog]').innerText;return p.includes('将在 7 天内到期')&&p.includes('导出数据和原始照片')&&p.includes('归档不会延长保留期限')})()"))
+  await browser.js("document.querySelector('[role=dialog] a[href=\"/support\"]').click()")
+  check('联系管理员入口关闭通知并进入留言页面', await browser.waitFor("!document.querySelector('[role=dialog]')&&location.pathname==='/support'"))
   await browser.fill('textarea', '请帮我开通视频功能。')
   await browser.clickText('/发送留言/')
   check('普通用户留言提交成功', await browser.waitFor("window.__qaWrites.some(w=>w.p==='/api/v1/support/messages'&&w.body.content.includes('开通视频'))"))
@@ -95,8 +100,25 @@ try {
     await browser.goto(`${web}/support`, 300)
     await browser.waitFor("document.body.innerText.includes('旅程备份与到期时间')")
     check(`${width} 留言与备份页面无横向溢出`, await browser.js('document.documentElement.scrollWidth<=innerWidth+1'))
+    await openNotifications()
+    check(`${width} 通知面板与滚动区在视口内`, await browser.js("(()=>{const p=document.querySelector('[role=dialog]'),r=p.getBoundingClientRect(),s=p.querySelector('.notification-scroll');return r.left>=0&&r.right<=innerWidth+1&&r.bottom<=innerHeight&&s.scrollHeight>=s.clientHeight})()"))
+    await screenshot(`notifications-${width}`)
+    await browser.js("window.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape'}))")
+    check(`${width} Escape 可关闭通知`, await browser.waitFor("!document.querySelector('[role=dialog]')"))
     await screenshot(`support-${width}`)
   }
+  await browser.js("localStorage.setItem('qa-account',JSON.stringify({userLevel:'SVIP用户',tripLimit:100000,tripRetentionMonths:1200,notifyTripReminder:false,notifyStory:false,notifyShare:false}));localStorage.setItem('qa-trip-count','6');localStorage.removeItem('tabitrace-notifications-read-at')")
+  await browser.goto(`${web}/support`,300)
+  await browser.waitFor("document.body.innerText.includes('6 / 100000')")
+  await openNotifications()
+  check('关闭分类通知仍可查看 SVIP 真实配额与全部到期数量', await browser.waitFor("(()=>{const p=document.querySelector('[role=dialog]');return p?.innerText.includes('SVIP用户')&&p.innerText.includes('6 / 100000 条旅程')&&p.innerText.includes('1200 个月')&&p.innerText.includes('6 条旅程将在 7 天内到期')})()"))
+  check('账号规则不会产生业务通知或虚假未读红点', await browser.js("document.querySelector('[role=dialog] .popover-head span').innerText.includes('0')&&!document.querySelector('.icon-dot')"))
+  await screenshot('notifications-svip')
+  await browser.js("localStorage.setItem('qa-trip-count','0')")
+  await browser.goto(`${web}/support`,300)
+  await browser.waitFor("document.body.innerText.includes('0 / 100000')")
+  await openNotifications()
+  check('没有旅程或业务通知时仍能查看账号规则', await browser.waitFor("document.querySelector('[role=dialog]')?.innerText.includes('0 / 100000 条旅程')"))
   await browser.goto(`${web}/admin`, 300)
   check('普通用户访问后台自动返回旅程页', await browser.waitFor("location.pathname==='/trips'"))
   await browser.js("localStorage.removeItem('tabitrace-session');localStorage.setItem('qa-role','ADMIN')")

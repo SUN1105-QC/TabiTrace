@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { Camera, ChevronDown, LogOut, Menu, Search, Settings, UserRound } from 'lucide-react'
-import { authApi, type UserView } from '@/services/tabitrace-api'
+import { authApi, type TripView, type UserView } from '@/services/tabitrace-api'
 import { useQuickCheckIn } from '@/components/checkin/QuickCheckInProvider'
 import { NotificationCenter, type NotificationItem } from './NotificationCenter'
 import { greeting } from '@/lib/time'
@@ -12,10 +12,11 @@ import { avatarImage } from '@/utils/avatar'
 import { usePreferences } from '@/components/common/PreferencesProvider'
 
 export function AppHeader({
-  title, user, notifications, activeTripId, onOpenSearch, onOpenMenu, showTitle = true
+  title, user, trips, notifications, activeTripId, onOpenSearch, onOpenMenu, showTitle = true
 }: {
   title: string
   user: UserView | null
+  trips: TripView[]
   notifications: NotificationItem[]
   activeTripId: number | null
   onOpenSearch: () => void
@@ -61,7 +62,7 @@ export function AppHeader({
       </button>
 
       <div className="workspace-actions">
-        <NotificationCenter items={notifications} />
+        <NotificationCenter items={notifications} user={user} trips={trips} />
         <button className="warm-button quick-checkin" onClick={() => openQuickCheckIn(activeTripId ?? undefined)}>
           <Camera size={15} /> <span>{t('header.quickCheckin')}</span>
         </button>

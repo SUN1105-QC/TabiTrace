@@ -23,7 +23,6 @@ import { useQuickCheckIn } from '@/components/checkin/QuickCheckInProvider'
 import { usePreferences } from '@/components/common/PreferencesProvider'
 import type { MessageKey } from '@/i18n'
 import { ACTIVE_TRIP_KEY, ACTIVE_TRIP_CHANGED } from '@/lib/active-trip'
-import { TripRetentionNotice } from '@/components/trip/TripRetentionNotice'
 
 const APP_PREFIXES = ['/trips', '/explore', '/pricing', '/profile', '/memories', '/support']
 /** 访客也能看的页面：登录后用工作区外壳，未登录用公开导航（不显示通知、头像、打卡和「我的」入口） */
@@ -165,17 +164,17 @@ export function SiteHeader() {
         showTitle={pathname !== '/'}
         title={pathname.startsWith('/support')?'联系管理员':t(titleKey(pathname))}
         user={user}
+        trips={trips}
         notifications={notifications}
         activeTripId={activeTripId}
         onOpenSearch={() => setSearchOpen(true)}
         onOpenMenu={() => setDrawer(true)}
       />
       {/* 旅行详情及其子页面在手机上使用紧凑顶栏，把首屏留给旅行本身 */}
-      <MobileTopBar user={user} notifications={notifications} onOpenSearch={() => setSearchOpen(true)} compact={pathname === '/' || pathname === '/trips/new' || /^\/trips\/\d+(\/|$)/.test(pathname)} />
+      <MobileTopBar user={user} trips={trips} notifications={notifications} onOpenSearch={() => setSearchOpen(true)} compact={pathname === '/' || pathname === '/trips/new' || /^\/trips\/\d+(\/|$)/.test(pathname)} />
       <MobileBottomNav activeTripId={activeTripId} readOnly={trips.find(trip => trip.id === activeTripId)?.status === 'ARCHIVED'} />
       {searchOpen && <GlobalSearch activeTripId={activeTripId} onClose={() => setSearchOpen(false)} />}
       <div className="workspace-spacer" />
-      <TripRetentionNotice user={user} trips={trips}/>
     </>
   )
 }
