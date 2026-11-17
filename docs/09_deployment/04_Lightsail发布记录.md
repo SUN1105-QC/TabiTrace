@@ -1,5 +1,13 @@
 # 2026-10-26 · Lightsail 发布记录
 
+## 2026-11-17 · 账号配额与保留规则移入通知（仅 Web）
+
+- Web `notify-20261117-20cad4e3a0e4`，源提交 `20cad4e3a0e474a9ff2b4c6d0333514cfe261aed`。[GitHub CI](https://github.com/SUN1105-QC/TabiTrace/actions/runs/44084938429) 前后端任务均通过后切换。
+- `git archive` 包 SHA256 为 `bc3fc7a459438454bb3199233179aba397f990777c94a06321f39aff89b9bae4`，服务器校验一致。Web 镜像 `sha256:e90b4754e51f7b3d74dd1d9080b37705524d6287a93ff8bf09645a41460545cc`，健康、restart=0。
+- 仅 `docker compose up -d --no-deps --wait web`，API / Worker / MySQL 的容器 ID 与启动时间保持一致，无迁移、数据操作或环境配置变更。当前发布指针同步至新 Web 版本。
+- 133 项公网只读检查、线上前端 30 项通知 / 支持专项均通过，共 163 项；专项的业务 API 全部被浏览器夹具拦截，不向生产库写测试数据。Web / API 健康检查通过。
+- 回退保留 `admin-20261116-d64d1bc3a0d7` 源码及 Web 镜像，仅切换旧 Web；本轮构建 / 切换脚本与日志在服务器 `releases/notify-20261117-20cad4e3a0e4-{build,switch}.{sh,log}`。
+
 ## 2026-11-17 · 后台管理与账号保留策略上线（Web / API）
 
 日本时间 20:26 完成切换，当前版本 `admin-20261116-d64d1bc3a0d7`，源提交 `d64d1bc3a0d734fd3bcbed6c94bff1ec25c9b68d`。用户授权提交推送，[GitHub CI 第 23 次](https://github.com/SUN1105-QC/TabiTrace/actions/runs/43890161963) 成功后从提交归档构建，包 SHA256 `f1655aa02ce10057afe355ca9489422843963d64eb55ebfb29f1ceb793256cb8`。
