@@ -2,7 +2,9 @@
 
 当前目标为 `https://tabi.sunows.com`，服务器 `175.41.217.207`。本方案补充 Lightsail 独立 Compose 部署；原 Railway 配置保留供参考。
 
-2026-11-13最新版本：Web 为 `audit-20261113-121f36de`（提交 `121f36d`，全页面审查修复，只更新 Web）；API / Worker 仍为 speed 版本镜像。脚本 `releases/deploy-audit-build.sh` / `deploy-audit-switch.sh`。
+2026-11-17最新版本：Web / API 为 `admin-20261116-d64d1bc3a0d7`（提交 `d64d1bc`，CI 第 23 次成功），后台管理与账号保留策略上线，数据库 V26；Worker、MySQL 保留原实例。脚本为版本同名 `-build.sh` / `-switch.sh`，通用源文件见本目录 `build-admin-release.sh` / `switch-admin-release.sh`。[验收与回退](../../docs/08_testing/17_后台管理系统上线验收_2026-11-17.md)。
+
+2026-11-13版本：Web 为 `audit-20261113-121f36de`（提交 `121f36d`，全页面审查修复，只更新 Web）；API / Worker 仍为 speed 版本镜像。脚本 `releases/deploy-audit-build.sh` / `deploy-audit-switch.sh`。
 
 2026-11-13早前版本：Web 为 `fix-20261113-31cfd17a`（提交 `31cfd17`，九宫格手机页、成品图导出、iOS 输入框放大修复，只更新 Web）；API / Worker 仍为 speed 版本镜像。脚本 `releases/deploy-fix-build.sh` / `deploy-fix-switch.sh`。
 
