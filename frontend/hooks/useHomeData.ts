@@ -29,13 +29,14 @@ export type HomeData = {
   shares: ShareLinkView[]
   stats: { places: number; placesTotal: number; photos: number; trips: number }
   activities: Activity[]
+  loadIssues: string[]
   recommended: PlaceView[]
 }
 
 const EMPTY: HomeData = {
   user: null, trips: [], activeTrip: null, summaries: {}, activeSummary: null,
   places: [], checkins: [], itinerary: [], photos: [], videos: [], shares: [],
-  stats: { places: 0, placesTotal: 0, photos: 0, trips: 0 }, activities: [], recommended: []
+  stats: { places: 0, placesTotal: 0, photos: 0, trips: 0 }, activities: [], recommended: [], loadIssues: []
 }
 
 export function useHomeData(enabled: boolean) {
@@ -48,6 +49,15 @@ export function useHomeData(enabled: boolean) {
   const reload = useCallback(() => setReloadKey(k => k + 1), [])
 
   useEffect(() => {
+    if (!enabled) return
+    const visible = () => { if (document.visibilityState === 'visible') reload() }
+    const restored = (event: PageTransitionEvent) => { if (event.persisted) reload() }
+    document.addEventListener('visibilitychange', visible)
+    window.addEventListener('pageshow', restored)
+    return () => { document.removeEventListener('visibilitychange', visible); window.removeEventListener('pageshow', restored) }
+  }, [enabled, reload])
+
+  useEffect(() => {
     if (!enabled) { setLoading(false); return }
     let cancelled = false
     setLoading(true); setError('')
@@ -55,6 +65,8 @@ export function useHomeData(enabled: boolean) {
     void (async () => {
       try {
         const [user, trips] = await Promise.all([userApi.me(), tripApi.list()])
+        const loadIssues: string[] = []
+        const failed = (label: string) => { loadIssues.push(label); return [] }
         const stored = Number(localStorage.getItem('tabitrace-live-trip-id') || 0)
         const activeTrip = trips.find(t => t.id === stored)
           || trips.find(t => t.status !== 'ARCHIVED')
@@ -71,12 +83,12 @@ export function useHomeData(enabled: boolean) {
         let photos: PhotoView[] = [], videos: VideoProjectView[] = [], shares: ShareLinkView[] = []
         if (activeTrip) {
           ;[places, checkins, itinerary, photos, videos, shares] = await Promise.all([
-            tripApi.places(activeTrip.id).catch(() => []),
-            tripApi.checkins(activeTrip.id).catch(() => []),
-            tripApi.itinerary(activeTrip.id).catch(() => []),
-            tripApi.photos(activeTrip.id).catch(() => []),
-            tripApi.videos(activeTrip.id).catch(() => []),
-            tripApi.shares(activeTrip.id).catch(() => [])
+            tripApi.places(activeTrip.id).catch(() => failed('地点')),
+            tripApi.checkins(activeTrip.id).catch(() => failed('打卡')),
+            tripApi.itinerary(activeTrip.id).catch(() => failed('行程')),
+            tripApi.photos(activeTrip.id).catch(() => failed('照片')),
+            tripApi.videos(activeTrip.id).catch(() => failed('视频')),
+            tripApi.shares(activeTrip.id).catch(() => failed('分享'))
           ])
         }
 
@@ -112,12 +124,12 @@ export function useHomeData(enabled: boolean) {
               photos: totals.photos,
               trips: trips.length
             },
-            activities,
+            activities, loadIssues,
             recommended
           })
         }
-      } catch (e: any) {
-        if (!cancelled) setError(e?.message || '首页数据加载失败')
+      } catch (e: unknown) {
+        if (!cancelled) setError(e instanceof Error ? e.message : '首页数据加载失败')
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -201,5 +213,4 @@ function buildActivities(input: {
   return items
     .filter(i => i.at)
     .sort((a, b) => (toDate(b.at)?.getTime() || 0) - (toDate(a.at)?.getTime() || 0))
-    .slice(0, 8)
 }

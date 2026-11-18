@@ -146,7 +146,10 @@ export default function TravelStoryPage() {
   const focused = named.find(p => p.id === focusedId) ?? named[0] ?? null
   const running = projects.some(p => isRunning(p))
 
+  const previewSequence = useRef(0)
+  const loadSequence = useRef(0)
   const refreshPreview = useCallback(async (d?: VideoDraft) => {
+    const sequence = ++previewSequence.current
     const current = d ?? draftRef.current
     if (!current) return
     if (current.photoIds.length === 0) { setPreviewError('请先选择至少一张照片'); return }
@@ -154,16 +157,18 @@ export default function TravelStoryPage() {
     setPreviewError('')
     try {
       const sb = await videoApi.preview(tripId, current)
+      if (sequence !== previewSequence.current) return
       setStoryboard(sb)
       setPreviewKey(storyKey(current))
     } catch (e) {
-      setPreviewError(friendly(e))
+      if (sequence === previewSequence.current) setPreviewError(friendly(e))
     } finally {
-      setPreviewLoading(false)
+      if (sequence === previewSequence.current) setPreviewLoading(false)
     }
   }, [tripId])
 
   const load = useCallback(async () => {
+    const sequence = ++loadSequence.current
     setLoading(true)
     setLoadError('')
     try {
@@ -173,6 +178,7 @@ export default function TravelStoryPage() {
         planApi.tripPro().catch(() => null)
       ])
       const tierMap: Tiers = tripPro ? { FREE: tripPro.storyFree, PRO: tripPro.storyPro } : PLAN_LIMITS
+      if (sequence !== loadSequence.current) return
       setTrip(t); setPhotos(ps); setCheckins(cs); setProjects(vs); setTemplates(tpls); setTiers(tierMap)
       setFocusedId(vs[0]?.id ?? null)
       const p: Plan = t.planType === 'PRO' ? 'PRO' : 'FREE'
@@ -192,21 +198,27 @@ export default function TravelStoryPage() {
       setDraft(initial)
       if (initial.photoIds.length) void refreshPreview(initial)
     } catch (e) {
-      setLoadError(friendly(e))
+      if (sequence === loadSequence.current) setLoadError(friendly(e))
     } finally {
-      setLoading(false)
+      if (sequence === loadSequence.current) setLoading(false)
     }
   }, [tripId, refreshPreview])
 
-  useEffect(() => { void load() }, [load])
+  useEffect(() => {
+    ++previewSequence.current
+    setStoryboard(null); setDraft(null); setPreviewKey(''); setPreviewLoading(false)
+    void load()
+    return () => { ++loadSequence.current; ++previewSequence.current }
+  }, [load])
 
   // 有任务在排队 / 生成时轮询后端真实状态
   useEffect(() => {
     if (!running) return
+    let cancelled = false
     const id = setInterval(() => {
-      videoApi.list(tripId).then(setProjects).catch(() => { /* 下一次轮询重试 */ })
+      videoApi.list(tripId).then(rows => { if (!cancelled) setProjects(rows) }).catch(() => { /* 下一次轮询重试 */ })
     }, 1500)
-    return () => clearInterval(id)
+    return () => { cancelled = true; clearInterval(id) }
   }, [running, tripId])
 
   useEffect(() => {

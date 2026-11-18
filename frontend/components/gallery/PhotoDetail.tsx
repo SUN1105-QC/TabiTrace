@@ -7,11 +7,12 @@
  */
 
 import Link from 'next/link'
-import { useEffect, useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight, Download, Film, Image as ImageIcon, Loader2, Share2, Star, Trash2, X } from 'lucide-react'
 import type { CheckinView } from '@/services/tabitrace-api'
 import { TIME_SOURCE_LABEL, type GalleryItem } from '@/utils/gallery'
 import { photoMedium, photoSrcSet } from '@/utils/photo-variants'
+import { useModalFocus } from '@/hooks/useModalFocus'
 
 export function PhotoDetail({ tripId, item, position, total, checkins, isCover, readOnly, onClose, onPrev, onNext, onToggleFeatured, onCover, onDelete, onLink }: {
   tripId: number
@@ -34,12 +35,15 @@ export function PhotoDetail({ tripId, item, position, total, checkins, isCover, 
   const [loaded, setLoaded] = useState(false)
   const [busy, setBusy] = useState<string | null>(null)
   const [downloadError, setDownloadError] = useState('')
+  const [imageFailed, setImageFailed] = useState(false)
+  const panel = useRef<HTMLDivElement>(null)
+  useModalFocus(panel)
 
-  useEffect(() => { setLoaded(false); setDownloadError('') }, [photo.id])
+  useEffect(() => { setLoaded(false); setImageFailed(false); setDownloadError('') }, [photo.id])
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if ((e.target as HTMLElement)?.tagName === 'SELECT') return
       if (e.key === 'Escape') onClose()
+      else if (['SELECT', 'INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return
       else if (e.key === 'ArrowLeft') onPrev()
       else if (e.key === 'ArrowRight') onNext()
     }
@@ -70,10 +74,10 @@ export function PhotoDetail({ tripId, item, position, total, checkins, isCover, 
 
   return (
     <div className="modal-backdrop gl-detail-backdrop" onMouseDown={e => { if (e.target === e.currentTarget) onClose() }}>
-      <div className="modal-panel gl-detail" role="dialog" aria-modal="true" aria-labelledby={titleId}>
+      <div ref={panel} className="modal-panel gl-detail" role="dialog" aria-modal="true" aria-labelledby={titleId}>
         <div className="gl-detail-media">
           {!loaded && <div className="gl-detail-loading"><Loader2 size={22} className="gl-spin" /> 正在加载原图…</div>}
-          <img src={photoMedium(photo)} srcSet={photoSrcSet(photo)} sizes="(max-width: 767px) 100vw, 80vw" alt={checkin ? `${checkin.placeName} 的照片` : '旅行照片'} onLoad={() => setLoaded(true)} onError={() => setLoaded(true)} className={loaded ? '' : 'is-hidden'} />
+          {imageFailed ? <div className="gl-detail-loading" role="status"><ImageIcon size={24} />照片暂时无法显示，请稍后重试或返回相册。</div> : <img src={photoMedium(photo)} srcSet={photoSrcSet(photo)} sizes="(max-width: 767px) 100vw, 80vw" alt={checkin ? `${checkin.placeName} 的照片` : '旅行照片'} onLoad={() => setLoaded(true)} onError={() => { setLoaded(true); setImageFailed(true) }} className={loaded ? '' : 'is-hidden'} />}
           {total > 1 && <>
             <button type="button" className="gl-nav is-prev" onClick={onPrev} aria-label="上一张"><ChevronLeft size={20} /></button>
             <button type="button" className="gl-nav is-next" onClick={onNext} aria-label="下一张"><ChevronRight size={20} /></button>
@@ -86,7 +90,7 @@ export function PhotoDetail({ tripId, item, position, total, checkins, isCover, 
               <p className="gl-eyebrow">PHOTO {position} / {total}</p>
               <h2 id={titleId}>{checkin?.placeName ?? '旅行照片'}</h2>
             </div>
-            <button type="button" className="icon-button" onClick={onClose} aria-label="关闭"><X size={16} /></button>
+            <button type="button" data-modal-initial-focus className="icon-button" onClick={onClose} aria-label="关闭"><X size={16} /></button>
           </div>
 
           <dl className="gl-detail-facts">

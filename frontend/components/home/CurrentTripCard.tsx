@@ -64,7 +64,7 @@ export function CurrentTripCard({
           <div className="trip-facts">
             <span><MapPin size={13} /> {trip.destinationName}</span>
             <span>{totalDays}天{Math.max(totalDays - 1, 0)}晚</span>
-            <span>{summary?.places ?? 0} 个地点</span>
+            <span>{summary?.places ?? '—'} 个地点</span>
             <span><Users size={13} /> {trip.peopleCount} 人</span>
           </div>
 
@@ -77,7 +77,7 @@ export function CurrentTripCard({
           </div>
 
           <div className="trip-actions">
-            <Link href={`/trips/${trip.id}/map`} className="warm-button">继续记录 <ArrowRight size={14} /></Link>
+            <Link href={`/trips/${trip.id}/map`} className="warm-button">{trip.status === 'ARCHIVED' ? '回看旅行' : '继续记录'} <ArrowRight size={14} /></Link>
             <Link href={`/trips/${trip.id}/map`} className="hero-ghost-button"><MapIcon size={14} /> 查看旅行地图</Link>
           </div>
         </div>

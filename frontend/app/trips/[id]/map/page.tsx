@@ -51,6 +51,7 @@ export default function TripMapWorkspace() {
   const [destination, setDestination] = useState<{ center: [number, number]; official: { code: string; name: string } | null } | null>(null)
   const toastTimer = useRef<number | undefined>(undefined)
   const seenVersion = useRef(checkinVersion)
+  const loadSequence = useRef(0)
 
   const showToast = useCallback((msg: string) => {
     setToast(msg)
@@ -59,21 +60,28 @@ export default function TripMapWorkspace() {
   }, [])
 
   const load = useCallback(async (quiet = false) => {
+    const sequence = ++loadSequence.current
     if (!quiet) { setLoading(true); setLoadError('') }
     try {
       const [t, p, i, tl] = await Promise.all([tripApi.get(tripId), tripApi.places(tripId), tripApi.itinerary(tripId), tripApi.timeline(tripId)])
+      if (sequence !== loadSequence.current) return
       setTrip(t); setPlaces(p); setItinerary(i); setTimeline(tl); setLoadError('')
       const validDays = tripDays(t)
       setDay(d => d !== null && (d === 'ALL' || validDays.includes(d)) ? d : defaultDay(validDays, localDateKey(new Date())))
     } catch (e) {
+      if (sequence !== loadSequence.current) return
       const msg = e instanceof Error && e.message ? e.message : '请稍后再试'
       if (quiet) showToast(`刷新失败：${msg}`); else setLoadError(msg)
     } finally {
-      if (!quiet) setLoading(false)
+      if (sequence === loadSequence.current) setLoading(false)
     }
   }, [tripId, showToast])
 
-  useEffect(() => { localStorage.setItem('tabitrace-live-trip-id', String(tripId)); void load() }, [tripId, load])
+  useEffect(() => {
+    setAdding(false); setPicking(false); setPreview(null); setSelectedKey(null); setDay(null)
+    void load()
+    return () => { ++loadSequence.current }
+  }, [load])
   // 从快速打卡「查看时间轴」进入（#tm-timeline-title）：数据加载完、时间轴渲染出来后再滚过去
   useEffect(() => {
     if (loading || window.location.hash !== '#tm-timeline-title') return
@@ -100,12 +108,16 @@ export default function TripMapWorkspace() {
   // 目的地：地图的初始中心 + 是否有官方推荐探索（复用创建旅行的目的地库，只查一次）
   const destName = trip ? trip.city || trip.destinationName : ''
   useEffect(() => {
+    let cancelled = false
+    setDestination(null)
     if (!destName) return
     destinationApi.search(destName, 1).then(r => {
+      if (cancelled) return
       const d = r[0]
       if (!d || (d.name !== destName && d.nameEn.toLowerCase() !== destName.toLowerCase())) return
       setDestination({ center: [Number(d.longitude), Number(d.latitude)], official: d.official ? { code: d.official.code, name: d.official.name } : null })
     }).catch(() => {})
+    return () => { cancelled = true }
   }, [destName])
 
   const days = useMemo(() => (trip ? tripDays(trip) : []), [trip])

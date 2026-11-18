@@ -8,7 +8,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Menu, X } from 'lucide-react'
 import { Brand } from './Brand'
 import { AppSidebar } from './AppSidebar'
@@ -24,7 +24,7 @@ import { usePreferences } from '@/components/common/PreferencesProvider'
 import type { MessageKey } from '@/i18n'
 import { ACTIVE_TRIP_KEY, ACTIVE_TRIP_CHANGED } from '@/lib/active-trip'
 
-const APP_PREFIXES = ['/trips', '/explore', '/pricing', '/profile', '/memories', '/support']
+const APP_PREFIXES = ['/trips', '/explore', '/pricing', '/profile', '/memories', '/support', '/activities']
 /** 访客也能看的页面：登录后用工作区外壳，未登录用公开导航（不显示通知、头像、打卡和「我的」入口） */
 const PUBLIC_APP_PREFIXES = ['/explore', '/pricing']
 
@@ -41,6 +41,7 @@ export function SiteHeader() {
   const [user, setUser] = useState<UserView | null>(null)
   const [trips, setTrips] = useState<TripView[]>([])
   const [rememberedTrip, setRememberedTrip] = useState<number | null>(null)
+  const shellRequest = useRef(0)
   // 通知只保存原始数据，渲染时按当前语言与时区生成文案（切换语言后通知也跟着变）
   const [notifyInput, setNotifyInput] = useState<Parameters<typeof buildNotifications>[0] | null>(null)
   const { t, locale, timeZone } = usePreferences()
@@ -64,9 +65,12 @@ export function SiteHeader() {
 
   // 工作区外壳所需的轻量数据：当前用户 + 旅行列表 + 通知（通知基于当前旅行真实数据推导）
   const load = useCallback(async () => {
+    // 快速切换旅行时，旧的概览 / 通知响应不能回写到新的工作区。
+    const request = ++shellRequest.current
     if (!hasSession()) { setUser(null); setTrips([]); setNotifyInput(null); return }
     try {
       const [me, rows] = await Promise.all([userApi.me().catch(() => null), tripApi.list().catch(() => [] as TripView[])])
+      if (request !== shellRequest.current) return
       setUser(me); setTrips(rows)
       if(me?.role==='ADMIN'){router.replace('/admin');return}
       const stored = Number(localStorage.getItem(ACTIVE_TRIP_KEY) || 0)
@@ -77,6 +81,7 @@ export function SiteHeader() {
         tripApi.videos(trip.id).catch(() => []),
         tripApi.shares(trip.id).catch(() => [])
       ])
+      if (request !== shellRequest.current) return
       setNotifyInput({ trip, summary, videos, shares, prefs: me })
     } catch { /* 外壳数据失败不阻塞页面本身 */ }
   }, [router])
@@ -114,7 +119,7 @@ export function SiteHeader() {
   }, [])
 
   useEffect(() => {
-    const isProtected = pathname.startsWith('/trips') || pathname.startsWith('/profile') || pathname.startsWith('/memories') || pathname.startsWith('/support')
+    const isProtected = pathname.startsWith('/trips') || pathname.startsWith('/profile') || pathname.startsWith('/memories') || pathname.startsWith('/support') || pathname.startsWith('/activities')
     // 带上查询参数，登录后回到原来的筛选 / 标签页
     if (isProtected && mounted && !hasSession()) router.replace(`/login?next=${encodeURIComponent(pathname + window.location.search)}`)
   }, [pathname, router, mounted])
@@ -162,7 +167,7 @@ export function SiteHeader() {
       <AppSidebar activeTripId={activeTripId} badges={badges} open={drawer} onClose={() => setDrawer(false)} />
       <AppHeader
         showTitle={pathname !== '/'}
-        title={pathname.startsWith('/support')?'联系管理员':t(titleKey(pathname))}
+        title={pathname.startsWith('/support')?'联系管理员':pathname.startsWith('/activities')?'旅行活动':t(titleKey(pathname))}
         user={user}
         trips={trips}
         notifications={notifications}

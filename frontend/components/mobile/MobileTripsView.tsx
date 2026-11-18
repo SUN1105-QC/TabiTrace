@@ -78,8 +78,8 @@ export function MobileTripsView({
                       <span className="m-trip-tags">
                         <i className={t.status === 'ONGOING' ? 'live' : ''}>{STATUS_TEXT[t.status] || t.status}</i>
                         <i>{days} 天</i>
-                        <i>{s?.places ?? 0} 地点</i>
-                        <i>{s?.photos ?? 0} 照片</i>
+                        <i>{s?.places ?? '—'} 地点</i>
+                        <i>{s?.photos ?? '—'} 照片</i>
                       </span>
                     </span>
                     <ChevronRight size={17} className="m-trip-arrow" />

@@ -11,7 +11,7 @@ import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 export function ShareScaleFrame({ children }: { children: ReactNode }) {
   const outer = useRef<HTMLDivElement>(null)
   const inner = useRef<HTMLDivElement>(null)
-  const [box, setBox] = useState({ scale: 1, height: 0 })
+  const [box, setBox] = useState({ scale: 1, height: 0, tall: false })
 
   useLayoutEffect(() => {
     const o = outer.current
@@ -19,19 +19,21 @@ export function ShareScaleFrame({ children }: { children: ReactNode }) {
     if (!o || !i) return
     const update = () => {
       const scale = i.offsetWidth ? Math.min(1, o.clientWidth / i.offsetWidth) : 1
-      setBox({ scale, height: i.offsetHeight * scale })
+      const height = i.offsetHeight * scale
+      setBox({ scale, height, tall: height > window.innerHeight - 180 })
     }
     update()
     // 外框变宽窄（旋转屏幕）、卡片变高矮（图片加载、切换模式）都重新计算
     const observer = new ResizeObserver(update)
     observer.observe(o)
     observer.observe(i)
-    return () => observer.disconnect()
+    window.addEventListener('resize', update)
+    return () => { observer.disconnect(); window.removeEventListener('resize', update) }
   }, [])
 
   const scaled = box.scale < 1
   return (
-    <div ref={outer} className={`share-scale${scaled ? ' is-scaled' : ''}`} style={{ height: box.height || undefined }}>
+    <div ref={outer} className={`share-scale${scaled ? ' is-scaled' : ''}${box.tall ? ' is-tall' : ''}`} style={{ height: box.height || undefined }}>
       <div ref={inner} className="share-scale-inner" style={scaled ? { transform: `scale(${box.scale})` } : undefined}>
         {children}
       </div>

@@ -6,7 +6,7 @@
  * 选择模式下点整张卡片即勾选。
  */
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Check, Image as ImageIcon, MoreHorizontal, Star, Trash2, Maximize2 } from 'lucide-react'
 import type { GalleryItem } from '@/utils/gallery'
 import { photoSrcSet, photoThumb } from '@/utils/photo-variants'
@@ -32,6 +32,8 @@ export function PhotoCard({ item, index, selecting, selected, isCover, readOnly,
 }) {
   const { photo, when, checkin } = item
   const menu = useRef<HTMLDivElement | null>(null)
+  const [failedSource, setFailedSource] = useState<string | null>(null)
+  const thumbnail = photoThumb(photo)
   const place = checkin ? [checkin.placeName, checkin.area].filter(Boolean).join(' · ') : ''
   const label = `照片 ${index + 1}${place ? `，${place}` : ''}${when ? `，${when.date}` : ''}${photo.featured ? '，精选' : ''}`
 
@@ -46,7 +48,7 @@ export function PhotoCard({ item, index, selecting, selected, isCover, readOnly,
   return (
     <figure className={`gl-card${photo.featured ? ' is-featured' : ''}${selected ? ' is-selected' : ''}${selecting ? ' is-selecting' : ''}${menuOpen ? ' is-menu' : ''}`}>
       <button type="button" className="gl-card-hit" onClick={selecting ? onToggleSelect : onOpen} aria-label={selecting ? `${selected ? '取消选择' : '选择'}${label}` : `查看${label}`} aria-pressed={selecting ? selected : undefined}>
-        <img src={photoThumb(photo)} srcSet={photoSrcSet(photo)} sizes={GRID_SIZES} alt="" loading="lazy" decoding="async" />
+        {failedSource === thumbnail ? <span className="hw-photo-fallback"><ImageIcon size={24} />照片暂时无法显示</span> : <img src={thumbnail} srcSet={photoSrcSet(photo)} sizes={GRID_SIZES} alt="" loading="lazy" decoding="async" onError={() => setFailedSource(thumbnail)} />}
       </button>
 
       {photo.featured && !selecting && readOnly && <span className="gl-star-badge" aria-hidden="true"><Star size={11} /></span>}

@@ -1,13 +1,15 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowUpRight, CalendarDays, Camera, ChevronDown, ChevronRight, Clock, Film, Image as ImageIcon, LocateFixed, Map as MapIcon, MapPin, Navigation, Plus, Share2, Sparkles } from 'lucide-react'
+import { ArrowUpRight, CalendarDays, Camera, ChevronRight, Clock, Film, Image as ImageIcon, LocateFixed, Map as MapIcon, MapPin, Navigation, Plus, Share2, Sparkles } from 'lucide-react'
 import type { HomeData } from '@/hooks/useHomeData'
 import { useQuickCheckIn } from '@/components/checkin/QuickCheckInProvider'
 import { RecentActivities } from './RecentActivities'
 import { TripLandmark } from './TripLandmark'
+import { HomeTripSwitcher } from './HomeTripSwitcher'
+import { HomeArt } from './HomeArt'
+import { RecentPhotos } from './RecentPhotos'
 import { buildStops, getNextStop, navigationUrl } from '@/utils/travel-map'
-import { photoThumb } from '@/utils/photo-variants'
 import { rememberActiveTrip } from '@/lib/active-trip'
 import { localDateKey } from '@/lib/time'
 import { parseDay } from '@/utils/journey'
@@ -39,11 +41,10 @@ export function HomeWorkspace({ data, onSwitch }: { data: HomeData; onSwitch: ()
   const timeline = data.checkins.map(checkin => ({ date: checkin.checkinTime.slice(0, 10), items: [{ checkin, photos: [] }] }))
   const next = getNextStop(buildStops(data.itinerary, timeline, data.places), new Date())
   const href = (suffix: string) => trip ? `/trips/${trip.id}/${suffix}` : '/trips/new'
-  const photos = [...data.photos].reverse().slice(0, 6)
-  const name = data.user?.nickname?.trim() || '旅行中的你'
+  const name = data.user?.nickname?.trim() || '旅人'
 
   const today = localDateKey(new Date())
-  const phase = !trip ? null : readOnly ? 'archived' : today < trip.startDate ? 'upcoming' : today > trip.endDate ? 'ended' : 'ongoing'
+  const phase = !trip ? null : readOnly ? 'archived' : trip.status === 'COMPLETED' ? 'ended' : today < trip.startDate ? 'upcoming' : today > trip.endDate ? 'ended' : 'ongoing'
   const start = trip ? parseDay(trip.startDate) : null, end = trip ? parseDay(trip.endDate) : null
   const days = start !== null && end !== null ? Math.round((end - start) / 86400000) + 1 : null
   const country = countryName(trip?.countryCode)
@@ -54,9 +55,11 @@ export function HomeWorkspace({ data, onSwitch }: { data: HomeData; onSwitch: ()
   const stopDay = next ? parseDay(next.stop.date) : null
   const stopDate = stopDay !== null ? new Date(stopDay) : null
   const stopTime = next?.stop.plannedTime?.slice(0, 5)
+  const upcoming = data.trips.filter(row => row.id !== trip?.id && row.status !== 'ARCHIVED' && row.status !== 'COMPLETED' && row.startDate > today).sort((a, b) => a.startDate.localeCompare(b.startDate))[0]
 
   return <div className="hw-workspace">
     <header className="hw-heading">
+      <HomeArt scene="welcome" />
       <div>
         <p className="hw-eyebrow">YOUR TRAVEL SPACE<span>/</span>旅行工作台</p>
         <h1>你好，{name}。{headline}</h1>
@@ -64,19 +67,15 @@ export function HomeWorkspace({ data, onSwitch }: { data: HomeData; onSwitch: ()
       </div>
       <Link href="/trips/new" className="hw-secondary hw-create"><Plus size={16} />创建旅行</Link>
     </header>
+    {data.loadIssues.length > 0 && <div className="hw-load-issues" role="alert"><p>{data.loadIssues.join('、')}暂时读取失败，以下内容可能不完整。</p><button className="hw-secondary" onClick={onSwitch}>重试读取</button></div>}
     {trip ? <>
       <section className="hw-trip" aria-label="当前旅行">
         <TripLandmark trip={trip} />
+        {(trip.countryCode === 'JP' || /东京|日本|tokyo/i.test(`${trip.city} ${trip.destinationName}`)) && <HomeArt scene="japan" />}
         {/[A-Za-z]/.test(trip.city || '') && <span className="hw-script" aria-hidden="true">{trip.city}.</span>}
         <div className="hw-trip-copy">
           <span className="hw-badge"><Sparkles size={12} />{badge} · 当前旅行</span>
-          <label className="sr-only" htmlFor="hw-trip">切换旅行</label>
-          <div className="hw-trip-title">
-            <select id="hw-trip" value={trip.id} onChange={e => { rememberActiveTrip(Number(e.target.value)); onSwitch() }}>
-              {data.trips.map(row => <option key={row.id} value={row.id}>{row.title}{row.status === 'ARCHIVED' ? ' · 已归档' : ''}</option>)}
-            </select>
-            {data.trips.length > 1 && <ChevronDown size={20} aria-hidden="true" />}
-          </div>
+          <HomeTripSwitcher trip={trip} trips={data.trips} onSelect={id => { rememberActiveTrip(id); onSwitch() }} />
           <p className="hw-trip-meta">
             {place && <span><MapPin size={16} />{place}</span>}
             <span><CalendarDays size={16} />{dateRange(trip.startDate, trip.endDate)}</span>
@@ -101,9 +100,10 @@ export function HomeWorkspace({ data, onSwitch }: { data: HomeData; onSwitch: ()
       </nav>
       <div className="hw-columns">
         <div className="hw-main">
-          {!readOnly && <section className="hw-section hw-next">
+          <section className="hw-section hw-next">
+            <HomeArt scene="next" />
             <header><h2>{next?.overdue ? '待完成的计划' : '下一站'}<small>{next?.overdue ? '计划时间已过，可以补记' : '即将开启的旅程'}</small></h2><Link href={href('map')}>全部行程<ChevronRight size={14} /></Link></header>
-            {next ? <div className="hw-next-body">
+            {next && !readOnly ? <div className="hw-next-body">
               {stopDate && <div className="hw-date-card" aria-label={next.stop.date}>
                 <span>{MONTHS[stopDate.getUTCMonth()]} · {stopDate.getUTCFullYear()}</span>
                 <b>{stopDate.getUTCDate()}</b>
@@ -122,23 +122,14 @@ export function HomeWorkspace({ data, onSwitch }: { data: HomeData; onSwitch: ()
                   {stopDate && <span><Clock size={13} />{stopDate.getUTCMonth() + 1}月{stopDate.getUTCDate()}日{stopTime ? ` ${stopTime}` : ''}</span>}
                 </p>
               </div>
-            </div> : <div className="hw-next-empty"><p>还没有待完成的行程，随时记录也很好。</p><Link className="hw-secondary" href={href('map')}><Plus size={16} />安排行程</Link></div>}
-          </section>}
+            </div> : upcoming ? <div className="hw-next-empty"><h3>{upcoming.title}</h3><p>{upcoming.destinationName} · {dateRange(upcoming.startDate, upcoming.endDate)}</p><Link className="hw-secondary" href={`/trips/${upcoming.id}/map`}>查看下一段旅行<ChevronRight size={16} /></Link></div> : <div className="hw-next-empty"><p>{readOnly ? '这段旅程已归档，回看一路留下的记录吧。' : '还没有待完成的行程，随时记录也很好。'}</p><Link className="hw-secondary" href={href('map')}><Plus size={16} />{readOnly ? '查看行程' : '安排行程'}</Link></div>}
+          </section>
           <RecentActivities activities={data.activities} tripId={trip.id} />
         </div>
         <aside className="hw-side">
-          <section className="hw-section hw-photos"><header><h2>最近照片</h2><Link href={href('gallery')}>全部照片<ChevronRight size={14} /></Link></header>
-            {photos.length ? <>
-              <div className="hw-photo-grid">{photos.map(photo => <Link key={photo.id} href={href('gallery')} aria-label="打开旅行相册"><img src={photoThumb(photo)} alt="旅行照片" loading="lazy" /></Link>)}</div>
-              {!readOnly && <Link className="hw-secondary" href={href('gallery')}><Plus size={15} />整理与添加照片</Link>}
-            </> : <div className="hw-photo-empty">
-              <span className="hw-round"><ImageIcon size={22} /></span>
-              <b>旅途故事，等待第一张照片</b>
-              <p>上传照片，留住值得回忆的瞬间。</p>
-              {!readOnly && <Link className="hw-secondary" href={href('gallery')}><Plus size={15} />整理与添加照片</Link>}
-            </div>}
-          </section>
+          <RecentPhotos key={trip.id} photos={data.photos} tripId={trip.id} readOnly={!!readOnly} />
           <section className="hw-section hw-export-tip">
+            <HomeArt scene="memories" />
             <Sparkles className="hw-spark" size={22} aria-hidden="true" />
             <p className="hw-eyebrow">TRAVEL MEMORIES</p>
             <h2>把旅行带回家</h2>

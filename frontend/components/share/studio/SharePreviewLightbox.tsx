@@ -10,6 +10,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { Maximize2, Minimize2, X } from 'lucide-react'
+import { useModalFocus } from '@/hooks/useModalFocus'
 
 /** 高宽比超过这个值时，「适应屏幕」改为按宽度适应（否则长图会缩得看不清） */
 const TALL_RATIO = 2.2
@@ -19,21 +20,17 @@ export function SharePreviewLightbox({ title, onClose, children }: { title: stri
   const viewport = useRef<HTMLDivElement>(null)
   const content = useRef<HTMLDivElement>(null)
   const closeBtn = useRef<HTMLButtonElement>(null)
+  const panel = useRef<HTMLDivElement>(null)
+  useModalFocus(panel)
   const [actual, setActual] = useState(false)
   const [box, setBox] = useState({ scale: 0, w: 0, h: 0 })
 
   // 锁定背景滚动、Esc 关闭、焦点进出
   useEffect(() => {
-    const opener = document.activeElement as HTMLElement | null
-    const overflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    closeBtn.current?.focus()
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', onKey)
     return () => {
       window.removeEventListener('keydown', onKey)
-      document.body.style.overflow = overflow
-      opener?.focus?.()
     }
   }, [onClose])
 
@@ -61,13 +58,13 @@ export function SharePreviewLightbox({ title, onClose, children }: { title: stri
 
   if (typeof document === 'undefined') return null
   return createPortal(
-    <div className="ss-lightbox" role="dialog" aria-modal="true" aria-label={`查看大图：${title}`}>
+    <div ref={panel} className="ss-lightbox" role="dialog" aria-modal="true" aria-label={`查看大图：${title}`}>
       <div className="ss-lightbox-bar">
         <b>{title}</b>
         <button type="button" onClick={() => setActual(a => !a)} aria-pressed={actual}>
           {actual ? <Minimize2 size={16} aria-hidden="true" /> : <Maximize2 size={16} aria-hidden="true" />}{actual ? '适应屏幕' : '原始大小'}
         </button>
-        <button type="button" ref={closeBtn} onClick={onClose} aria-label="关闭大图"><X size={18} aria-hidden="true" /></button>
+        <button type="button" ref={closeBtn} data-modal-initial-focus onClick={onClose} aria-label="关闭大图"><X size={18} aria-hidden="true" /></button>
       </div>
       <div className="ss-lightbox-view" ref={viewport} onMouseDown={e => { if (e.target === e.currentTarget) onClose() }}>
         {/* 外层占位按缩放后的尺寸排版，滚动范围与看到的一致 */}

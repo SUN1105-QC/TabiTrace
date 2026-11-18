@@ -29,6 +29,7 @@ export function MobileTopBar({
   const avatar = avatarImage(user)
   // 顶栏吸顶：页面滚动后加上底边线与阴影，和下面的内容分开
   const [stuck, setStuck] = useState(false)
+  const [failedAvatar, setFailedAvatar] = useState<string | null>(null)
   useEffect(() => {
     const onScroll = () => setStuck(window.scrollY > 4)
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -50,7 +51,7 @@ export function MobileTopBar({
           )}
           <NotificationCenter items={notifications} user={user} trips={trips} />
           <Link href="/profile" className="m-avatar" aria-label={t('nav.settings')}>
-            {avatar ? <img src={avatar.src} srcSet={avatar.srcSet} sizes="46px" alt="" /> : <span>{name.slice(0, 1)}</span>}
+            {avatar && failedAvatar !== avatar.src ? <img src={avatar.src} srcSet={avatar.srcSet} sizes="46px" alt="" onError={() => setFailedAvatar(avatar.src)} /> : <span>{name.slice(0, 1)}</span>}
           </Link>
         </div>
       </div>

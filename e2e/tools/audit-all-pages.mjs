@@ -22,11 +22,15 @@ const pages = [
   ['share-long', '/trips/900001/share?mode=long', true], ['share-poster', '/trips/900001/share?mode=poster', true],
   ['share-records', '/trips/900001/share', true, "(()=>{const e=[...document.querySelectorAll('button')].find(x=>x.innerText.includes('保存旅行记录'));e&&e.click();return !!e})()"], ['share-link', '/trips/900001/share', true, "(()=>{const e=[...document.querySelectorAll('button')].find(x=>x.innerText.includes('发送访问链接'));e&&e.click();return !!e})()"],
   ['video', '/trips/900001/video', true], ['memories', '/memories', true], ['profile', '/profile', true],
-  ['pricing', '/pricing', true], ['explore', '/explore', true], ['tokyo', '/explore/tokyo', true]
+  ['pricing', '/pricing', true], ['explore', '/explore', true], ['tokyo', '/explore/tokyo', true],
+  ['activities', '/activities', true], ['support', '/support', true],
+  ...['preferences', 'privacy', 'notifications', 'security', 'pro'].map(tab => [`profile-${tab}`, `/profile?tab=${tab}`, true]),
+  ['not-found', '/page-audit-missing-route', false]
 ].filter(([name]) => !only || only.test(name))
 
 const fixture = session => {
   let src = layoutFixture({web, photoCount: 12, session})
+  src = src.replace('else window.__auditUnknown.push({p,method});', "else if(p==='/api/v1/support/messages')data=[];else window.__auditUnknown.push({p,method});")
   // 公开分享页：用同一份测试旅行
   src = src.replace('else window.__auditUnknown.push({p,method});', "else if(p.startsWith('/api/v1/share/'))data={trip,summary,timeline,featuredPhotos:photos,ownerNickname:'布局验收'};else window.__auditUnknown.push({p,method});")
   src = src.replace("['plans','official-cities','destinations','video-templates']", "['plans','official-cities','destinations']").replace('else window.__auditUnknown.push({p,method});', "else if(p==='/api/v1/video-templates')data=[{code:'CITY_WALK',name:'城市漫步',englishName:'City Walk',description:'节奏轻快的城市散步',suitableFor:'城市旅行',pace:'MEDIUM',transition:'fade',transitionSeconds:.5,plan:'FREE'},{code:'SLOW_LIFE',name:'慢生活',englishName:'Slow Life',description:'舒缓的风景与生活片段',suitableFor:'度假',pace:'SLOW',transition:'dissolve',transitionSeconds:.8,plan:'PRO'},{code:'NIGHT_CITY',name:'城市夜色',englishName:'Night City',description:'夜景与灯光',suitableFor:'夜游',pace:'FAST',transition:'slideleft',transitionSeconds:.4,plan:'PRO'}];else window.__auditUnknown.push({p,method});")
@@ -37,7 +41,7 @@ const fixture = session => {
 
 const METRICS = `(() => {
   const W = innerWidth, H = innerHeight, touch = W < 1100
-  const vis = e => { if (e.closest('details:not([open])') && !e.closest('summary')) return false; const r = e.getBoundingClientRect(), cs = getComputedStyle(e); return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none' && Number(cs.opacity) > 0.05 }
+  const vis = e => { if (e.closest('.sr-only') || e.closest('details:not([open])') && !e.closest('summary')) return false; const r = e.getBoundingClientRect(), cs = getComputedStyle(e); return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none' && Number(cs.opacity) > 0.05 }
   const hit = e => { const r = e.getBoundingClientRect(); let w = r.width, h = r.height; for (const p of ['::after', '::before']) { const c = getComputedStyle(e, p); if (c.content !== 'none' && c.position === 'absolute') { w = Math.max(w, r.width - parseFloat(c.left || 0) - parseFloat(c.right || 0)); h = Math.max(h, r.height - parseFloat(c.top || 0) - parseFloat(c.bottom || 0)) } } return [w, h] }
   const label = e => (e.tagName.toLowerCase() + (e.id ? '#' + e.id : '') + (typeof e.className === 'string' && e.className ? '.' + e.className.trim().split(/\\s+/).slice(0, 2).join('.') : '') + ' "' + (e.innerText || e.getAttribute('aria-label') || '').trim().replace(/\\s+/g, ' ').slice(0, 30) + '"')
   const scrollerAncestor = e => { for (let p = e.parentElement; p && p !== document.body; p = p.parentElement) { const cs = getComputedStyle(p); if (/(auto|scroll|hidden|clip)/.test(cs.overflowX)) return p } return null }
@@ -88,4 +92,6 @@ for (const [w, h] of sizes) {
   await b.close?.()
 }
 fs.writeFileSync(path.join(out, 'report.json'), JSON.stringify(report, null, 1))
-process.exit(0)
+const failures = report.filter(page => page.failed || page.docW > Number(page.size.split('x')[0]) + 2 || page.errors?.length || page.broken?.length || page.unknown?.length)
+console.log(`Page audit: ${report.length - failures.length}/${report.length} passed core checks; small text and target metrics require visual review.`)
+process.exitCode = failures.length ? 1 : 0

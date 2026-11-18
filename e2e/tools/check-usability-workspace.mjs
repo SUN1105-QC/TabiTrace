@@ -35,12 +35,12 @@ try{
   }
  }
  await load('/',390)
- const home=await b.js("({top:document.querySelector('.hw-trip').getBoundingClientRect().top,actions:[...document.querySelectorAll('.hw-shortcuts a')].map(e=>e.getAttribute('href')),text:document.querySelector('.hw-trip').innerText})")
- check('Current trip appears in first mobile screen',home.top<260,home)
+ const home=await b.js("({top:document.querySelector('.hw-trip').getBoundingClientRect().top,bottom:document.querySelector('.hw-trip').getBoundingClientRect().bottom,height:innerHeight,actions:[...document.querySelectorAll('.hw-shortcuts a')].map(e=>e.getAttribute('href')),text:document.querySelector('.hw-trip').innerText})")
+ check('Current trip appears in first mobile screen',home.top<home.height/2&&home.bottom<home.height-72,home)
  check('All home actions identify current trip',home.actions.length===4&&home.actions.every(h=>h.startsWith('/trips/900001/')),home.actions)
  await shot('home-390')
  await b.fill('#hw-trip','900002')
- check('Home selector changes context and protects archived trip',await b.waitFor("document.querySelector('.hw-trip').innerText.includes('已归档')&&[...document.querySelectorAll('.hw-shortcuts a')].every(a=>a.getAttribute('href').startsWith('/trips/900002/'))&&!document.querySelector('.hw-trip button')",10000))
+ check('Home selector changes context and protects archived trip',await b.waitFor("document.querySelector('.hw-trip').innerText.includes('已归档')&&[...document.querySelectorAll('.hw-shortcuts a')].every(a=>a.getAttribute('href').startsWith('/trips/900002/'))&&!document.querySelector('.hw-trip-actions button')",10000))
  await load('/',1440);await shot('home-1440')
  await b.fill('#hw-trip','900002')
  await b.waitFor("document.querySelector('.hw-trip').innerText.includes('已归档')",10000)

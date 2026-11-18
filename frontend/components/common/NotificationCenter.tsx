@@ -5,7 +5,7 @@
  * 行程日期、免费额度），已读状态存在本地。不使用任何假数据。
  */
 
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { useRouter } from 'next/navigation'
 import { Bell, Clock3, Film, Share2, TriangleAlert } from 'lucide-react'
 import { relativeTime, toDate, localDateKey } from '@/lib/time'
@@ -60,17 +60,29 @@ export function buildNotifications(input: {
 }
 
 const READ_KEY = 'tabitrace-notifications-read-at'
+const READ_CHANGED = 'tabitrace:notifications-read'
+function subscribeRead(callback: () => void) {
+  window.addEventListener('storage', callback)
+  window.addEventListener(READ_CHANGED, callback)
+  return () => { window.removeEventListener('storage', callback); window.removeEventListener(READ_CHANGED, callback) }
+}
+const serverReadAt = () => 0
 const ICONS = { film: Film, share: Share2, clock: Clock3, warn: TriangleAlert }
 
 export function NotificationCenter({ items, user, trips }: { items: NotificationItem[]; user: UserView | null; trips: TripView[] }) {
   const router = useRouter()
   const t = useT()
   const [open, setOpen] = useState(false)
-  const [readAt, setReadAt] = useState<number>(0)
+  // 已读状态按账号隔离，并在同页两套顶栏及其他标签页之间同步。
+  const readKey = `${READ_KEY}:${user?.id ?? 'guest'}`
+  const getReadAt = useCallback(() => {
+    try { const value = Number(localStorage.getItem(readKey) || 0); return Number.isFinite(value) ? value : 0 }
+    catch { return 0 }
+  }, [readKey])
+  const readAt = useSyncExternalStore(subscribeRead, getReadAt, serverReadAt)
   const ref = useRef<HTMLDivElement | null>(null)
   const panelId = useId()
 
-  useEffect(() => { setReadAt(Number(localStorage.getItem(READ_KEY) || 0)) }, [])
   useEffect(() => {
     if (!open) return
     const onDown = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
@@ -90,7 +102,10 @@ export function NotificationCenter({ items, user, trips }: { items: Notification
   function toggle() {
     const next = !open
     setOpen(next)
-    if (next) { const now = Date.now(); localStorage.setItem(READ_KEY, String(now)); setReadAt(now) }
+    if (next) {
+      try { localStorage.setItem(readKey, String(Date.now())) } catch { /* 存储不可用时仍可浏览通知 */ }
+      window.dispatchEvent(new Event(READ_CHANGED))
+    }
   }
 
   return (

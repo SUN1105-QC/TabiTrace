@@ -5,7 +5,7 @@
  * 加上可访问的 Switch 与确认对话框（复用站内 modal 样式）。
  */
 
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useT } from '@/components/common/PreferencesProvider'
 import { avatarImage, type AvatarSource } from '@/utils/avatar'
 
@@ -74,7 +74,8 @@ export function Switch({ id, checked, onChange, label, disabled, busy, described
 export function Avatar({ name, user, size = 56 }: { name: string; user?: AvatarSource | null; size?: number }) {
   const initial = Array.from(name.trim() || '旅')[0]
   const img = avatarImage(user)
-  return img
-    ? <img className="st-avatar" src={img.src} srcSet={img.srcSet} sizes={`${size}px`} alt="" width={size} height={size} style={{ width: size, height: size }} />
+  const [failedSource, setFailedSource] = useState<string | null>(null)
+  return img && failedSource !== img.src
+    ? <img className="st-avatar" src={img.src} srcSet={img.srcSet} sizes={`${size}px`} alt="" width={size} height={size} style={{ width: size, height: size }} onError={() => setFailedSource(img.src)} />
     : <span className="st-avatar is-initial" style={{ width: size, height: size, fontSize: Math.round(size * 0.4) }} aria-hidden="true">{initial}</span>
 }

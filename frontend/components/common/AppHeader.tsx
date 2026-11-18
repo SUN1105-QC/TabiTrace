@@ -26,6 +26,7 @@ export function AppHeader({
   const router = useRouter()
   const { openQuickCheckIn } = useQuickCheckIn()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [failedAvatar, setFailedAvatar] = useState<string | null>(null)
   const { t, locale, timeZone } = usePreferences()
   const [hello, setHello] = useState('')
   const menuRef = useRef<HTMLDivElement | null>(null)
@@ -68,8 +69,8 @@ export function AppHeader({
         </button>
         <div className="relative" ref={menuRef}>
           <button className="user-chip" onClick={() => setMenuOpen(v => !v)} aria-haspopup="menu" aria-expanded={menuOpen}>
-            {avatar
-              ? <img className="user-avatar" src={avatar.src} srcSet={avatar.srcSet} sizes="32px" alt="" />
+            {avatar && failedAvatar !== avatar.src
+              ? <img className="user-avatar" src={avatar.src} srcSet={avatar.srcSet} sizes="32px" alt="" onError={() => setFailedAvatar(avatar.src)} />
               : <span className="user-avatar">{name.slice(0, 1)}</span>}
             <span className="user-hello">{hello ? t('header.hello', { greeting: hello, name }) : name}</span>
             <ChevronDown size={14} />

@@ -202,7 +202,7 @@ export default function SupportPage() {
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
                   <TripExportButton tripId={t.id} />
-                  <Link href={`/trips/${t.id}/video`} className="text-xs font-semibold text-warm underline">
+                  <Link href={`/trips/${t.id}/video`} className="inline-flex min-h-11 items-center text-xs font-semibold text-warm underline">
                     下载视频
                   </Link>
                 </div>

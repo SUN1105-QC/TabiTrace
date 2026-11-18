@@ -11,6 +11,7 @@ import { CheckCircle2, CircleAlert, ImagePlus, Loader2, RotateCcw, Upload, X } f
 import { uploadTripPhoto, type CheckinView } from '@/services/tabitrace-api'
 import { offsetIso } from '@/lib/time'
 import { FREE_PHOTO_LIMIT, MAX_PHOTO_BYTES, readExifDate } from '@/utils/gallery'
+import { useModalFocus } from '@/hooks/useModalFocus'
 
 type Status = 'waiting' | 'uploading' | 'done' | 'failed'
 type QueueItem = { id: number; file: File; url: string; status: Status; error?: string }
@@ -29,6 +30,8 @@ export function UploadDialog({ tripId, checkins, freeUsed, onClose, onUploaded }
 }) {
   const titleId = useId()
   const input = useRef<HTMLInputElement | null>(null)
+  const panel = useRef<HTMLDivElement>(null)
+  useModalFocus(panel)
   const [queue, setQueue] = useState<QueueItem[]>([])
   const [checkinId, setCheckinId] = useState('')
   const [featured, setFeatured] = useState(false)
@@ -96,13 +99,13 @@ export function UploadDialog({ tripId, checkins, freeUsed, onClose, onUploaded }
 
   return (
     <div className="modal-backdrop gl-sheet-backdrop" onMouseDown={e => { if (e.target === e.currentTarget) close() }}>
-      <div className="modal-panel gl-upload" role="dialog" aria-modal="true" aria-labelledby={titleId}>
+      <div ref={panel} className="modal-panel gl-upload" role="dialog" aria-modal="true" aria-labelledby={titleId}>
         <div className="modal-head">
           <div>
             <p className="gl-eyebrow">ADD PHOTOS</p>
             <h2 id={titleId}>添加照片</h2>
           </div>
-          <button type="button" className="icon-button" onClick={close} disabled={running} aria-label="关闭"><X size={16} /></button>
+          <button type="button" data-modal-initial-focus className="icon-button" onClick={close} disabled={running} aria-label="关闭"><X size={16} /></button>
         </div>
 
         <div className="gl-upload-body">

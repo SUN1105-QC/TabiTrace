@@ -63,11 +63,15 @@ export default function SharePage() {
   const [plan, setPlan] = useState<TripProPlan | null>(null)
   const ref = useRef<HTMLDivElement | null>(null)
   const modeFromUrl = useRef(false)
+  const loadSequence = useRef(0)
 
   const reload = useCallback(async () => {
+    const sequence = ++loadSequence.current
+    setError('')
     try {
       // 行程只用于海报的「探索进度」（非官方城市时按计划地点算），读不到时不影响其余内容
       const [t, s, p, tl, l, it] = await Promise.all([tripApi.get(tripId), tripApi.summary(tripId), tripApi.photos(tripId), tripApi.timeline(tripId), tripApi.shares(tripId), tripApi.itinerary(tripId).catch(() => [] as ItineraryView[])])
+      if (sequence !== loadSequence.current) return
       setTrip(t); setSummary(s); setPhotos(p); setTimeline(tl); setLinks(l); setItinerary(it)
       // 从 Trip Pro 页等处带 ?mode=nine / long 进来时，第一次加载完成后打开对应的成果
       if (!modeFromUrl.current) {
@@ -76,12 +80,17 @@ export default function SharePage() {
         if (wanted === 'poster' || wanted === 'nine' || wanted === 'long') setMode(wanted)
       }
     } catch (e) {
-      setError(message(e, '分享数据加载失败，请稍后重试'))
+      if (sequence === loadSequence.current) setError(message(e, '分享数据加载失败，请稍后重试'))
     } finally {
-      setLoading(false)
+      if (sequence === loadSequence.current) setLoading(false)
     }
   }, [tripId])
-  useEffect(() => { void reload() }, [reload])
+  useEffect(() => {
+    setTrip(null); setSummary(null); setPhotos([]); setLoading(true); setEdit(NO_EDIT); setBigView(false)
+    modeFromUrl.current = false
+    void reload()
+    return () => { ++loadSequence.current }
+  }, [reload])
   useEffect(() => { let alive = true; tripApi.places(tripId).then(rows => { if (alive) setPlaces(rows) }).catch(() => {}); return () => { alive = false } }, [tripId])
   // 分享图规格（Free / Pro）来自方案配置；读不到时 shareTierOf 用与后端一致的默认值
   useEffect(() => { planApi.tripPro().then(setPlan).catch(() => setPlan(null)) }, [])
@@ -266,6 +275,7 @@ export default function SharePage() {
         {error && (
           <div className="ss-alert" role="alert">
             <p>{error}</p>
+            {!trip && !loading && <button type="button" onClick={() => { setLoading(true); void reload() }}>重新加载</button>}
             <button type="button" onClick={() => setError('')} aria-label="关闭提示"><X size={15} /></button>
           </div>
         )}
