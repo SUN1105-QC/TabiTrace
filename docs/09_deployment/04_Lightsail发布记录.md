@@ -1,5 +1,17 @@
 # 2026-10-26 · Lightsail 发布记录
 
+## 2026-11-18 · 移动旅行工作台与页面可靠性修复（仅 Web）
+
+日本时间 20:39 切换 Web `workspace-20261118-c6113ea2624b`，源提交 `c6113ea2624b130aea83a3e925d8f1f8460dbbf9`。[GitHub CI](https://github.com/SUN1105-QC/TabiTrace/actions/runs/44296096251) 前后端任务全部成功，发布使用提交归档。
+
+- 内容：移动首页插画、2×2 快捷入口、4 条活动与完整列表、6 张照片与预览；电脑旅行切换菜单；搜索 / 通知、当前旅行、慢请求隔离、失败重试、统计 / 头像容错、弹层焦点和触屏操作改善。
+- 源码包 SHA256：`42cba74542d077ebc5fa535b454d9e9ef6c65f47ccbafefdbf818032bfd75b06`，服务器一致。Web 镜像：`sha256:2f8f3bb508f068a410de51866145353aa02e6034f734f5be27e088e5a0215e0d`。
+- 仅 `docker compose up -d --no-deps --wait web`；新 Web 健康、restart=0。API `admin-20261116-d64d1bc3a0d7`、Worker `speed-20261111-83c006db`、MySQL 原容器 ID 与启动时间一致；无迁移、生产库写入、共享配置或 Nginx / TLS 变更。发布指针已同步。
+- 验收：公网只读 133 / 133、页面交互 31 / 31、移动首页 40 / 40、旅行菜单 17 / 17，共 221 项通过，无浏览器运行异常。登录业务数据与写入由浏览器夹具隔离，未使用真实账号进行管理 / 付款 / 上传。
+- 插画 Next Image 828px 优化请求均 200、WebP：水彩图 49732 字节，日本插画 40400 字节。
+- 服务器保留 `releases/workspace-20261118-c6113ea2624b-{build,switch}.{sh,log}`、源码包、发布清单及 `-previous-web.txt`。回退只切换旧 Web `notify-20261117-20cad4e3a0e4`，不降级数据库或替换其他服务。
+- 本地机器验收记录：`backend/.tabitrace/workspace-deploy/production/`。前端版本的详细检查见 [移动工作台验收](../08_testing/18_移动旅行工作台验收_2026-11-17.md) 与 [页面合理性检查](../08_testing/19_页面合理性深度检查_2026-11-18.md)。
+
 ## 2026-11-17 · 账号配额与保留规则移入通知（仅 Web）
 
 - Web `notify-20261117-20cad4e3a0e4`，源提交 `20cad4e3a0e474a9ff2b4c6d0333514cfe261aed`。[GitHub CI](https://github.com/SUN1105-QC/TabiTrace/actions/runs/44084938429) 前后端任务均通过后切换。
